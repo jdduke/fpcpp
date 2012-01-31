@@ -1,0 +1,6 @@
+[submodule "externals/fc"]
+	path = externals/fc
+	url = git://github.com/jdduke/fc.git
+[submodule "externals/tthread"]
+	path = externals/tthread
+	url = git://github.com/jdduke/tthread.git
