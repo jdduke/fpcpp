@@ -4,12 +4,9 @@
 // www.opensource.org/licenses/mit-license.php
 /////////////////////////////////////////////////////////////////////////////
 
-#ifndef _FPCPP_H_
-#define _FPCPP_H_
+#ifndef _FP_DEFINES_H_
+#define _FP_DEFINES_H_
 
-#include "fp_defines.h"
-#include "fp_common.h"
-#include "fp_prelude.h"
-#include "fp_curry.h"
+#define let auto
 
-#endif /* _FPCPP_H_ */
+#endif /* _FP_DEFINES_H_ */
