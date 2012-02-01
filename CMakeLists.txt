@@ -1,5 +1,5 @@
 cmake_minimum_required (VERSION 2.6)
-project()
+project(FPCPP)
 
 set(CMAKE_DEBUG_POSTFIX "d")
 
@@ -74,7 +74,7 @@ if(WIN32)
   endif()
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /DNOMINMAX /MP /W3")
   if(MSVC10 OR MSVC11)
-    SET(ITERATOR_DEBUG OFF CACHE BOOL "Use iterator debug level 2")
+    SET(ITERATOR_DEBUG TRUE CACHE BOOL "Use iterator debug level 2")
     #add_definitions("-D_ITERATOR_DEBUG_LEVEL=0")
     if (ITERATOR_DEBUG)
       set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /D_ITERATOR_DEBUG_LEVEL=2")
@@ -108,13 +108,13 @@ if(WIN32)
 endif()
 
 include_directories(${FPCPP_SOURCE_DIR}/include)
+include_directories(${FPCPP_SOURCE_DIR}/externals/fc/include)
 include_directories(${FPCPP_SOURCE_DIR}/externals)
-include_directories(${FPCPP_SOURCE_DIR})
 
 set(TTHREAD_LIB tthread)
 
 if(BUILD_SAMPLES OR BUILD_TESTS)
-  add_subdirectory(externals\tthread)
+  add_subdirectory(externals/tthread)
   include_directories(common)
   include_directories(external)
 endif()
@@ -124,5 +124,6 @@ if(BUILD_SAMPLES)
 endif()
 
 if(BUILD_TESTS)
+  include_directories(${FPCPP_SOURCE_DIR}/tests)
   add_subdirectory(tests)
 endif()
