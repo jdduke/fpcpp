@@ -5,6 +5,8 @@
 
 #include <algorithm>
 #include <numeric>
+#include <sstream>
+#include <tuple>
 
 namespace fp {
 
@@ -13,11 +15,15 @@ namespace prelude {
 ///////////////////////////////////////////////////////////////////////////
 // map
 
+template<typename F, typename T, typename R>
+inline R& __map__(F f, const T& t, R& r) {
+  std::transform(head(t), tail(t), back(r), f);
+  return r;
+}
+
 template<typename F, typename T>
-inline T map(F& f, const T& t) {
-  T result;
-  std::transform(head(t), tail(t), back(result), f);
-  return result;
+inline T map(F f, const T& t) {
+  return __map__(f, t, T());
 }
 FP_DEFINE_FUNC_OBJ(map, map_, _map_);
 
@@ -25,7 +31,7 @@ FP_DEFINE_FUNC_OBJ(map, map_, _map_);
 // foldl
 
 template<typename F, typename T>
-inline typename traits<T>::value foldl(F& f, const T& t, typename traits<T>::value t0 = typename traits<T>::value()) {
+inline typename traits<T>::value foldl(F f, const T& t, typename traits<T>::value t0 = typename traits<T>::value()) {
   return std::accumulate(head(t), tail(t), t0, f);
 }
 FP_DEFINE_FUNC_OBJ_T(foldl, foldl_, _foldl_);
@@ -34,7 +40,7 @@ FP_DEFINE_FUNC_OBJ_T(foldl, foldl_, _foldl_);
 // foldr
 
 template<typename F, typename T>
-inline typename traits<T>::value foldr(F& f, const T& t, typename traits<T>::value t0 = typename traits<T>::value()) {
+inline typename traits<T>::value foldr(F f, const T& t, typename traits<T>::value t0 = typename traits<T>::value()) {
   return std::accumulate(rhead(t), rtail(t), t0, f);
 }
 FP_DEFINE_FUNC_OBJ_T(foldr, foldr_, _foldr_);
@@ -43,9 +49,12 @@ FP_DEFINE_FUNC_OBJ_T(foldr, foldr_, _foldr_);
 // filter
 
 template<typename F, typename T>
-inline T filter(F& f, const T& t) {
-  T result;
-  return std::copy_if(head(t), tail(t), back(result), f);
+inline std::vector<T> filter(F f, const std::vector<T>& t) {
+  std::vector<T> result;
+  std::copy_if(head(t), 
+               tail(t), 
+               back(result), 
+               f);
   return result;
 }
 FP_DEFINE_FUNC_OBJ(filter, filter_, _filter_);
@@ -54,15 +63,14 @@ FP_DEFINE_FUNC_OBJ(filter, filter_, _filter_);
 // zipWith
 
 template<typename F, typename T, typename U, typename R>
-inline void __zipWith__(F& f, const T& t, const U& u, R& r) {
+inline R& __zipWith__(F f, const T& t, const U& u, R& r) {
   std::transform(head(t), tail(t), head(u), back(r), f);
+  return r;
 }
 
 template<typename F, typename T, typename U>
-inline T zipWith(F& f, const T& t, const U& u) {
-  T result;
-  __zipWith__(f, t, u, result);
-  return result;
+inline T zipWith(F f, const T& t, const U& u) {
+  return __zipWith__(f, t, u, T());
 }
 FP_DEFINE_FUNC_OBJ(zipWith, zipWith_, _zipWith_)
 
@@ -70,13 +78,9 @@ FP_DEFINE_FUNC_OBJ(zipWith, zipWith_, _zipWith_)
 // zip
 
 template<typename T, typename U>
-inline T zip(const T& t, const U& u) {
-  typedef typename traits<T>::value t_val;
-  typedef typename traits<U>::value u_val;
-  typedef std::vector< std::tuple<t_val,u_val> > result_type;
-  result_type r;
-  return zipWith(&std::make_tuple<t_val,u_val>,t,u,r);
-  return r;
+inline std::vector< std::pair<T,U> > zip(const std::vector<T>& t, const std::vector<U>& u) {
+  typedef std::vector< std::pair<T,U> > result_type;
+  return __zipWith__([](const T& t, const U& u) -> std::pair<T,U> { return std::make_pair(t,u); },t,u,result_type());
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -117,7 +121,7 @@ inline bool notElem(const T& t, const C& c) {
 // dropWhile
 
 template<typename F, typename T>
-inline T dropWhile(F& f, const T& t) {
+inline T dropWhile(F f, const T& t) {
   T result;
   std::copy_if(head(t), tail(t), back(result), std::not1<F>(f));
   return result;
@@ -137,7 +141,7 @@ inline T drop(size_t n, const T& t) {
 // takeWhile
 
 template<typename F, typename T>
-inline T takeWhile(F& f, const T& t) {
+inline T takeWhile(F f, const T& t) {
   T result;
   std::copy_if(head(t), tail(t), back(result), f);
   return result;
@@ -156,29 +160,30 @@ inline T take(size_t n, const T& t) {
 ///////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////
 
-template<typename T, typename Ts>
-inline Ts& split_helper(const T& s, char delim, Ts& elems) {
-  stringstream ss(s);
-  Ts item;
+template<typename T>
+inline std::vector<T>& split_helper(const T& s, char delim, std::vector<T>& elems) {
+  std::stringstream ss(s);
+  T item;
   while(std::getline(ss, item, delim)) {
     elems.push_back(item);
   }
   return elems;
 }
 
-template<typename T, typename Ts>
-inline Ts split(const T& s, char delim) {
-  Ts elems;
+template<typename T>
+inline std::vector<T> split(const T& s, char delim) {
+  std::vector<T> elems;
   return split_helper(s, delim, elems);
 };
 
-template<typename Ts>
-typename traits<Ts>::value_type concat(const Ts& elems, char delim=' ') {
+template<typename T>
+typename T concat(const std::vector<T>& elems, char delim = ' ') {
   std::stringstream ss;
-  std::for_each(head(elems), tail(elems), [&ss](const traits<Ts>::value_type& s) {
+  std::for_each(head(elems), tail(elems), [=,&ss](const T& s) {
     ss << s << delim;
   });
-  return ss.str();
+  let str = ss.str();
+  return str.length() > 0 ? str.substr(0, str.length()-1) : "";
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -207,8 +212,8 @@ inline std::vector<T> words(const T& s) {
 ///////////////////////////////////////////////////////////////////////////
 // unwords
 
-template<typename Ts>
-typename traits<Ts>::value_type unwords(const Ts& elems) {
+template<typename T>
+typename T unwords(const std::vector<T>& elems) {
   return concat(elems, ' ');
 }
 

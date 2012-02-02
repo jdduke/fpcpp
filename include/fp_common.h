@@ -35,14 +35,14 @@ inline T* tail(T (&A)[S]) {
  return (&A[0] + S);
 }
 
-template <typename T>
-std::back_insert_iterator<T> back(T& t) {
-  return std::back_inserter(t);
+template <typename C>
+std::back_insert_iterator<C> back(C& c) {
+  return std::back_inserter(c);
 }
 
-template <typename T>
-std::front_insert_iterator<T> front(T& t) {
-  return types<T>::back(t);
+template <typename C>
+std::front_insert_iterator<C> front(C& c) {
+  return std::front_inserter(c);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -52,6 +52,12 @@ struct traits {
   typedef typename T::value_type value;
   typedef typename T::iterator iterator;
   typedef typename T::const_iterator const_iterator;
+};
+template <typename T, typename U>
+struct tuple_traits {
+  typedef typename traits<T>::value t;
+  typedef typename traits<U>::value u;
+  typedef std::pair<t,u> type;
 };
 
 template <typename T>

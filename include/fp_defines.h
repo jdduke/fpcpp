@@ -18,6 +18,10 @@
     inline returnType operator()(const std::vector<T>& t) {  \
       return funcName(f,t);                                  \
     }                                                        \
+    template<typename T, typename U>                         \
+    inline returnType operator()(const std::vector<T>& t, const U& u) { \
+      return funcName(f,t,u);                                \
+    }                                                        \
   private:                                                   \
     F f;                                                     \
   };                                                         \
@@ -25,8 +29,7 @@
   inline funcObjName1<F> funcName ## _with (F f) {           \
     return funcObjName1<F>(f);                               \
   }                                                          
-  
-  
+
   /*
   template<typename T, typename T1>                        \
   inline returnType operator()(const T& t, const T1& t1) { \
