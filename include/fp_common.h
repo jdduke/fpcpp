@@ -12,6 +12,10 @@ inline auto head(C& c) -> decltype(std::begin(c)){
   return std::begin(c);
 }
 template<typename C>
+inline auto chead(const C& c) -> decltype(c.begin()) {
+  return c.begin();
+}
+template<typename C>
 inline auto rhead(C& c) -> decltype(c.rbegin()) {
   return c.rbegin();
 }
@@ -21,10 +25,15 @@ inline auto tail(C& c) -> decltype(std::end(c)) {
   return std::end(c);
 }
 template<typename C>
+inline auto ctail(const C& c) -> decltype(c.end()) {
+  return c.end();
+}
+template<typename C>
 inline auto rtail(C& c) -> decltype(c.rend()) {
   return c.rend();
 }
 
+/*
 template<typename T, size_t S>
 inline T* head(T (&A)[S]) {
   return (&A[0]);
@@ -34,6 +43,7 @@ template<typename T, size_t S>
 inline T* tail(T (&A)[S]) {
  return (&A[0] + S);
 }
+*/
 
 template <typename C>
 std::back_insert_iterator<C> back(C& c) {

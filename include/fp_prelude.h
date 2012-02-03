@@ -24,7 +24,7 @@ template<typename F, typename T>
 inline T map(F f, const T& t) {
   return __map__(f, t, T());
 }
-template<typename F> 
+template<typename F>
 inline auto map_(F f) -> decltype( curry(map<F, typename fc::function_traits<F>::t0_type>, f) ) {
   return curry(map<F, typename function_traits<F>::t0_type>, f);
 }
@@ -54,9 +54,9 @@ FP_DEFINE_FUNC_OBJ_T(foldr, foldr_, _foldr_);
 template<typename F, typename T>
 inline std::vector<T> filter(F f, const std::vector<T>& t) {
   std::vector<T> result;
-  std::copy_if(head(t), 
-               tail(t), 
-               back(result), 
+  std::copy_if(head(t),
+               tail(t),
+               back(result),
                f);
   return result;
 }
@@ -149,7 +149,7 @@ inline T takeWhile(F f, const T& t) {
   std::copy_if(head(t), tail(t), back(result), f);
   return result;
 }
-FP_DEFINE_FUNC_OBJ(takeWhile, takeWhile_, _takeWhile_); 
+FP_DEFINE_FUNC_OBJ(takeWhile, takeWhile_, _takeWhile_);
 
 ///////////////////////////////////////////////////////////////////////////
 // take
@@ -192,7 +192,7 @@ typename T concat(const std::vector<T>& elems, char delim = ' ') {
 ///////////////////////////////////////////////////////////////////////////
 // lines
 
-template<typename T> 
+template<typename T>
 inline std::vector<T> lines(const T& s) {
   return split(s, '\n');
 }
@@ -207,7 +207,7 @@ typename traits<Ts>::value_type unlines(const Ts& elems) {
 
 ///////////////////////////////////////////////////////////////////////////
 // words
-template<typename T> 
+template<typename T>
 inline std::vector<T> words(const T& s) {
   return split(s, ' ');
 }
@@ -268,18 +268,18 @@ inline T pred(const T& t) {
 // increasing_n
 template<typename T>
 inline std::vector<T> increasing_n(size_t n, T t0 = (T)0) {
-  return generate_n(n, [&]() -> T { 
-    T r = t0; t0 = succ(t0); return r; 
-  }); 
+  return generate_n(n, [&]() -> T {
+    T r = t0; t0 = succ(t0); return r;
+  });
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // decreasing_n
 template<typename T>
 inline std::vector<T> decreasing_n(size_t n, T t0 = (T)0) {
-  return generate_n(n, [&]() -> T { 
-    T r = t0; t0 = pred(t0); return r; 
-  }); 
+  return generate_n(n, [&]() -> T {
+    T r = t0; t0 = pred(t0); return r;
+  });
 }
 
 } /* namespace fp */
