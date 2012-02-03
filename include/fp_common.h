@@ -48,6 +48,13 @@ std::front_insert_iterator<C> front(C& c) {
 ///////////////////////////////////////////////////////////////////////////
 
 template <typename T>
+struct remove_ref_const {
+  typedef typename std::remove_const< typename std::remove_reference<T>::type >::type type;
+};
+
+///////////////////////////////////////////////////////////////////////////
+
+template <typename T>
 struct traits {
   typedef typename T::value_type value;
   typedef typename T::iterator iterator;

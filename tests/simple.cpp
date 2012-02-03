@@ -6,22 +6,21 @@
 #include "common.h"
 
 using namespace fp;
-using namespace prelude;
 
 template<typename T> T add(T t0, T t1)  { return t0 + t1; }
 template<typename T> T sub(T t0, T t1)  { return t0 - t1; }
 template<typename T> T mult(T t0, T t1) { return t0 * t1; }
 template<typename T> T div(T t0, T t1)  { return t0 / t1; }
 
-let fold_f = foldl_with(&add<float>);
-let fold_d = foldl_with(&add<double>);
-let fold_i = foldl_with(&add<int>);
-let fold_s = foldl_with(&add<std::string>);
+let fold_f = foldl_(&add<float>);
+let fold_d = foldl_(&add<double>);
+let fold_i = foldl_(&add<int>);
+let fold_s = foldl_(&add<std::string>);
 
-let fold_add  = foldl_with(&add<double>);
-let fold_sub  = foldl_with(&sub<double>);
-let fold_mult = foldl_with(&mult<double>);
-let fold_div  = foldl_with(&div<double>);
+let fold_add  = foldl_(&add<double>);
+let fold_sub  = foldl_(&sub<double>);
+let fold_mult = foldl_(&mult<double>);
+let fold_div  = foldl_(&div<double>);
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -49,24 +48,29 @@ void testNoArgs(A a_, B b_, C c_, D d_)
 }
 
 TEST(Prelude, Map) {
-  EXPECT_EQ(fold_f( map(add_2,  fVec10_1) ),    30.0f);
-  EXPECT_EQ(fold_d( map(sub_3,  dVec10_2) ),   -10.0 );
-  EXPECT_EQ(fold_i( map(div_5,  iVec10_0_9) ),  5);
-  EXPECT_EQ(fold_i( map(mult_4, iVec10_9_0) ),  180);
+  EXPECT_EQ(fold_f( map(add_2,  fVec10_1) , 0.f),    30.0f);
+  EXPECT_EQ(fold_d( map(sub_3,  dVec10_2) , 0.),   -10.0 );
+  EXPECT_EQ(fold_i( map(div_5,  iVec10_0_9), 0),  5);
+  EXPECT_EQ(fold_i( map(mult_4, iVec10_9_0), 0),  180);
 }
 
 TEST(Prelude, FoldL) {
 
-  EXPECT_EQ(fold_f(fVec10_1),    10.f);
-  EXPECT_EQ(fold_d(dVec10_2),    20. );
-  EXPECT_EQ(fold_i(iVec10_0_9),  45);
-  EXPECT_EQ(fold_i(iVec10_9_0),  45);
+  EXPECT_EQ(fold_f(fVec10_1, 0.f),    10.f);
+  EXPECT_EQ(fold_d(dVec10_2,  0.),    20. );
+  EXPECT_EQ(fold_i(iVec10_0_9, 0),  45);
+  EXPECT_EQ(fold_i(iVec10_9_0, 0),  45);
 
   EXPECT_EQ(fold_mult(dVec10_2, 1.), pow(2.,10) );
   EXPECT_EQ(fold_div(dVec10_2,  1.), pow(.5,10) );
   EXPECT_EQ(fold_div(dVec10_2,  1.) * fold_mult(dVec10_2, 1.), 1.);
 
-  EXPECT_EQ(fold_s(words(std::string("a b c d e f g h i j"))), "abcdefghij");
+  EXPECT_EQ(fold_s(words(std::string("a b c d e f g h i j")), ""), "abcdefghij");
+}
+
+template<typename F> 
+static auto foldr_with2(F f) -> decltype(FP_CURRIED(foldr,f)) {
+  return FP_CURRIED(foldr,f);
 }
 
 TEST(Prelude, FoldR) {
@@ -77,15 +81,18 @@ TEST(Prelude, FoldR) {
   EXPECT_EQ(foldr(subi, iVec10_0_9, 0),  -45);
   EXPECT_EQ(foldr(subi, iVec10_0_9, 0), foldl(subi, iVec10_9_0, 0));
 
-  let foldr_s = foldr_with(&add<std::string>);
-  EXPECT_EQ(foldr_s(words(std::string("a b c d e f g h i j"))), "jihgfedcba");
-  EXPECT_EQ(foldr_s(words(std::string("a b c"))), fold_s(reverse(words(std::string("a b c")))));
+  let add_s = [](const std::string& s0, const std::string& s1) { return s0 + s1; };
+  let add_s2 = &add<std::string>;
+  let foldr_s = foldr_(add_s);
+  let foldr_s2 = foldr_(add_s2);
+  EXPECT_EQ(foldr_s(words(std::string("a b c d e f g h i j")), std::string()), "jihgfedcba");
+  EXPECT_EQ(foldr_s(words(std::string("a b c")), std::string()), fold_s(reverse(words(std::string("a b c"))), ""));
 }
 
 TEST(Prelude, Filter) {
-  let r15 = fold_i(filter([](int x) { return x <= 5; }, iVec10_0_9));
+  let r15 = fold_i(filter([](int x) { return x <= 5; }, iVec10_0_9), 0);
   EXPECT_EQ(r15, 15);
-  let r30 = fold_i(filter([](int x) { return x >  5; }, iVec10_0_9));
+  let r30 = fold_i(filter([](int x) { return x >  5; }, iVec10_0_9), 0);
   EXPECT_EQ(r30, 30);
 
   let str = std::string("a b c d e f g");
@@ -97,7 +104,7 @@ TEST(Prelude, Zip) {
   let ifZip  = zip(iVec10_0_9, iVec10_9_0);
   let pairSum = [](const std::pair<int,int>& a) -> int { return a.first + a.second; };
   let pairIs9 = [&](const std::pair<int,int>& a) -> int { return pairSum(a) == 9 ? 1 : 0; };
-  EXPECT_EQ(fold_i(__map__(pairIs9, ifZip, std::vector<int>())), 10);
+  EXPECT_EQ(fold_i(__map__(pairIs9, ifZip, std::vector<int>()), 0), 10);
 }
 
 TEST(Prelude, ZipWith) {

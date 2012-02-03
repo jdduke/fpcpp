@@ -2,6 +2,7 @@
 #define _FP_PRELUDE_H_
 
 #include "fp_defines.h"
+#include "fp_curry.h"
 
 #include <algorithm>
 #include <numeric>
@@ -9,8 +10,6 @@
 #include <tuple>
 
 namespace fp {
-
-namespace prelude {
 
 ///////////////////////////////////////////////////////////////////////////
 // map
@@ -25,13 +24,17 @@ template<typename F, typename T>
 inline T map(F f, const T& t) {
   return __map__(f, t, T());
 }
-FP_DEFINE_FUNC_OBJ(map, map_, _map_);
+template<typename F> 
+inline auto map_(F f) -> decltype( curry(map<F, typename fc::function_traits<F>::t0_type>, f) ) {
+  return curry(map<F, typename function_traits<F>::t0_type>, f);
+}
+//FP_DEFINE_FUNC_OBJ(map, map_, _map_);
 
 /////////////////////////////////////////////////////////////////////////////
 // foldl
 
 template<typename F, typename T>
-inline typename traits<T>::value foldl(F f, const T& t, typename traits<T>::value t0 = typename traits<T>::value()) {
+inline T foldl(F f, const std::vector<T>& t, T t0 = T()) {
   return std::accumulate(head(t), tail(t), t0, f);
 }
 FP_DEFINE_FUNC_OBJ_T(foldl, foldl_, _foldl_);
@@ -40,7 +43,7 @@ FP_DEFINE_FUNC_OBJ_T(foldl, foldl_, _foldl_);
 // foldr
 
 template<typename F, typename T>
-inline typename traits<T>::value foldr(F f, const T& t, typename traits<T>::value t0 = typename traits<T>::value()) {
+inline T foldr(F f, const std::vector<T>& t, T t0 = T()) {
   return std::accumulate(rhead(t), rtail(t), t0, f);
 }
 FP_DEFINE_FUNC_OBJ_T(foldr, foldr_, _foldr_);
@@ -278,8 +281,6 @@ inline std::vector<T> decreasing_n(size_t n, T t0 = (T)0) {
     T r = t0; t0 = pred(t0); return r; 
   }); 
 }
-
-} /* namespace prelude */
 
 } /* namespace fp */
 
