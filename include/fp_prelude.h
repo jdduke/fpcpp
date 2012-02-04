@@ -110,7 +110,7 @@ inline std::vector< std::pair<T,U> > zip(const std::vector<T>& t, const std::vec
 
 template<typename C>
 inline value_type_of(C) maximum(const C& c) {
-  return valueIn( std::max_element(extent(c)), c);
+  return iter_value( std::max_element(extent(c)), c);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -118,7 +118,7 @@ inline value_type_of(C) maximum(const C& c) {
 
 template<typename C>
 inline value_type_of(C) minimum(const C& c) {
-  return valueIn( std::min_element(extent(c)), c);
+  return iter_value( std::min_element(extent(c)), c);
 }
 
 ///////////////////////////////////////////////////////////////////////////

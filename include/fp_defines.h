@@ -17,10 +17,10 @@
     inline auto b(F f) -> decltype( a ) {     \
     return a;                                 \
   }
-//#define FP_CURRIED(func0,func1) fp::curry(func0<decltype(func1), typename remove_ref_const<typename fc::function_traits< decltype(func1) >::t0_type>::type>, func1)
+
 #define FP_CURRIED(func0,func1)                                                                                             \
   fp::curry(func0<decltype(func1),                                                                                          \
-                  std::vector<typename remove_ref_const<typename fc::function_traits< decltype(func1) >::t0_type>::type> >, \
+                  std::vector<typename remove_const_ref<typename fc::function_traits< decltype(func1) >::t0_type>::type> >, \
             func1)
 
 #define FP_DEFINE_CURRIED_HELPER(funcName, funcName2)  FP_DEFINE_CURRIED_HELPER_IMPL( FP_CURRIED(funcName, f), funcName2 )
