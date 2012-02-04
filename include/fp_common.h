@@ -103,9 +103,10 @@ struct is_container {
 
 ///////////////////////////////////////////////////////////////////////////
 
-template <typename C>
-auto valueIn(typename traits<C>::iterator& i, const C& c) -> decltype(*i) {
-  return (i != tail(c) ? *i : typename traits<C>::value() )
+template <typename I, typename C>
+auto valueIn(I i, const C& c) -> decltype(*i) {
+  typedef decltype(*i) iter_value;
+  return (i != tail(c)) ? *i : iter_value();
 }
 
 } /* namespace fp */

@@ -2,6 +2,8 @@
 
 #include <fc.h>
 #include <fpcpp.h>
+
+#include <array>
 #include <string>
 #include <vector>
 
@@ -95,18 +97,72 @@ TEST(Prelude, Zip) {
   let pairSum = [](const std::pair<int,int>& a) -> int { return a.first + a.second; };
   let pairIs9 = [&](const std::pair<int,int>& a) -> int { return pairSum(a) == 9 ? 1 : 0; };
   EXPECT_EQ(fold_i(fp::__map__(pairIs9, ifZip, std::vector<int>()), 0), 10);
+
+  ///////////////////////////////////////////////////////////////////////////
+
+
+
 }
 
 TEST(Prelude, ZipWith) {
+
+
+
   
 }
 
 TEST(Prelude, Maximum) {
+  using fp::maximum;
 
+  let zeroToThousand = fp::increasing_n(1001, 0);
+  EXPECT_EQ(maximum(zeroToThousand), 1000);
+  zeroToThousand.pop_back();
+  EXPECT_EQ(maximum(zeroToThousand), 999);
+
+  ///////////////////////////////////////////////////////////////////////////
+
+  let randFloat = fp::rand_range_<float>();
+  std::vector<float> randFloats;
+  randFloats.push_back(randFloat());
+  float randMax = randFloats.back();
+  while (randFloats.size() < 1000) {
+    randFloats.push_back(randFloat());
+    float newRandMax = maximum(randFloats);
+    EXPECT_GE(newRandMax, randMax);
+    newRandMax = randMax;
+  }
 }
 
 TEST(Prelude, Random) {
+  using fp::rand_n;
+  using fp::rand_range;
+  using fp::rand_range_;
 
+  enum {
+    numRands = 10000,
+    numRandBins = 10,
+    minRandsPerBin = (int)((numRands / numRandBins) * .9),
+    maxRandsPerBin = (int)((numRands / numRandBins) * 1.1)
+  };
+
+  static const float  minRand = 0.f;
+  static const float  maxRand = (float)numRandBins;
+
+  let randFloats = generate_n(numRands, rand_range_<float>(minRand, maxRand));
+  EXPECT_GE(maxRand, fp::maximum(randFloats));
+  EXPECT_LE(minRand, fp::maximum(randFloats));
+  EXPECT_LE(5.f, fp::maximum(randFloats));
+  EXPECT_GE(5.f, fp::minimum(randFloats));
+
+  std::array<int, numRandBins> buckets = {0,0,0,0,0,0,0,0,0,0};
+  std::for_each(fp::head(randFloats), fp::tail(randFloats), [&buckets](float x) {
+    ++buckets[(size_t)std::floor(x)];
+  });
+
+  std::for_each(fp::head(buckets), fp::tail(buckets), [=](int x) {
+    EXPECT_GE(maxRandsPerBin, x);
+    EXPECT_LE(minRandsPerBin, x);
+  });
 }
 
 TEST(Prelude, EnumFrom) {
@@ -116,12 +172,38 @@ TEST(Prelude, EnumFrom) {
   let Zero_Ten2 = fp::takeF(11, enumFrom(0));
   EXPECT_EQ(fold_i(Zero_Ten),  55);
   EXPECT_EQ(fold_i(Zero_Ten2), 55);
+
+  ///////////////////////////////////////////////////////////////////////////
+
   let a_z       = fp::takeWhileF([](char x) -> bool { return x <= 'z'; }, enumFrom('a'));
   let a_z2      = fp::takeF(26, enumFrom('a'));
-  const std::string atoz("abcdefghijklmnopqrstuvwxyz");
   let vectostring = [](std::vector<char> s) { return std::string(fp::head(s), fp::tail(s)); };
+  const std::string atoz("abcdefghijklmnopqrstuvwxyz");
   EXPECT_EQ(vectostring(a_z),  atoz);
   EXPECT_EQ(vectostring(a_z2), atoz);
+
+  ///////////////////////////////////////////////////////////////////////////
+
+  let charEnumFrom0 = enumFrom('0');
+  EXPECT_EQ(charEnumFrom0(), '0');
+  EXPECT_EQ(charEnumFrom0(), '1');
+
+  enum TestEnum {
+    First=0,
+    Last=1,
+  };
+
+  let enumEnumFrom = enumFrom(First);
+  EXPECT_EQ(enumEnumFrom(), First);
+  EXPECT_EQ(enumEnumFrom(), Last);
+
+  let floatEnumFromNeg10 = enumFrom(-10.f);
+  EXPECT_EQ(floatEnumFromNeg10(), -10.f);
+  EXPECT_EQ(floatEnumFromNeg10(), -9.f);
+
+  let ptrEnumFromNull = enumFrom(NULL);
+  EXPECT_EQ(ptrEnumFromNull(), 0);
+  EXPECT_EQ(ptrEnumFromNull(), 1);
 }
 
 ///////////////////////////////////////////////////////////////////////////

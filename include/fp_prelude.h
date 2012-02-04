@@ -104,6 +104,14 @@ inline typename traits<T>::value maximum(const T& t) {
 }
 
 ///////////////////////////////////////////////////////////////////////////
+// minimum
+
+template<typename T>
+inline typename traits<T>::value minimum(const T& t) {
+  return valueIn( std::min_element(head(t), tail(t)), t);
+}
+
+///////////////////////////////////////////////////////////////////////////
 // reverse
 
 template<typename T>
@@ -263,11 +271,11 @@ inline auto generate_n(size_t n, F f) -> std::vector< decltype(f()) > {
 
 template<typename T>
 inline T rand_range(T t0 = std::numeric_limits<T>::min(), T t1 = std::numeric_limits<T>::max()) {
-  return t0 + static_cast<T>(static_cast<double>(rand())/(RAND_MAX+1)) * (t1 - t0 + (T)1);
+  return t0 + static_cast<T>(static_cast<double>(rand())/(RAND_MAX+1)) * (t1 - t0);
 }
 template<typename T>
 struct rand_range_ {
-  rand_range_(T t0 = std::numeric_limits<T>::min(), T t1 = std::numeric_limits<T>::max()) : t0(t0_), t1(t1_) { }
+  rand_range_(T t0_ = std::numeric_limits<T>::min(), T t1_ = std::numeric_limits<T>::max()) : t0(t0_), t1(t1_) { }
   T operator()() { return rand_range<T>(t0,t1); }
   T t0, t1;
 };
