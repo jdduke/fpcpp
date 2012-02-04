@@ -1,10 +1,6 @@
 #ifndef _FC_TEST_COMMON_H_
 #define _FC_TEST_COMMON_H_
 
-#define fOf(f_) &f_ 
-#define sOf(s_) S_ ## s_ ## ()
-#define lOf(l_) L_ ## l_
-
 inline void  Void_Void () { }
 struct S_Void_Void{ void operator()() { }; };
 auto   L_Void_Void = []() { };

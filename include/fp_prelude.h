@@ -12,6 +12,19 @@
 namespace fp {
 
 ///////////////////////////////////////////////////////////////////////////
+// accumulate
+
+template<class It, class Op>
+auto fold(It first, It last, Op op) -> typename std::iterator_traits<It>::value_type {
+  if (first != last) {
+    auto value = *first;
+    return std::accumulate(++first, last, value, op);
+  } else {
+    return typename std::iterator_traits<It>::value_type();
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////
 // map
 
 template<typename F, typename T, typename R>
@@ -34,8 +47,8 @@ inline auto map_(F f) -> decltype( curry(map<F, typename fc::function_traits<F>:
 // foldl
 
 template<typename F, typename T>
-inline T foldl(F f, const std::vector<T>& t, T t0 = T()) {
-  return std::accumulate(head(t), tail(t), t0, f);
+inline T foldl(F f, const std::vector<T>& t) {
+  return fold(head(t), tail(t), f);
 }
 FP_DEFINE_FUNC_OBJ_T(foldl, foldl_, _foldl_);
 
@@ -43,8 +56,8 @@ FP_DEFINE_FUNC_OBJ_T(foldl, foldl_, _foldl_);
 // foldr
 
 template<typename F, typename T>
-inline T foldr(F f, const std::vector<T>& t, T t0 = T()) {
-  return std::accumulate(rhead(t), rtail(t), t0, f);
+inline T foldr(F f, const std::vector<T>& t) {
+  return fold(rhead(t), rtail(t), f);
 }
 FP_DEFINE_FUNC_OBJ_T(foldr, foldr_, _foldr_);
 
@@ -52,8 +65,8 @@ FP_DEFINE_FUNC_OBJ_T(foldr, foldr_, _foldr_);
 // filter
 
 template<typename F, typename T>
-inline std::vector<T> filter(F f, const std::vector<T>& t) {
-  std::vector<T> result;
+inline T filter(F f, T t) {
+  T result;
   std::copy_if(head(t),
                tail(t),
                back(result),
@@ -151,12 +164,29 @@ inline T takeWhile(F f, const T& t) {
 }
 FP_DEFINE_FUNC_OBJ(takeWhile, takeWhile_, _takeWhile_);
 
+template<typename F, typename F2>
+inline auto takeWhileF(F f, F2 f2) -> std::vector< decltype(f2()) > {
+  std::vector<decltype(f())> result;
+  auto backR = back(result);
+  while (f()) {
+    backR = f2();
+  }
+  return result;
+}
+FP_DEFINE_FUNC_OBJ(takeWhileF, takeWhileF_, _takeWhileF_);
+
 ///////////////////////////////////////////////////////////////////////////
 // take
 template<typename T>
 inline T take(size_t n, const T& t) {
-  let takeN = [&](const traits<T>::value&) { return n-- > 0; }
+  let takeN = [=](const traits<T>::value&) { return n-- > 0; }
   return takeWhile(takeN, t);
+}
+
+template<typename F>
+inline auto takeF(size_t n, F f) -> std::vector< decltype(f()) > {
+  let takeN = [=]() { return n-- > 0; }
+  return takeWhileF(takeN, f);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -200,8 +230,8 @@ inline std::vector<T> lines(const T& s) {
 ///////////////////////////////////////////////////////////////////////////
 // unlines
 
-template<typename Ts>
-typename traits<Ts>::value_type unlines(const Ts& elems) {
+template<typename T>
+typename traits<T>::value_type unlines(const T& elems) {
   return concat(elems, '\n');
 }
 
@@ -216,7 +246,7 @@ inline std::vector<T> words(const T& s) {
 // unwords
 
 template<typename T>
-typename T unwords(const std::vector<T>& elems) {
+auto unwords(const T& elems) -> decltype(concat(elems, ' ')) {
   return concat(elems, ' ');
 }
 
@@ -280,6 +310,41 @@ inline std::vector<T> decreasing_n(size_t n, T t0 = (T)0) {
   return generate_n(n, [&]() -> T {
     T r = t0; t0 = pred(t0); return r;
   });
+}
+
+///////////////////////////////////////////////////////////////////////////
+// enumFrom
+template<typename T>
+std::function<T(void)> enumFrom(T t) {
+  return [=]() -> T { T r = t; t = succ(t); return r; };
+}
+
+///////////////////////////////////////////////////////////////////////////
+// concat
+template<typename T>
+inline typename std::enable_if<is_container<T>::value, T>::type
+concat(const T& t0, const T& t1) {
+  T result(t0);
+  std::copy(head(t1), tail(t1), back(result));
+  return result;
+}
+
+///////////////////////////////////////////////////////////////////////////
+// append
+template<typename C, typename T>
+inline typename std::enable_if<is_container<C>::value && !is_container<T>::value, C>::type
+append(const C& c, const T& t) {
+  C result(c);
+  result.insert(tail(result), t);
+  return result;
+}
+
+///////////////////////////////////////////////////////////////////////////
+// cons
+template<typename T, typename C>
+inline typename std::enable_if<!is_container<T>::value && is_container<C>::value, C>::type
+cons(const T& t, const C& c) {
+  return concat( append(C(), t), c );
 }
 
 } /* namespace fp */
