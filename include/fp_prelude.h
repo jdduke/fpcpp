@@ -37,10 +37,6 @@ template<typename F, typename T>
 inline T map(F f, const T& t) {
   return __map__(f, t, T());
 }
-template<typename F>
-inline auto map_(F f) -> decltype( curry(map<F, typename fc::function_traits<F>::t0_type>, f) ) {
-  return curry(map<F, typename function_traits<F>::t0_type>, f);
-}
 //FP_DEFINE_FUNC_OBJ(map, map_, _map_);
 
 /////////////////////////////////////////////////////////////////////////////
@@ -166,10 +162,13 @@ FP_DEFINE_FUNC_OBJ(takeWhile, takeWhile_, _takeWhile_);
 
 template<typename F, typename F2>
 inline auto takeWhileF(F f, F2 f2) -> std::vector< decltype(f2()) > {
-  std::vector<decltype(f())> result;
-  auto backR = back(result);
-  while (f()) {
-    backR = f2();
+  typedef decltype(f2()) t_type;
+  std::vector<t_type> result;
+  auto   backR = back(result);
+  t_type value = f2();
+  while (f(value)) {
+    backR = value;
+    value = f2();
   }
   return result;
 }
@@ -185,7 +184,7 @@ inline T take(size_t n, const T& t) {
 
 template<typename F>
 inline auto takeF(size_t n, F f) -> std::vector< decltype(f()) > {
-  let takeN = [=]() { return n-- > 0; }
+  let takeN = [=]( decltype(f()) ) mutable { return n-- > 0; };
   return takeWhileF(takeN, f);
 }
 
@@ -316,7 +315,7 @@ inline std::vector<T> decreasing_n(size_t n, T t0 = (T)0) {
 // enumFrom
 template<typename T>
 std::function<T(void)> enumFrom(T t) {
-  return [=]() -> T { T r = t; t = succ(t); return r; };
+  return [=]() mutable -> T { T r = t; t = succ(t); return r; };
 }
 
 ///////////////////////////////////////////////////////////////////////////
