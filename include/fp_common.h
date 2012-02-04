@@ -66,8 +66,9 @@ struct remove_ref_const {
 
 template <typename T>
 struct traits {
-  typedef typename T::value_type value;
+  typedef typename T::value_type value_type;
   typedef typename T::iterator iterator;
+  //typedef typename remove_ref_const< decltype( *(head(declval<iterator>())) ) >::type value;
   typedef typename T::const_iterator const_iterator;
 };
 template <typename T, typename U>
@@ -79,7 +80,7 @@ struct tuple_traits {
 
 template <typename T>
 struct traits<T*> {
-  typedef T value;
+  typedef T value_type;
   typedef T* iterator;
   typedef const T* const_iterator;
 };

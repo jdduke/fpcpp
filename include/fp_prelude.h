@@ -12,7 +12,22 @@
 namespace fp {
 
 ///////////////////////////////////////////////////////////////////////////
-// accumulate
+// map
+
+template<typename F, typename C, typename R>
+inline R& __map__(F f, const C& c, R& r) {
+  std::transform(extent(c), back(r), f);
+  return r;
+}
+
+template<typename F, typename C>
+inline C map(F f, const C& c) {
+  return __map__(f, c, C());
+}
+//FP_DEFINE_FUNC_OBJ(map, map_, _map_);
+
+///////////////////////////////////////////////////////////////////////////
+// fold
 
 template<class It, class Op>
 auto fold(It first, It last, Op op) -> typename std::iterator_traits<It>::value_type {
@@ -24,36 +39,31 @@ auto fold(It first, It last, Op op) -> typename std::iterator_traits<It>::value_
   }
 }
 
-///////////////////////////////////////////////////////////////////////////
-// map
-
-template<typename F, typename T, typename R>
-inline R& __map__(F f, const T& t, R& r) {
-  std::transform(head(t), tail(t), back(r), f);
-  return r;
+template<class C>
+auto fold(const C& c) -> value_type_of(C) {
+  return std::accumulate(extent(c), value_type_of(C)());
 }
 
-template<typename F, typename T>
-inline T map(F f, const T& t) {
-  return __map__(f, t, T());
+template<typename C, typename T, typename Op>
+T fold_with(const C& c, T t, Op op) {
+  return std::accumulate(extent(c), t, op);
 }
-//FP_DEFINE_FUNC_OBJ(map, map_, _map_);
 
 /////////////////////////////////////////////////////////////////////////////
 // foldl
 
-template<typename F, typename T>
-inline T foldl(F f, const std::vector<T>& t) {
-  return fold(head(t), tail(t), f);
+template<typename F, typename C>
+inline auto foldl(F f, const C& c) -> value_type_of(C) {
+  return fold(extent(c), f);
 }
 FP_DEFINE_FUNC_OBJ_T(foldl, foldl_, _foldl_);
 
 /////////////////////////////////////////////////////////////////////////////
 // foldr
 
-template<typename F, typename T>
-inline T foldr(F f, const std::vector<T>& t) {
-  return fold(rhead(t), rtail(t), f);
+template<typename F, typename C>
+inline auto foldr(F f, const C& c) -> value_type_of(C) {
+  return fold(rextent(c), f);
 }
 FP_DEFINE_FUNC_OBJ_T(foldr, foldr_, _foldr_);
 
@@ -76,7 +86,7 @@ FP_DEFINE_FUNC_OBJ(filter, filter_, _filter_);
 
 template<typename F, typename T, typename U, typename R>
 inline R& __zipWith__(F f, const T& t, const U& u, R& r) {
-  std::transform(head(t), tail(t), head(u), back(r), f);
+  std::transform(extent(t), head(u), back(r), f);
   return r;
 }
 
@@ -98,27 +108,27 @@ inline std::vector< std::pair<T,U> > zip(const std::vector<T>& t, const std::vec
 ///////////////////////////////////////////////////////////////////////////
 // maximum
 
-template<typename T>
-inline typename traits<T>::value maximum(const T& t) {
-  return valueIn( std::max_element(head(t), tail(t)), t);
+template<typename C>
+inline value_type_of(C) maximum(const C& c) {
+  return valueIn( std::max_element(extent(c)), c);
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // minimum
 
-template<typename T>
-inline typename traits<T>::value minimum(const T& t) {
-  return valueIn( std::min_element(head(t), tail(t)), t);
+template<typename C>
+inline value_type_of(C) minimum(const C& c) {
+  return valueIn( std::min_element(extent(c)), c);
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // reverse
 
-template<typename T>
-inline T reverse(const T& t_) {
-  T t(t_);
-  std::reverse(head(t), tail(t));
-  return t;
+template<typename C>
+inline C reverse(const C& c_) {
+  C c(c_);
+  std::reverse(head(c), tail(c));
+  return c;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -126,7 +136,7 @@ inline T reverse(const T& t_) {
 
 template<typename T, typename C>
 inline bool elem(const T& t, const C& c) {
-  return std::find(head(c), tail(c), t) != tail(c);
+  return std::find(extent(c), t) != tail(c);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -143,7 +153,7 @@ inline bool notElem(const T& t, const C& c) {
 template<typename F, typename T>
 inline T dropWhile(F f, const T& t) {
   T result;
-  std::copy_if(head(t), tail(t), back(result), std::not1<F>(f));
+  std::copy_if(extent(t), back(result), std::not1<F>(f));
   return result;
 }
 FP_DEFINE_FUNC_OBJ(dropWhile, dropWhile_, _dropWhile_);
@@ -153,7 +163,7 @@ FP_DEFINE_FUNC_OBJ(dropWhile, dropWhile_, _dropWhile_);
 
 template<typename T>
 inline T drop(size_t n, const T& t) {
-  let dropN = [&](const traits<T>::value&) { return n-- > 0; }
+  let dropN = [&](const traits<T>::value_type&) { return n-- > 0; }
   return dropWhile(dropN, t);
 }
 
@@ -163,7 +173,7 @@ inline T drop(size_t n, const T& t) {
 template<typename F, typename T>
 inline T takeWhile(F f, const T& t) {
   T result;
-  std::copy_if(head(t), tail(t), back(result), f);
+  std::copy_if(extent(t), back(result), f);
   return result;
 }
 FP_DEFINE_FUNC_OBJ(takeWhile, takeWhile_, _takeWhile_);
@@ -173,11 +183,8 @@ inline auto takeWhileF(F f, F2 f2) -> std::vector< decltype(f2()) > {
   typedef decltype(f2()) t_type;
   std::vector<t_type> result;
   auto   backR = back(result);
-  t_type value = f2();
-  while (f(value)) {
+  for (t_type value = f2(); f(value); value=f2())
     backR = value;
-    value = f2();
-  }
   return result;
 }
 FP_DEFINE_FUNC_OBJ(takeWhileF, takeWhileF_, _takeWhileF_);
@@ -237,8 +244,8 @@ inline std::vector<T> lines(const T& s) {
 ///////////////////////////////////////////////////////////////////////////
 // unlines
 
-template<typename T>
-typename traits<T>::value_type unlines(const T& elems) {
+template<typename C>
+auto unlines(const C& elems) -> value_type_of(C) {
   return concat(elems, '\n');
 }
 
