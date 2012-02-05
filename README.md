@@ -14,8 +14,8 @@ Generate PI:
         using namespace fp;
         typedef std::pair<double,double> point;
         let dxs = map([](const point& p) { return p.first*p.first + p.second*p.second; },
-                      zip(generate_n(samples, rand_range<double>(-1.0,1.0)),
-                          generate_n(samples, rand_range<double>(-1.0,1.0))));
+                      zip(take(samples, rand_range(-1.0,1.0)),
+                          take(samples, rand_range(-1.0,1.0))));
         return 4.0 * filter([](double d) { return d <= 1.0; }, dxs).size() / dxs.size();
     }
 
