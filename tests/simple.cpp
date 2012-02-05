@@ -5,6 +5,7 @@
 
 #include <array>
 #include <string>
+#include <map>
 #include <vector>
 
 #include "common.h"
@@ -22,9 +23,9 @@ let fold_div  = fp::foldl_(&div<double>);
 
 static const std::vector<float>  fVec10_1(10, 1.f);
 static const std::vector<double> dVec10_2(10, 2.f);
-let dVec10_0_9 = fp::increasing_n(5, 1.);
-let iVec10_0_9 = fp::increasing_n(10, 0);
-let iVec10_9_0 = fp::decreasing_n(10, 9);
+let dVec5_1_5 = fp::increasing_n(5, 1.);
+let iVec5_0_5 = fp::increasing_n(6, 0);
+let iVec5_5_0 = fp::decreasing_n(6, 5);
 
 /////////////////////////////////////////////////////////////////////////////
 
@@ -34,8 +35,12 @@ TEST(Prelude, Map) {
 
   EXPECT_EQ(fold( map(add_2,  fVec10_1)),    30.0f);
   EXPECT_EQ(fold( map(sub_3,  dVec10_2)),   -10.0 );
-  EXPECT_EQ(fold( map(div_5,  iVec10_0_9)),  5);
-  EXPECT_EQ(fold( map(mult_4, iVec10_9_0)),  180);
+  EXPECT_EQ(fold( map(mult_4, iVec5_5_0)),  0*4.f + 1*4.f + 2*4.f + 3*4.f + 4*4.f + 5*4.f);
+  EXPECT_EQ(fold( map(div_5,  iVec5_0_5)),  0/5.f + 1/5.f + 2/5.f + 3/5.f + 4/5.f + 5/5.f);
+
+  ///////////////////////////////////////////////////////////////////////////
+
+  EXPECT_EQ(map(toupper, "abc"), "ABC");
 }
 
 TEST(Prelude, FoldL) {
@@ -44,8 +49,8 @@ TEST(Prelude, FoldL) {
 
   EXPECT_EQ(fold(fVec10_1),    10.f);
   EXPECT_EQ(fold(dVec10_2),    20. );
-  EXPECT_EQ(fold(iVec10_0_9),  45);
-  EXPECT_EQ(fold(iVec10_9_0),  45);
+  EXPECT_EQ(fold(iVec5_0_5),  0+1+2+3+4+5);
+  EXPECT_EQ(fold(iVec5_5_0),  5+4+3+2+1+0);
 
   EXPECT_EQ(fold_mult(dVec10_2), pow(2.,10) );
   EXPECT_EQ(fold_div(dVec10_2), pow(.5,8) );
@@ -62,8 +67,8 @@ TEST(Prelude, FoldR) {
   let subi = &sub<int>;
 
   EXPECT_EQ(foldr(addf, fVec10_1),    10.f);
-  EXPECT_EQ(foldr(subi, iVec10_0_9), -27);
-  EXPECT_EQ(foldr(subi, iVec10_0_9), fp::foldl(subi, iVec10_9_0));
+  EXPECT_EQ(foldr(subi, iVec5_0_5), 5-4-3-2-1-0);
+  EXPECT_EQ(foldr(subi, iVec5_5_0), 0-1-2-3-4-5);
 
   let add_s = [](const std::string& s0, const std::string& s1) { return s0 + s1; };
   let add_s2 = &add<std::string>;
@@ -76,33 +81,40 @@ TEST(Prelude, FoldR) {
 TEST(Prelude, Filter) {
   using fp::filter;
 
-  let r15 = fp::fold(filter([](int x) { return x <= 5; }, iVec10_0_9));
-  EXPECT_EQ(r15, 15);
-  let r30 = fp::fold(filter([](int x) { return x >  5; }, iVec10_0_9));
-  EXPECT_EQ(r30, 30);
+  let lessThanEq2 = fp::fold(filter([](int x) { return x <= 2; }, iVec5_0_5));
+  EXPECT_EQ(lessThanEq2, 0+1+2);
+  let greaterThan2 = fp::fold(filter([](int x) { return x >  2; }, iVec5_0_5));
+  EXPECT_EQ(greaterThan2, 3+4+5);
 
   std::string str("a b c d e f g");
   let strFilter = [](const std::string& s) -> bool { return s[0] < 'd'; };
-  EXPECT_EQ(fp::unwords(filter(strFilter, fp::words(str))), std::string("a b c"));
+  EXPECT_EQ(fp::fold(filter(strFilter, fp::words(str))), std::string("abc"));
 }
 
 TEST(Prelude, Zip) {
   using fp::zip;
 
-  let ifZip  = zip(iVec10_0_9, iVec10_9_0);
+  let ifZip  = zip(iVec5_0_5, iVec5_5_0);
   let pairSum = [](const std::pair<int,int>& a) -> int { return a.first + a.second; };
-  let pairIs9 = [&](const std::pair<int,int>& a) -> int { return pairSum(a) == 9 ? 1 : 0; };
-  EXPECT_EQ(fp::fold(fp::__map__(pairIs9, ifZip, std::vector<int>())), 10);
+  let pairIs5 = [&](const std::pair<int,int>& a) -> int { return pairSum(a) == 5 ? 1 : 0; };
+  EXPECT_EQ(fp::fold(fp::__map__(pairIs5, ifZip, std::vector<int>())), 6);
 
   ///////////////////////////////////////////////////////////////////////////
 
 }
 
 TEST(Prelude, ZipWith) {
+  using fp::zipWith;
 
+  int expectedSum[] = {4,4,4};
+  EXPECT_EQ(fp::make_vector(expectedSum),    zipWith(std::plus<int>(), fp::increasing_n(3, 1), fp::decreasing_n(3, 3)));
 
+  float expectedPow[] = {5.0f,25.0f,125.0f,625.0f,3125.0f};
+  EXPECT_EQ(fp::make_vector(expectedPow),    zipWith(std::powf, std::vector<float>(5, 5.f), fp::increasing_n(5, 1.f)));
 
-  
+  int expectedLambda[] = {7, 10, 13, 16};
+  let lambda = [](int x, int y) -> int { return 2*x+y; };
+  EXPECT_EQ(fp::make_vector(expectedLambda), zipWith(lambda, fp::increasing_n(4, 1), fp::increasing_n(4, 5)));
 }
 
 TEST(Prelude, MinMax) {
@@ -110,12 +122,12 @@ TEST(Prelude, MinMax) {
   using fp::minimum;
 
   let zeroToThousand = fp::increasing_n(1001, 0);
-  EXPECT_EQ(maximum(zeroToThousand), 1000);
-  EXPECT_EQ(minimum(zeroToThousand), 0);
+  EXPECT_EQ(1000, maximum(zeroToThousand));
+  EXPECT_EQ(0,    minimum(zeroToThousand));
   zeroToThousand.pop_back();
-  EXPECT_EQ(maximum(zeroToThousand), 999);
   zeroToThousand[0] = 999;
-  EXPECT_EQ(minimum(zeroToThousand), 1);
+  EXPECT_EQ(999,  maximum(zeroToThousand));
+  EXPECT_EQ(1,    minimum(zeroToThousand));
 
   ///////////////////////////////////////////////////////////////////////////
 
@@ -126,16 +138,20 @@ TEST(Prelude, MinMax) {
   while (randFloats.size() < 1000) {
     randFloats.push_back(randFloat());
     float newRandMax = maximum(randFloats);
-    EXPECT_GE(newRandMax, randMax);
+    EXPECT_LE(randMax, newRandMax);
     newRandMax = randMax;
   }
 
   ///////////////////////////////////////////////////////////////////////////
 
   std::array<double,5> testArray = {0, 1, 2, 3, 4};
-  EXPECT_EQ(maximum(testArray), 4);
-  EXPECT_EQ(minimum(testArray), 0);
+  EXPECT_EQ(4, maximum(testArray));
+  EXPECT_EQ(0, minimum(testArray));
 
+  ///////////////////////////////////////////////////////////////////////////
+
+  EXPECT_EQ('o', maximum(std::string("Hello")));
+  EXPECT_EQ('H', minimum(std::string("Hello")));
 }
 
 TEST(Prelude, Random) {
@@ -210,6 +226,30 @@ TEST(Prelude, EnumFrom) {
   EXPECT_EQ(ptrEnumFromNull(), 0);
   EXPECT_EQ(ptrEnumFromNull(), 1);
 }
+
+TEST(Prelude, Elem) {
+  using fp::elem;
+
+  bool hasFind = fp::has_find<std::map<int,int>,int>::value;
+
+  EXPECT_EQ(true,  elem(5,  iVec5_0_5));
+  EXPECT_EQ(false, elem(-1, iVec5_0_5));
+  EXPECT_EQ(false, elem(0,  fp::increasing_n(10, 1)));
+  EXPECT_EQ(true,  elem('o', "Hello"));
+  EXPECT_EQ(false, !elem('o', "Hello"));
+  EXPECT_EQ(false, elem(10, "Hello"));
+  EXPECT_EQ(true,  !elem(10, "Hello"));
+
+  std::map<int,int> testMap;
+  let pairs = fp::zip(fp::increasing_n(10, 0), fp::decreasing_n(10, 9));
+  testMap.insert(extent(pairs));
+  //EXPECT_EQ(true, elem(std::pair<int,int>(0,9), testMap));
+  //test.insert( std::pair<int,int>(1,2) );
+  //test.insert( std::pair<int,int>(1,2) );
+  //EXPECT_EQ()
+
+}
+
 
 ///////////////////////////////////////////////////////////////////////////
 

@@ -6,6 +6,7 @@
 
 #include <algorithm>
 #include <numeric>
+#include <map>
 #include <sstream>
 #include <tuple>
 
@@ -21,8 +22,18 @@ inline R& __map__(F f, const C& c, R& r) {
 }
 
 template<typename F, typename C>
-inline C map(F f, const C& c) {
-  return __map__(f, c, C());
+inline auto map(F f, const C& c) -> std::vector< typename fc::function_traits<F>::result_type > {
+  typedef std::vector< typename fc::function_traits<F>::result_type > result_type;
+  return __map__(f, c, result_type());
+}
+template<typename F>
+inline std::string map(F f, const std::string& s) {
+  let charVec = __map__(f, std::vector<char>(extent(s)), std::string());
+  return std::string(extent(charVec));
+}
+template<typename F>
+inline std::string map(F f, const char* s) {
+  return map(f, std::string(s));
 }
 //FP_DEFINE_FUNC_OBJ(map, map_, _map_);
 
@@ -99,10 +110,13 @@ FP_DEFINE_FUNC_OBJ(zipWith, zipWith_, _zipWith_)
 ///////////////////////////////////////////////////////////////////////////
 // zip
 
-template<typename T, typename U>
-inline std::vector< std::pair<T,U> > zip(const std::vector<T>& t, const std::vector<U>& u) {
-  typedef std::vector< std::pair<T,U> > result_type;
-  return __zipWith__([](const T& t, const U& u) -> std::pair<T,U> { return std::make_pair(t,u); },t,u,result_type());
+template<typename C1, typename C2>
+inline std::vector< typename tuple_traits<C1,C2>::type > zip(const C1& c1, const C2& c2) {
+  typedef typename traits<C1>::value_type T;
+  typedef typename traits<C2>::value_type U;
+  typedef typename tuple_traits<C1,C2>::type pair_type;
+  typedef std::vector< pair_type > result_type;
+  return __zipWith__([](const T& t, const U& u) -> pair_type { return std::make_pair(t,u); }, c1, c2, result_type());
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -134,10 +148,26 @@ inline C reverse(const C& c_) {
 ///////////////////////////////////////////////////////////////////////////
 // elem
 
+#if 1
+
 template<typename T, typename C>
 inline bool elem(const T& t, const C& c) {
   return std::find(extent(c), t) != tail(c);
 }
+
+#else
+
+template<typename T, typename C>
+inline typename std::enable_if< !has_find<C,T>::value, bool >::value elem(const T& t, const C& c) {
+  return std::find(extent(c), t) != tail(c);
+}
+
+template<typename T, typename C>
+inline typename std::enable_if< has_find<C,T>::value, bool>::value elem(const T& t, const C& c) {
+  return c.find(t) != tail(c);
+}
+
+#endif
 
 ///////////////////////////////////////////////////////////////////////////
 // notElem

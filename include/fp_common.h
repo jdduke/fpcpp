@@ -101,10 +101,9 @@ struct traits<T*> {
 
 ///////////////////////////////////////////////////////////////////////////
 
-#if 1
 template <typename T>
 struct is_container {
-  template <typename U, typename it_t = decltype( head(U) ) > 
+  template <typename U, typename it_t = typename traits<U>::iterator > 
   struct sfinae  {
     template < typename U, typename IT, IT (U::*)() const, IT (U::*)() const >
     struct type_ {};
@@ -116,22 +115,20 @@ struct is_container {
 
   enum { value = (1 == sizeof test<T>(0)) };
 };
-#else
-template <typename T>
-struct is_container {
-  template <typename U, typename it_t = typename U::const_iterator > 
-  struct sfinae  {
-    template < typename U, typename IT, IT (U::*)() const, IT (U::*)() const >
-    struct type_ {};
-    typedef type_<U,it_t,static_cast<it_t (U::*)() const>(&U::begin),static_cast<it_t (U::*)() const>(&U::end)> type;
-  };
 
-  template <typename U> static char test(typename sfinae<U>::type*);
-  template <typename U> static long test(...);
+template <typename T, typename T2>
+struct has_find {
+  typedef char Yes[1];
+  typedef char No[2];
+  typedef typename traits<T>::iterator It;
 
-  enum { value = (1 == sizeof test<T>(0)) };
+  template <typename U, U> struct Check;
+
+  template <typename C, typename C2> static Yes& Test(Check<It(C::*)(C2), &C::find>*);
+  template <typename C, typename C2> static No&  Test(...);
+
+  static const bool value = sizeof(Test<T,T2>(0)) == sizeof(Yes);
 };
-#endif
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -140,6 +137,13 @@ auto iter_value(I i, const C& c) -> decltype(*i) {
   typedef decltype(*i) iter_value;
   return (i != tail(c)) ? *i : iter_value();
 }
+
+///////////////////////////////////////////////////////////////////////////
+template<typename T, size_t S>
+inline std::vector<T> make_vector(T (&A)[S]) {
+  return std::vector<T>(A, A+S);
+}
+
 
 } /* namespace fp */
 

@@ -8,9 +8,9 @@
 #define _FP_DEFINES_H_
 
 #define let auto
-#define extent(c) head(c), tail(c)
-#define rextent(c) rhead(c), rtail(c)
-#define value_type_of(t) typename traits<t>::value_type
+#define extent(c)  fp::head(c),  fp::tail(c)
+#define rextent(c) fp::rhead(c), fp::rtail(c)
+#define value_type_of(t) typename fp::traits<t>::value_type
 
 #define FP_DEFINE_CURRIED_HELPER_IMPL(a,b)    \
   template <typename F>                       \
