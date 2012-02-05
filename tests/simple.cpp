@@ -63,8 +63,8 @@ TEST(Prelude, Fun) {
 
     let mp3Filter = [](const string& mp3) { 
       return (!mp3.empty())  && 
-        ( mp3[0] != '#') &&
-        ( mp3.find_first_of(".mp3") != std::string::npos);
+             ( mp3[0] != '#') &&
+             ( mp3.find_first_of(".mp3") != std::string::npos);
     };
     let mp3Delete = [=](const string& mp3) {
       return remove(mp3.c_str()) == 0; 
