@@ -7,6 +7,7 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <fstream>
 
 #include "common.h"
 
@@ -26,6 +27,41 @@ static const std::vector<double> dVec10_2(10, 2.f);
 let dVec5_1_5 = fp::increasing_n(5, 1.);
 let iVec5_0_5 = fp::increasing_n(6, 0);
 let iVec5_5_0 = fp::decreasing_n(6, 5);
+
+TEST(Prelude, Fun) {
+  using namespace fp;
+  using std::string;
+  using std::ifstream;
+  using std::cout;
+
+  ifstream playlistFile("TestList.m3u");
+  enum status { success = 0, failure };
+  typedef std::pair<string,status> line;
+
+  let lineSource = [=,&playlistFile]() -> line {
+    string s; 
+    return getline(playlistFile, s) ? line(s,success) : line("",failure);
+  };
+  let mp3Filter = [](const line& mp3) { 
+    return (!mp3.first.empty())  && 
+           ( mp3.first[0] != '#') &&
+           ( mp3.first.find_first_of(".mp3") != std::string::npos);
+  };
+  let mp3Delete = [=](const line& mp3) {
+    return remove(mp3.first.c_str()) == 0 ? success : failure; 
+  };
+  let successful = notElem(failure,
+                           map(mp3Delete, 
+                               filter(mp3Filter, 
+                                      takeWhileF([=](const line& s) { return s.second != failure; },
+                                                 lineSource))));
+
+  cout << "Deleting Playlist..." << success ? "Success!" : "Failure!!";
+
+  ///////////////////////////////////////////////////////////////////////////
+  
+
+}
 
 /////////////////////////////////////////////////////////////////////////////
 
