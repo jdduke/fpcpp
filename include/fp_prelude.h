@@ -8,6 +8,7 @@
 #include <numeric>
 #include <map>
 #include <sstream>
+#include <fstream>
 #include <tuple>
 
 namespace fp {
@@ -117,6 +118,14 @@ inline std::vector< typename tuple_traits<C1,C2>::type > zip(const C1& c1, const
   typedef typename tuple_traits<C1,C2>::type pair_type;
   typedef std::vector< pair_type > result_type;
   return __zipWith__([](const T& t, const U& u) -> pair_type { return std::make_pair(t,u); }, c1, c2, result_type());
+}
+
+///////////////////////////////////////////////////////////////////////////
+// all
+
+template<typename F, typename C>
+inline bool all(F f, const C& c) {
+  return std::all_of(extent(c), f);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -263,6 +272,8 @@ typename T concat(const std::vector<T>& elems, char delim = ' ') {
   return str.length() > 0 ? str.substr(0, str.length()-1) : "";
 }
 
+inline bool istrue(bool b) { return b; }
+
 ///////////////////////////////////////////////////////////////////////////
 // lines
 
@@ -270,6 +281,14 @@ template<typename T>
 inline std::vector<T> lines(const T& s) {
   return split(s, '\n');
 }
+inline std::vector<std::string> lines(std::ifstream ifs) {
+  std::vector<std::string> ifsLines;
+  std::string line;
+  while (getline(ifs, line)) 
+    ifsLines.push_back(line);
+  return ifsLines;
+}
+
 
 ///////////////////////////////////////////////////////////////////////////
 // unlines
@@ -325,6 +344,13 @@ inline std::vector<T> rand_n(size_t n, T t0 = std::numeric_limits<T>::min(), T t
 }
 
 ///////////////////////////////////////////////////////////////////////////
+// iterate
+template<typename F, typename T>
+inline std::function< T(void) > iterate(F f, T t) {
+  return [=]() mutable -> T { T r = t; t = f(t); return r; };
+}
+
+///////////////////////////////////////////////////////////////////////////
 // succ
 template<typename T>
 inline T succ(const T& t) {
@@ -360,7 +386,8 @@ inline std::vector<T> decreasing_n(size_t n, T t0 = (T)0) {
 // enumFrom
 template<typename T>
 std::function<T(void)> enumFrom(T t) {
-  return [=]() mutable -> T { T r = t; t = succ(t); return r; };
+  return iterate(&succ<T>, t);
+  //return [=]() mutable -> T { T r = t; t = succ(t); return r; };
 }
 
 ///////////////////////////////////////////////////////////////////////////

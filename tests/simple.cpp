@@ -28,38 +28,55 @@ let dVec5_1_5 = fp::increasing_n(5, 1.);
 let iVec5_0_5 = fp::increasing_n(6, 0);
 let iVec5_5_0 = fp::decreasing_n(6, 5);
 
+
+template<typename MapOp, typename FilterOp, typename Source>
+bool filteredMap(MapOp mapOp, FilterOp filterOp, Source source, std::function<bool(typename fc::function_traits<MapOp>::result_type)> successOp = &istrue) { 
+  using namespace fp;
+  return all(successOp,
+             map(mapOp,
+                 filter(filterOp,
+                        source)));
+}
+
+double pi() {
+  using namespace fp;
+  enum { samples = 1000 };
+  typedef std::pair<double,double> point;
+  let dxs = map([](const point& p) { return p.first*p.first + p.second*p.second; },
+                zip(takeF(samples, rand_range_<double>(-1.0,1.0)),
+                    takeF(samples, rand_range_<double>(-1.0,1.0))));
+  return 4.0*filter([](double d) { return d <= 1.0; }, dxs).size()/dxs.size();
+}
+
 TEST(Prelude, Fun) {
   using namespace fp;
   using std::string;
   using std::ifstream;
   using std::cout;
+  using std::string;
 
-  ifstream playlistFile("TestList.m3u");
-  enum status { success = 0, failure };
-  typedef std::pair<string,status> line;
 
-  let lineSource = [=,&playlistFile]() -> line {
-    string s; 
-    return getline(playlistFile, s) ? line(s,success) : line("",failure);
-  };
-  let mp3Filter = [](const line& mp3) { 
-    return (!mp3.first.empty())  && 
-           ( mp3.first[0] != '#') &&
-           ( mp3.first.find_first_of(".mp3") != std::string::npos);
-  };
-  let mp3Delete = [=](const line& mp3) {
-    return remove(mp3.first.c_str()) == 0 ? success : failure; 
-  };
-  let successful = notElem(failure,
-                           map(mp3Delete, 
-                               filter(mp3Filter, 
-                                      takeWhileF([=](const line& s) { return s.second != failure; },
-                                                 lineSource))));
+  if (false)
+  {
+    ifstream playlistFile("TestList.m3u");
+    static const bool failure = false;
 
-  cout << "Deleting Playlist..." << success ? "Success!" : "Failure!!";
+    let mp3Filter = [](const string& mp3) { 
+      return (!mp3.empty())  && 
+        ( mp3[0] != '#') &&
+        ( mp3.find_first_of(".mp3") != std::string::npos);
+    };
+    let mp3Delete = [=](const string& mp3) {
+      return remove(mp3.c_str()) == 0; 
+    };
+    let successful = filteredMap(mp3Delete, mp3Filter, lines(ifstream("playlist.m3u")));
+
+    cout << "Deleting Playlist..." << successful ? "Success!" : "Failure!!";
+  }
 
   ///////////////////////////////////////////////////////////////////////////
-  
+
+  EXPECT_NEAR(3.14, pi(), .1);
 
 }
 
