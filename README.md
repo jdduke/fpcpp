@@ -1,45 +1,50 @@
 fpcpp
 ===========================
 
-fpcpp (functional programming in C++) is a header-based C++ library for enabling functional programming style and features
+fpcpp (functional programming in C++) is a lightweight, header-based C++ library for enabling functional programming style and features
 in modern C++ programs.
 
 
 Example
 -------------
 
-Simple use:
+Generate PI:
 
+    double pi(size_t samples = 1000) {
+        using namespace fp;
+        typedef std::pair<double,double> point;
+        let dxs = map([](const point& p) { return p.first*p.first + p.second*p.second; },
+                      zip(generate_n(samples, rand_range<double>(-1.0,1.0)),
+                          generate_n(samples, rand_range<double>(-1.0,1.0))));
+        return 4.0 * filter([](double d) { return d <= 1.0; }, dxs).size() / dxs.size();
+    }
 
-Deleting all mp3's reference in an .m3u file:
+We might want a common operation for mapping an operation across a filtered source and checking for success.  
 
-    let deleteM3U = [](const string& fileName) -> bool {
-    
-      enum status { success = 0, failure };
-      typedef pair<string, status> line;
-      
-      ifstream m3uFile(fileName);      
+    template<typename SuccessOp, typename MapOp, typename FilterOp, typename Source> {
+    bool filteredMap(SuccessOp, MapOp mapOp, FilterOp filterOp, Source source) { 
+        using namespace fp;
+        return all(successOp,
+                   map(mapOp,
+                       filter(filterOp,
+                              source)));
+    }
 
-      let m3uLines = [=,&m3uFile]() -> line {
-        string s; 
-        return getline(playlistFile, s) ? line(s, success) : line("", failure);
-      };
+For example, we can use this to delete all mp3's referenced in an .m3u file:
+
+    let deleteM3UFiles = [](const string& fileName) -> bool {
+        
+        let isMp3 = [](const string& l) { 
+            return (!l.first.empty())  && 
+                   ( l.first[0] != '#') &&
+                   ( l.first.find_first_of(".mp3") != string::npos);
+        };
       
-      let isMp3 = [](const line& l) { 
-        return (!l.first.empty())  && 
-               ( l.first[0] != '#') &&
-               ( l.first.find_first_of(".mp3") != std::string::npos);
-      };
+        let deleteFile = [=](const string& mp3) {
+            return remove(mp3.c_str()) == 0; 
+        };
       
-      let deleteFile = [=](const line& mp3) {
-        return remove(mp3.first.c_str()) == 0 ? success : failure; 
-      };
-      
-      return notElem(failure,
-                     map(deleteFile, 
-                         filter(isMp3, 
-                                takeWhile([=](const line& l) { return l.second != failure; },
-                                          m3uLines))));                                          
+        return filteredMap(istrue, deleteFile, isMp3, lines(std::ifstream(fileName)));                                   
     }
 
 Documentation
