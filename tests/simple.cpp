@@ -58,9 +58,6 @@ TEST(Prelude, Fun) {
 
   if (false)
   {
-    ifstream playlistFile("TestList.m3u");
-    static const bool failure = false;
-
     let mp3Filter = [](const string& mp3) { 
       return (!mp3.empty())  && 
              ( mp3[0] != '#') &&
@@ -107,7 +104,6 @@ TEST(Prelude, FoldL) {
 
   EXPECT_EQ(fold_mult(dVec10_2), pow(2.,10) );
   EXPECT_EQ(fold_div(dVec10_2), pow(.5,8) );
-  //EXPECT_EQ(fold_div(dVec10_2) * fold_mult(dVec10_2), 1.);
 
   EXPECT_EQ(fold(fp::words(std::string("a b c d e f g h i j"))), "abcdefghij");
 }
@@ -152,8 +148,6 @@ TEST(Prelude, Zip) {
   let pairIs5 = [&](const std::pair<int,int>& a) -> int { return pairSum(a) == 5 ? 1 : 0; };
   EXPECT_EQ(fp::fold(fp::__map__(pairIs5, ifZip, std::vector<int>())), 6);
 
-  ///////////////////////////////////////////////////////////////////////////
-
 }
 
 TEST(Prelude, ZipWith) {
@@ -168,6 +162,19 @@ TEST(Prelude, ZipWith) {
   int expectedLambda[] = {7, 10, 13, 16};
   let lambda = [](int x, int y) -> int { return 2*x+y; };
   EXPECT_EQ(fp::make_vector(expectedLambda), zipWith(lambda, fp::increasing_n(4, 1), fp::increasing_n(4, 5)));
+}
+
+
+TEST(Prelude, All) {
+  using fp::all;
+
+  EXPECT_EQ(true,  all([](float x) { return x == 1.f; }, fVec10_1));
+  EXPECT_EQ(false, all([](float x) { return x != 1.f; }, fVec10_1));
+
+  EXPECT_EQ(true, all([](double x) { return x == 2.; }, dVec10_2));
+  EXPECT_EQ(false, all([](double x) { return x != 2.; }, dVec10_2));
+
+  EXPECT_EQ(true, all([](double x) { return x < 10; }, fp::increasing_n(10, 0.)));
 }
 
 TEST(Prelude, MinMax) {
@@ -205,6 +212,14 @@ TEST(Prelude, MinMax) {
 
   EXPECT_EQ('o', maximum(std::string("Hello")));
   EXPECT_EQ('H', minimum(std::string("Hello")));
+}
+
+TEST(Prelude, Reverse) {
+  using fp::reverse;
+
+  EXPECT_EQ("dcba", reverse(std::string("abcd")));
+
+  EXPECT_EQ(fp::increasing_n(5, 0), reverse(fp::decreasing_n(5, 4)));
 }
 
 TEST(Prelude, Random) {
@@ -282,24 +297,48 @@ TEST(Prelude, EnumFrom) {
 
 TEST(Prelude, Elem) {
   using fp::elem;
+  using fp::notElem;
 
   bool hasFind = fp::has_find<std::map<int,int>,int>::value;
 
-  EXPECT_EQ(true,  elem(5,  iVec5_0_5));
-  EXPECT_EQ(false, elem(-1, iVec5_0_5));
-  EXPECT_EQ(false, elem(0,  fp::increasing_n(10, 1)));
-  EXPECT_EQ(true,  elem('o', "Hello"));
-  EXPECT_EQ(false, !elem('o', "Hello"));
-  EXPECT_EQ(false, elem(10, "Hello"));
-  EXPECT_EQ(true,  !elem(10, "Hello"));
+  EXPECT_EQ(true,   elem(5,   iVec5_0_5));
+  EXPECT_EQ(false,  notElem(5, iVec5_0_5));
+  EXPECT_EQ(false,  elem(-1,  iVec5_0_5));
+  EXPECT_EQ(true,   notElem(-1,  iVec5_0_5));
+  EXPECT_EQ(false,  elem(0,   fp::increasing_n(10, 1)));
+  EXPECT_EQ(true,   notElem(0,   fp::increasing_n(10, 1)));
+  EXPECT_EQ(false,  elem(-1,  iVec5_0_5));
+  EXPECT_EQ(true,   notElem(-1,  iVec5_0_5));
+  EXPECT_EQ(true,   elem('o', "Hello"));
+  EXPECT_EQ(false,  notElem('o', "Hello"));
+  EXPECT_EQ(false,  elem(-1,  iVec5_0_5));
+  EXPECT_EQ(true,   notElem(-1,  iVec5_0_5));
+  EXPECT_EQ(false,  elem(10,  "Hello"));
+  EXPECT_EQ(true,   notElem(10,  "Hello"));
 
-  std::map<int,int> testMap;
   let pairs = fp::zip(fp::increasing_n(10, 0), fp::decreasing_n(10, 9));
-  testMap.insert(extent(pairs));
-  //EXPECT_EQ(true, elem(std::pair<int,int>(0,9), testMap));
-  //test.insert( std::pair<int,int>(1,2) );
-  //test.insert( std::pair<int,int>(1,2) );
-  //EXPECT_EQ()
+  typedef decltype(pairs) PairVec;
+  typedef PairVec::value_type Pair;
+  pairs.push_back( Pair(33,33) );
+
+  EXPECT_EQ(true,  elem(Pair(0,9),   pairs));
+  EXPECT_EQ(true,  elem(Pair(33,33), pairs));
+  EXPECT_EQ(false, elem(Pair(44,44), pairs));
+}
+
+TEST(Prelude, Drop) {
+  using fp::drop;
+  using fp::dropWhile;
+
+  EXPECT_EQ(0,   fp::fold(drop(10, fp::increasing_n(10, 0))));
+  EXPECT_EQ(9,   fp::fold(drop(9,  fp::increasing_n(10, 0))));
+  EXPECT_EQ(9+8, fp::fold(drop(8,  fp::increasing_n(10, 0))));
+  EXPECT_EQ(fp::increasing_n(5,0), drop(0, fp::increasing_n(5, 0)));
+
+  EXPECT_EQ(0,   fp::fold(dropWhile([](int x) { return x < 10; }, fp::increasing_n(10, 0))));
+  EXPECT_EQ(9,   fp::fold(dropWhile([](int x) { return x < 9; }, fp::increasing_n(10, 0))));
+  EXPECT_EQ(9+8, fp::fold(dropWhile([](int x) { return x < 8; }, fp::increasing_n(10, 0))));
+  EXPECT_EQ(fp::decreasing_n(5, 4), dropWhile([](int x) { return x > 4; }, fp::decreasing_n(10, 9)));
 
 }
 

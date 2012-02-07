@@ -186,24 +186,11 @@ inline bool notElem(const T& t, const C& c) {
   return !elem(t, c);
 }
 
-///////////////////////////////////////////////////////////////////////////
-// dropWhile
-
-template<typename F, typename T>
-inline T dropWhile(F f, const T& t) {
-  T result;
-  std::copy_if(extent(t), back(result), std::not1<F>(f));
-  return result;
-}
-FP_DEFINE_FUNC_OBJ(dropWhile, dropWhile_, _dropWhile_);
-
-///////////////////////////////////////////////////////////////////////////
-// drop
-
-template<typename T>
-inline T drop(size_t n, const T& t) {
-  let dropN = [&](const traits<T>::value_type&) { return n-- > 0; }
-  return dropWhile(dropN, t);
+template<typename InputIt, typename ResultIt, typename F>
+inline void copyWhile(InputIt first, InputIt last, ResultIt result, F& f) {
+  while ((first != last) && f(*first)) {
+    *result++ = *first++;
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -212,7 +199,8 @@ inline T drop(size_t n, const T& t) {
 template<typename F, typename T>
 inline T takeWhile(F f, const T& t) {
   T result;
-  std::copy_if(extent(t), back(result), f);
+  //std::copy(head(t), std::find_if(extent(t), std::not1<F>(f)), back(result));
+  copyWhile(extent(t), back(result), f);
   return result;
 }
 FP_DEFINE_FUNC_OBJ(takeWhile, takeWhile_, _takeWhile_);
@@ -230,16 +218,36 @@ FP_DEFINE_FUNC_OBJ(takeWhileF, takeWhileF_, _takeWhileF_);
 
 ///////////////////////////////////////////////////////////////////////////
 // take
-template<typename T>
-inline T take(size_t n, const T& t) {
-  let takeN = [=](const traits<T>::value&) { return n-- > 0; }
-  return takeWhile(takeN, t);
+template<typename C>
+inline C take(size_t n, const C& c) {
+  let takeN = [=](const traits<C>::value_type&) { return n-- > 0; }
+  return takeWhile(takeN, c);
 }
 
 template<typename F>
 inline auto takeF(size_t n, F f) -> std::vector< decltype(f()) > {
   let takeN = [=]( decltype(f()) ) mutable { return n-- > 0; };
   return takeWhileF(takeN, f);
+}
+
+///////////////////////////////////////////////////////////////////////////
+// dropWhile
+
+template<typename F, typename C>
+inline C dropWhile(F f, const C& c) {
+  C result;
+  std::copy(std::find_if_not(extent(c), f), tail(c), back(result));
+  return result;
+}
+FP_DEFINE_FUNC_OBJ(dropWhile, dropWhile_, _dropWhile_);
+
+///////////////////////////////////////////////////////////////////////////
+// drop
+
+template<typename C>
+inline C drop(size_t n, const C& c) {
+  let dropN = [=](const typename traits<C>::value_type&) mutable { return n-- > 0; };
+  return dropWhile(dropN, c);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -408,6 +416,24 @@ append(const C& c, const T& t) {
   C result(c);
   result.insert(tail(result), t);
   return result;
+}
+
+///////////////////////////////////////////////////////////////////////////
+// show
+template<typename T>
+inline typename std::enable_if<!is_container<T>::value, std::string>::type show(const T& t) {
+  std::stringstream ss;
+  ss << t;
+  return ss.str();
+}
+
+template<typename C>
+inline typename std::enable_if<is_container<C>::value, std::string>::type show(const C& c) {
+  return concat(c, ' ');
+}
+
+std::string show(const std::vector<char>& c) {
+  return std::string(head(c), tail(c));
 }
 
 ///////////////////////////////////////////////////////////////////////////
