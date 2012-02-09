@@ -34,10 +34,10 @@ For example, we can use this to delete all mp3's referenced in an .m3u file:
 
     let deleteM3UFiles = [](const string& fileName) -> bool {
         
-        let isMp3 = [](const string& l) { 
-            return (!l.first.empty())  && 
-                   ( l.first[0] != '#') &&
-                   ( l.first.find_first_of(".mp3") != string::npos);
+        let isMp3 = [](const string& s) { 
+            return (!s.empty())  && 
+                   ( s[0] != '#') &&
+                   ( s.find_first_of(".mp3") != string::npos );
         };
       
         let deleteFile = [=](const string& mp3) {
