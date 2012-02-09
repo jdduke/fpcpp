@@ -1,3 +1,9 @@
+/////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2012, Jared Duke.
+// This code is released under the MIT License.
+// www.opensource.org/licenses/mit-license.php
+/////////////////////////////////////////////////////////////////////////////
+
 #ifndef _FP_COMMON_H_
 #define _FP_COMMON_H_
 
@@ -24,6 +30,8 @@ inline auto rhead(C& c) -> decltype(c.rbegin()) {
   return c.rbegin();
 }
 
+///////////////////////////////////////////////////////////////////////////
+
 template<typename C>
 inline auto tail(C& c) -> decltype(std::end(c)) {
   return std::end(c);
@@ -41,6 +49,8 @@ inline auto rtail(C& c) -> decltype(c.rend()) {
   return c.rend();
 }
 
+///////////////////////////////////////////////////////////////////////////
+
 template<typename T, size_t S>
 inline T* head(T (&A)[S]) {
   return (&A[0]);
@@ -49,6 +59,8 @@ template<typename T, size_t S>
 inline const T* head(const T (&A)[S]) {
   return (&A[0]);
 }
+
+///////////////////////////////////////////////////////////////////////////
 
 template<typename T, size_t S>
 inline T* tail(T (&A)[S]) {
@@ -59,6 +71,8 @@ inline const T* tail(const T (&A)[S]) {
   return (&A[0] + S);
 }
 
+///////////////////////////////////////////////////////////////////////////
+
 template <typename C>
 std::back_insert_iterator<C> back(C& c) {
   return std::back_inserter(c);
@@ -67,6 +81,39 @@ std::back_insert_iterator<C> back(C& c) {
 template <typename C>
 std::front_insert_iterator<C> front(C& c) {
   return std::front_inserter(c);
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+template<typename C>
+inline size_t length(const C& c) {
+  return c.size();
+}
+template<typename T, size_t S>
+inline size_t length(T (&A)[S]) {
+  return S;
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+template<typename C>
+inline size_t null(const C& c) {
+  return length(c) == 0;
+}
+template<typename T, size_t S>
+inline size_t null(T (&A)[S]) {
+  return S==0;
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+template<typename T, typename U>
+T fst(const std::pair<T,U>& p) {
+  return p.first;
+}
+template<typename T, typename U>
+U snd(const std::pair<T,U>& p) {
+  return p.second;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -99,6 +146,26 @@ struct traits<T*> {
   typedef const T* const_iterator;
 };
 
+template <typename T, typename U, typename V>
+struct triple_traits {
+  typedef typename traits<T>::value_type t;
+  typedef typename traits<U>::value_type u;
+  typedef typename traits<V>::value_type v;
+  typedef std::tuple<t,u,v> type;
+};
+
+///////////////////////////////////////////////////////////////////////////
+
+template <int v>
+struct int_to_type {
+  enum { value = v };
+};
+
+template <typename T>
+struct type_to_type {
+  typedef T type;
+};
+
 ///////////////////////////////////////////////////////////////////////////
 
 template <typename T>
@@ -113,7 +180,7 @@ struct is_container {
   template <typename U> static char test(typename sfinae<U>::type*);
   template <typename U> static long test(...);
 
-  enum { value = (1 == sizeof test<T>(0)) };
+  static const bool value = sizeof(test<T>(0)) == 1;
 };
 
 template <typename T, typename T2>
@@ -139,9 +206,27 @@ auto iter_value(I i, const C& c) -> decltype(*i) {
 }
 
 ///////////////////////////////////////////////////////////////////////////
+
 template<typename T, size_t S>
 inline std::vector<T> make_vector(T (&A)[S]) {
   return std::vector<T>(A, A+S);
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+template<class InputIterator1, class InputIterator2, class InputIterator3,
+         class OutputIterator, class TernaryOperation>
+OutputIterator transform3(InputIterator1 first1, 
+                          InputIterator1 last1,
+                          InputIterator2 first2, 
+                          InputIterator3 first3,
+                          OutputIterator d_first, 
+                          TernaryOperation ternary_op)
+{
+    while (first1 != last1) {
+        *d_first++ = ternary_op(*first1++, *first2++, *first3++);
+    }
+    return d_first;
 }
 
 

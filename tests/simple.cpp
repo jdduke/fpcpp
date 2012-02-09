@@ -1,3 +1,9 @@
+/////////////////////////////////////////////////////////////////////////////
+// Copyright (c) 2012, Jared Duke.
+// This code is released under the MIT License.
+// www.opensource.org/licenses/mit-license.php
+/////////////////////////////////////////////////////////////////////////////
+
 #include <gtest/gtest.h>
 
 #include <fc.h>
@@ -30,7 +36,7 @@ let iVec5_5_0 = fp::decreasing_n(6, 5);
 
 
 template<typename MapOp, typename FilterOp, typename Source>
-bool filteredMap(MapOp mapOp, FilterOp filterOp, Source source, std::function<bool(typename fc::function_traits<MapOp>::result_type)> successOp = &istrue) { 
+bool filteredMap(MapOp mapOp, FilterOp filterOp, Source source, std::function<bool(result_type_of(MapOp))> successOp = &istrue) { 
   using namespace fp;
   return all(successOp,
              map(mapOp,
@@ -55,9 +61,7 @@ TEST(Prelude, Fun) {
   using std::cout;
   using std::string;
 
-
-  if (false)
-  {
+  if (false) {
     let mp3Filter = [](const string& mp3) { 
       return (!mp3.empty())  && 
              ( mp3[0] != '#') &&
@@ -342,6 +346,25 @@ TEST(Prelude, Drop) {
 
 }
 
+///////////////////////////////////////////////////////////////////////////
+
+TEST(General, Comparing) {
+  using fp::comparing;
+
+  static const std::string strings[] = {"one", "two", "three", "four", "five"};
+  let stringVec = fp::make_vector(strings);
+  EXPECT_EQ("three", fp::maximumBy(fp::comparing(&fp::length<std::string>), stringVec));
+
+  let zippedList = fp::zip(fp::increasing_n(10, 0), fp::decreasing_n(10, 9));
+  let sortedList = fp::sortBy(fp::comparing(&fp::snd<int,int>), zippedList);
+  EXPECT_EQ(zippedList.back(), sortedList.front());
+}
+
+TEST(General, Flip) {
+  using fp::flip;
+  EXPECT_EQ(std::divides<float>()(3.f,4.f), flip(std::divides<float>())(4.f,3.f));
+  EXPECT_EQ(std::plus<std::string>()("3", "4"), flip(std::plus<std::string>())("4", "3"));
+}
 
 ///////////////////////////////////////////////////////////////////////////
 
