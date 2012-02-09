@@ -22,9 +22,8 @@ template<typename T> T sub(T t0, T t1)  { return t0 - t1; }
 template<typename T> T mult(T t0, T t1) { return t0 * t1; }
 template<typename T> T div(T t0, T t1)  { return t0 / t1; }
 
-let fold_sub  = fp::foldl_(&sub<double>);
-let fold_mult = fp::foldl_(&mult<double>);
-let fold_div  = fp::foldl_(&div<double>);
+let fold_mult = fp::foldl1_(&mult<double>);
+let fold_div  = fp::foldl1_(&div<double>);
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -86,11 +85,12 @@ TEST(Prelude, Fun) {
 TEST(Prelude, Map) {
   using fp::fold;
   using fp::map;
+  using fp::sum;
 
-  EXPECT_EQ(fold( map(add_2,  fVec10_1)),    30.0f);
-  EXPECT_EQ(fold( map(sub_3,  dVec10_2)),   -10.0 );
-  EXPECT_EQ(fold( map(mult_4, iVec5_5_0)),  0*4.f + 1*4.f + 2*4.f + 3*4.f + 4*4.f + 5*4.f);
-  EXPECT_EQ(fold( map(div_5,  iVec5_0_5)),  0/5.f + 1/5.f + 2/5.f + 3/5.f + 4/5.f + 5/5.f);
+  EXPECT_EQ(sum( map(add_2,  fVec10_1)),    30.0f);
+  EXPECT_EQ(sum( map(sub_3,  dVec10_2)),   -10.0 );
+  EXPECT_EQ(sum( map(mult_4, iVec5_5_0)),  0*4.f + 1*4.f + 2*4.f + 3*4.f + 4*4.f + 5*4.f);
+  EXPECT_EQ(sum( map(div_5,  iVec5_0_5)),  0/5.f + 1/5.f + 2/5.f + 3/5.f + 4/5.f + 5/5.f);
 
   ///////////////////////////////////////////////////////////////////////////
 
@@ -100,48 +100,51 @@ TEST(Prelude, Map) {
 TEST(Prelude, FoldL) {
   using fp::fold;
   using fp::foldl;
+  using fp::sum;
 
-  EXPECT_EQ(fold(fVec10_1),    10.f);
-  EXPECT_EQ(fold(dVec10_2),    20. );
-  EXPECT_EQ(fold(iVec5_0_5),  0+1+2+3+4+5);
-  EXPECT_EQ(fold(iVec5_5_0),  5+4+3+2+1+0);
+  EXPECT_EQ(sum(fVec10_1),    10.f);
+  EXPECT_EQ(sum(dVec10_2),    20. );
+  EXPECT_EQ(sum(iVec5_0_5),  0+1+2+3+4+5);
+  EXPECT_EQ(sum(iVec5_5_0),  5+4+3+2+1+0);
 
   EXPECT_EQ(fold_mult(dVec10_2), pow(2.,10) );
   EXPECT_EQ(fold_div(dVec10_2), pow(.5,8) );
 
-  EXPECT_EQ(fold(fp::words(std::string("a b c d e f g h i j"))), "abcdefghij");
+  EXPECT_EQ(sum(fp::words(std::string("a b c d e f g h i j"))), "abcdefghij");
 }
 
 TEST(Prelude, FoldR) {
   using fp::foldr;
   using fp::foldr_;
+  using fp::foldr1;
+  using fp::foldr1_;
 
   let addf = &add<float>;
   let subi = &sub<int>;
 
-  EXPECT_EQ(foldr(addf, fVec10_1),    10.f);
-  EXPECT_EQ(foldr(subi, iVec5_0_5), 5-4-3-2-1-0);
-  EXPECT_EQ(foldr(subi, iVec5_5_0), 0-1-2-3-4-5);
+  EXPECT_EQ(foldr1(addf, fVec10_1),    10.f);
+  EXPECT_EQ(foldr1(subi, iVec5_0_5), 5-4-3-2-1-0);
+  EXPECT_EQ(foldr1(subi, iVec5_5_0), 0-1-2-3-4-5);
 
   let add_s = [](const std::string& s0, const std::string& s1) { return s0 + s1; };
   let add_s2 = &add<std::string>;
-  let foldr_s = foldr_(add_s);
-  let foldr_s2 = foldr_(add_s2);
+  let foldr_s = foldr1_(add_s);
+  let foldr_s2 = foldr1_(add_s2);
   EXPECT_EQ(foldr_s(fp::words(std::string("a b c d e f g h i j")), std::string()), "jihgfedcba");
-  EXPECT_EQ(foldr_s(fp::words(std::string("a b c")), std::string()), fp::fold(fp::reverse(fp::words(std::string("a b c")))));
+  EXPECT_EQ(foldr_s(fp::words(std::string("a b c")), std::string()), fp::sum(fp::reverse(fp::words(std::string("a b c")))));
 }
 
 TEST(Prelude, Filter) {
   using fp::filter;
 
-  let lessThanEq2 = fp::fold(filter([](int x) { return x <= 2; }, iVec5_0_5));
+  let lessThanEq2 = fp::sum(filter([](int x) { return x <= 2; }, iVec5_0_5));
   EXPECT_EQ(lessThanEq2, 0+1+2);
-  let greaterThan2 = fp::fold(filter([](int x) { return x >  2; }, iVec5_0_5));
+  let greaterThan2 = fp::sum(filter([](int x) { return x >  2; }, iVec5_0_5));
   EXPECT_EQ(greaterThan2, 3+4+5);
 
   std::string str("a b c d e f g");
   let strFilter = [](const std::string& s) -> bool { return s[0] < 'd'; };
-  EXPECT_EQ(fp::fold(filter(strFilter, fp::words(str))), std::string("abc"));
+  EXPECT_EQ(fp::sum(filter(strFilter, fp::words(str))), std::string("abc"));
 }
 
 TEST(Prelude, Zip) {
@@ -150,7 +153,7 @@ TEST(Prelude, Zip) {
   let ifZip  = zip(iVec5_0_5, iVec5_5_0);
   let pairSum = [](const std::pair<int,int>& a) -> int { return a.first + a.second; };
   let pairIs5 = [&](const std::pair<int,int>& a) -> int { return pairSum(a) == 5 ? 1 : 0; };
-  EXPECT_EQ(fp::fold(fp::__map__(pairIs5, ifZip, std::vector<int>())), 6);
+  EXPECT_EQ(fp::sum(fp::__map__(pairIs5, ifZip, std::vector<int>())), 6);
 
 }
 
@@ -263,8 +266,8 @@ TEST(Prelude, EnumFrom) {
 
   let Zero_Ten  = fp::takeWhileF([](int x) -> bool { return x < 11; }, enumFrom(0));
   let Zero_Ten2 = fp::takeF(11, enumFrom(0));
-  EXPECT_EQ(fp::fold(Zero_Ten),  55);
-  EXPECT_EQ(fp::fold(Zero_Ten2), 55);
+  EXPECT_EQ(fp::sum(Zero_Ten),  55);
+  EXPECT_EQ(fp::sum(Zero_Ten2), 55);
 
   ///////////////////////////////////////////////////////////////////////////
 
@@ -334,14 +337,14 @@ TEST(Prelude, Drop) {
   using fp::drop;
   using fp::dropWhile;
 
-  EXPECT_EQ(0,   fp::fold(drop(10, fp::increasing_n(10, 0))));
-  EXPECT_EQ(9,   fp::fold(drop(9,  fp::increasing_n(10, 0))));
-  EXPECT_EQ(9+8, fp::fold(drop(8,  fp::increasing_n(10, 0))));
+  EXPECT_EQ(0,   fp::sum(drop(10, fp::increasing_n(10, 0))));
+  EXPECT_EQ(9,   fp::sum(drop(9,  fp::increasing_n(10, 0))));
+  EXPECT_EQ(9+8, fp::sum(drop(8,  fp::increasing_n(10, 0))));
   EXPECT_EQ(fp::increasing_n(5,0), drop(0, fp::increasing_n(5, 0)));
 
-  EXPECT_EQ(0,   fp::fold(dropWhile([](int x) { return x < 10; }, fp::increasing_n(10, 0))));
-  EXPECT_EQ(9,   fp::fold(dropWhile([](int x) { return x < 9; }, fp::increasing_n(10, 0))));
-  EXPECT_EQ(9+8, fp::fold(dropWhile([](int x) { return x < 8; }, fp::increasing_n(10, 0))));
+  EXPECT_EQ(0,   fp::sum(dropWhile([](int x) { return x < 10; }, fp::increasing_n(10, 0))));
+  EXPECT_EQ(9,   fp::sum(dropWhile([](int x) { return x < 9; }, fp::increasing_n(10, 0))));
+  EXPECT_EQ(9+8, fp::sum(dropWhile([](int x) { return x < 8; }, fp::increasing_n(10, 0))));
   EXPECT_EQ(fp::decreasing_n(5, 4), dropWhile([](int x) { return x > 4; }, fp::decreasing_n(10, 9)));
 
 }

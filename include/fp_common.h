@@ -229,6 +229,12 @@ OutputIterator transform3(InputIterator1 first1,
     return d_first;
 }
 
+template<typename InputIterator, typename OutputIterator, typename UnaryOperation>
+inline void copyWhile(InputIterator first, InputIterator last, OutputIterator result, UnaryOperation unary_op) {
+  while ((first != last) && unary_op(*first)) {
+    *result++ = *first++;
+  }
+}
 
 } /* namespace fp */
 

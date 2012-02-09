@@ -11,6 +11,7 @@
 #include "fp_common.h"
 #include "fp_prelude.h"
 #include "fp_prelude_lists.h"
+#include "fp_prelude_strings.h"
 #include "fp_curry.h"
 
 #endif /* _FPCPP_H_ */
