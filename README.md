@@ -8,7 +8,7 @@ in modern C++ programs.
 Example
 -------------
 
-Generate PI:
+Generate pi using Monte Carlo sampling:
 
     double pi(size_t samples = 1000) {
         using namespace fp;
@@ -19,7 +19,7 @@ Generate PI:
         return 4.0 * filter([](double d) { return d <= 1.0; }, dxs).size() / dxs.size();
     }
 
-We might want a common operation for mapping an operation across a filtered source and checking for success.  
+Map an operation across a filtered source and check for success: 
 
     template<typename SuccessOp, typename MapOp, typename FilterOp, typename Source> {
     bool filteredMap(SuccessOp, MapOp mapOp, FilterOp filterOp, Source source) { 
@@ -30,7 +30,7 @@ We might want a common operation for mapping an operation across a filtered sour
                               source)));
     }
 
-For example, we can use this to delete all mp3's referenced in an .m3u file:
+With which we can, for example, delete all MP3's referenced in an M3U playlist:
 
     let deleteM3UFiles = [](const string& fileName) -> bool {
         
