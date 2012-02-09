@@ -43,9 +43,8 @@ bool filteredMap(MapOp mapOp, FilterOp filterOp, Source source, std::function<bo
                         source)));
 }
 
-double pi() {
+double pi(size_t samples = 1000) {
   using namespace fp;
-  enum { samples = 1000 };
   typedef std::pair<double,double> point;
   let dxs = map([](const point& p) { return p.first*p.first + p.second*p.second; },
                 zip(takeF(samples, rand_range_<double>(-1.0,1.0)),
