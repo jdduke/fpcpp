@@ -354,22 +354,22 @@ inline C sort(C c) {
 //////////////////////////////////////////////////////////////////////////
 // takeWhile
 
-template<typename F, typename T>
-inline T takeWhile(F f, const T& t) {
-  T result;
+template<typename F, typename C>
+inline C takeWhile(F f, const C& c) {
+  C result;
   //std::copy(head(t), std::find_if(extent(t), std::not1<F>(f)), back(result));
-  copyWhile(extent(t), back(result), f);
+  copyWhile(extent(c), back(result), f);
   return result;
 }
 FP_DEFINE_FUNC_OBJ(takeWhile, takeWhile_, _takeWhile_);
 
-template<typename F, typename F2>
-inline auto takeWhileF(F f, F2 f2) -> std::vector< decltype(f2()) > {
-  typedef decltype(f2()) t_type;
+template<typename F, typename Source>
+inline auto takeWhileF(F f, Source source) -> std::vector< decltype(source()) > {
+  typedef decltype(source()) t_type;
   std::vector<t_type> result;
-  auto   backR = back(result);
-  for (t_type value = f2(); f(value); value=f2())
-    backR = value;
+  auto   back_iter = back(result);
+  for (t_type value = source(); f(value); value=source())
+    back_iter = value;
   return result;
 }
 FP_DEFINE_FUNC_OBJ(takeWhileF, takeWhileF_, _takeWhileF_);
