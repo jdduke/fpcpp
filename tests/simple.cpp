@@ -63,7 +63,7 @@ TEST(Prelude, Fun) {
     let mp3Filter = [](const string& mp3) { 
       return (!mp3.empty())  && 
              ( mp3[0] != '#') &&
-             ( mp3.find_first_of(".mp3") != std::string::npos);
+             ( mp3.find_first_of(".mp3") != std::string::npos );
     };
     let mp3Delete = [=](const string& mp3) {
       return remove(mp3.c_str()) == 0; 
@@ -348,6 +348,24 @@ TEST(Prelude, Drop) {
 
 }
 
+TEST(Prelude, Take) {
+	using fp::take;
+	using fp::takeWhile;
+	using fp::takeWhileF;
+
+	EXPECT_EQ(0,   fp::sum(take(0, fp::increasing_n(10, 0))));
+	EXPECT_EQ(0,   fp::sum(take(1,   fp::increasing_n(10, 0))));
+	EXPECT_EQ(1,   fp::sum(take(2,   fp::increasing_n(10, 0))));
+	EXPECT_EQ(1+2, fp::sum(take(3,  fp::increasing_n(10, 0))));
+	EXPECT_EQ(fp::increasing_n(5,0), take(5, fp::increasing_n(10, 0)));
+
+	EXPECT_EQ(0,   fp::sum(takeWhile([](int x) { return x < 0; }, fp::increasing_n(10, 0))));
+	EXPECT_EQ(0,   fp::sum(takeWhile([](int x) { return x < 1; }, fp::increasing_n(10, 0))));
+	EXPECT_EQ(0+1, fp::sum(takeWhile([](int x) { return x < 2; }, fp::increasing_n(10, 0))));
+	EXPECT_EQ(fp::decreasing_n(5, 9), takeWhile([](int x) { return x > 4; }, fp::decreasing_n(10, 9)));
+}
+
+
 ///////////////////////////////////////////////////////////////////////////
 
 TEST(General, Comparing) {
@@ -364,13 +382,30 @@ TEST(General, Comparing) {
 
 TEST(General, Flip) {
   using fp::flip;
-  EXPECT_EQ(std::divides<float>()(3.f,4.f), flip(std::divides<float>())(4.f,3.f));
+  EXPECT_EQ(std::divides<float>()(3.f,4.f),     flip(std::divides<float>())(4.f,3.f));
   EXPECT_EQ(std::plus<std::string>()("3", "4"), flip(std::plus<std::string>())("4", "3"));
 }
 
 ///////////////////////////////////////////////////////////////////////////
 
 TEST(Curry, NoArgs) {
+  using fp::curry;
+  using fp::curry2;
+  using fp::curry3;
+
+  //let times2        = [](float x, float y) { return x*2.f; };
+  //let times2Curried = fp::curry(times2, 1.f);
+  //let times2Curried = curry(std::multiplies<float>(), 2.f);//, std::placeholders::_1);
+  //let times2Result  = times2Curried(2.f);
+  let timesMult = std::multiplies<float>();
+  let arity = fc::function_traits<decltype(timesMult)>::arity;
+  //let times2MultCurried = fp::curry2(timesMult, 1.f, 2.f);
+  let times2MultCurried = std::bind(timesMult, 1.f, 2.f);
+
+  //EXPECT_EQ(2.f,   curry2(timesMult, 1.f, 2.f)());
+  //EXPECT_EQ(2.f, fp::curry2(std::plus<float>(),       1.f, 1.f)());
+  //EXPECT_EQ(2.f, fp::curry2(std::multiplies<float>(), 1.f, 2.f)());
+  //EXPECT_EQ(2.f, fp::curry3([](float x, float y, float z) { return x + y + z; }, 1.f, .5f, .5f));
 
 }
 

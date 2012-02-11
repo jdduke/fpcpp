@@ -8,7 +8,6 @@
 #define _FP_PRELUDE_STRINGS_H_
 
 #include "fp_defines.h"
-#include "fp_curry.h"
 #include "fp_prelude.h"
 
 #include <sstream>
