@@ -4,3 +4,6 @@
 [submodule "externals/tthread"]
 	path = externals/tthread
 	url = git://github.com/jdduke/tthread.git
+[submodule "externals/googletest"]
+	path = externals/googletest
+	url = git@github.com:jdduke/googletest.git
