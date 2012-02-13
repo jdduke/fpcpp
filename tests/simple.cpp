@@ -33,7 +33,6 @@ let dVec5_1_5 = fp::increasing_n(5, 1.);
 let iVec5_0_5 = fp::increasing_n(6, 0);
 let iVec5_5_0 = fp::decreasing_n(6, 5);
 
-
 template<typename MapOp, typename FilterOp, typename Source>
 bool filteredMap(MapOp mapOp, FilterOp filterOp, Source source, std::function<bool(result_type_of(MapOp))> successOp = &istrue) { 
   using namespace fp;
@@ -388,33 +387,43 @@ TEST(General, Flip) {
 
 ///////////////////////////////////////////////////////////////////////////
 
-TEST(Curry, NoArgs) {
+template<typename T>
+T multBy2(T x) {
+  return x * (T)2;
+}
+
+template<typename T>
+T xor(T x, T y) {
+  return x ^ y;
+}
+
+template <typename T>
+T mult3(T x, T y, T z) {
+  return x*y*z;
+}
+
+TEST(Curry, Everything) {
   using fp::curry;
   using fp::curry2;
   using fp::curry3;
 
-  //let times2        = [](float x, float y) { return x*2.f; };
-  //let times2Curried = fp::curry(times2, 1.f);
-  //let times2Curried = curry(std::multiplies<float>(), 2.f);//, std::placeholders::_1);
-  //let times2Result  = times2Curried(2.f);
-  let timesMult = std::multiplies<float>();
-  let arity = fc::function_traits<decltype(timesMult)>::arity;
-  //let times2MultCurried = fp::curry2(timesMult, 1.f, 2.f);
-  let times2MultCurried = std::bind(timesMult, 1.f, 2.f);
+  // No args
+  EXPECT_EQ(2.f,   curry(&multBy2<float>, 1.f)());
+  EXPECT_EQ(2.f,   curry2(std::plus<float>(),       1.f, 1.f)());
+  EXPECT_EQ(2.f,   curry2(std::multiplies<float>(), 1.f, 2.f)());
+  EXPECT_EQ(99^77, curry2(&xor<int>, 99, 77)());
+  EXPECT_EQ(2.f,   curry3(&mult3<float>, 8.f, .5f, .5f)());
 
-  //EXPECT_EQ(2.f,   curry2(timesMult, 1.f, 2.f)());
-  //EXPECT_EQ(2.f, fp::curry2(std::plus<float>(),       1.f, 1.f)());
-  //EXPECT_EQ(2.f, fp::curry2(std::multiplies<float>(), 1.f, 2.f)());
-  //EXPECT_EQ(2.f, fp::curry3([](float x, float y, float z) { return x + y + z; }, 1.f, .5f, .5f));
+  // 1 arg
+  EXPECT_EQ(2.f,   curry(std::plus<float>(),       1.f)(1.f));
+  EXPECT_EQ(2.f,   curry(std::multiplies<float>(), 1.f)(2.f));
+  EXPECT_EQ(99^77, curry(&xor<int>, 99)(77));
+  EXPECT_EQ(2.f,   curry2(&mult3<float>, 8.f, .5f)(.5f));
 
-}
+  // 2 args
+  EXPECT_EQ(2.f,   curry(&mult3<float>, 8.f)(.5f, .5f));
 
-TEST(Curry, Args) {
-
-}
-
-TEST(Curry, Compound) {
-
+  EXPECT_EQ((float)1*2*3*4*5, curry(&fp::foldl1<std::function<float(float,float)>,std::vector<float> >, std::multiplies<float>())(fp::increasing_n(5, 1.f)));
 }
 
 ///////////////////////////////////////////////////////////////////////////

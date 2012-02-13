@@ -43,10 +43,10 @@ int main(int argc, char **argv) {
 
   while (true) {
     grid = life(grid, X, Y);
-    let toString = [](int x) -> char { return 1 == x ? 'X' : ' '; };
+    let show = [](int x) -> char { return x ? 'X' : ' '; };
     std::stringstream ss;
-    for (int i = 0; i < X*Y; ++i) {
-      ss << toString(grid[i]);
+    for (int i = 0; i < fp::length(grid); ++i) {
+      ss << show(grid[i]);
       if (i % X == 0) ss << std::endl;
     }
     std::cout << ss.str();
