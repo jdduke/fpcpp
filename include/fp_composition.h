@@ -15,9 +15,7 @@ namespace fp {
 ///////////////////////////////////////////////////////////////////////////
 
 template <typename F, typename G>
-inline auto compose(F f, G g) -> typename composed_traits<F,G>::type {
-  return typename composed_traits<F,G>::type(f, g);
-}
+inline auto compose(F f, G g) FP_RETURNS( typename composed_traits<F,G>::type(f,g) );
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -103,18 +101,14 @@ namespace fp_operators {
 #if FP_PLUS_OPERATOR
   // Example: (f + g)(Args) == (compose(f,g)(Args)
   template<typename F, typename G>
-  inline auto operator+(F f, G g) -> typename fp::composed_traits<F,G>::type {
-    return fp::compose(f,g);
-  }
+  inline auto operator+(F f, G g) FP_RETURNS( fp::compose(f,g) );
 #endif
 
 #if FP_DOT_OPERATOR
   // Example: (f <o> g)(Args) == (compose(f,g)(args))
   static class compose_dot_helper { } o;
   template<typename F, typename G>
-  inline auto operator>(F f, G g) -> typename fp::composed_traits<F,G>::type {
-    return fp::compose(f,g);
-  }
+  inline auto operator>(F f, G g) FP_RETURNS( fp::compose(f,g) );
   template<typename F>
   inline F operator<(F f, compose_dot_helper) {
     return f;

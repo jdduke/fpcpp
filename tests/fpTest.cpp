@@ -427,22 +427,22 @@ TEST(Curry, Everything) {
 
 ///////////////////////////////////////////////////////////////////////////
 
-template<typename A, typename B, typename C, typename D>
-void testNoArgs(A a_, B b_, C c_, D d_)
+template<typename Void, typename VoidFloat, typename One, typename Identity>
+void testNoArgs(Void voidf, VoidFloat voidfF, One one, Identity identity)
 {
   using namespace fp;
   using namespace fp_operators;
 
-  auto a = compose(a_,a_);
-  auto b = compose(b_,c_);
-  auto c = compose(c_,b_);
-  auto d = compose(d_,c_);
+  auto void_void    = compose(voidf,voidf);
+  auto one_voidf    = compose(voidfF,one);
+  auto voidf_one    = compose(one,voidfF);
+  auto one_identity = compose(identity,one);
 
-  a();
-  b();
-  EXPECT_EQ(1.f, c(1.f));
-  EXPECT_EQ(1.f, d());
-  EXPECT_EQ(1.f, (d + a)());
+  void_void();
+  one_voidf();
+  EXPECT_EQ(1.f, voidf_one(1.f));
+  EXPECT_EQ(1.f, one_identity());
+  EXPECT_EQ(1.f, (one_identity + void_void)());
 }
 
 TEST(CompositionNoArgs, Func) {
@@ -459,31 +459,31 @@ TEST(CompositionNoArgs, Lambda) {
 
 ///////////////////////////////////////////////////////////////////////////
 
-template<typename A, typename B, typename C, typename D>
-void testArgs(A a_, B b_, C c_, D d_)
+template<typename Identity, typename Plus2, typename Plus3, typename Plus4>
+void testArgs(Identity identity, Plus2 plus2, Plus3 plus3, Plus4 plus4)
 {
   using namespace fp;
   using namespace fp_operators;
 
-  auto a = compose(a_,a_);
-  auto b = compose(a_,b_);
-  auto c = compose(a_,c_);
-  auto d = compose(a_,d_);
+  auto identity_identity = compose(identity,identity);
+  auto plus2_identity = compose(identity,plus2);
+  auto plus3_identity = compose(identity,plus3);
+  auto plus4_identity = compose(identity,plus4);
 
-  EXPECT_EQ(1.f, a(1.f));
-  EXPECT_EQ(2.f, b(1.f,1.f));
-  EXPECT_EQ(3.f, c(1.f,1.f,1.f));
-  EXPECT_EQ(4.f, d(1.f,1.f,1.f,1.f));
+  EXPECT_EQ(1.f, identity_identity(1.f));
+  EXPECT_EQ(2.f, plus2_identity(1.f,1.f));
+  EXPECT_EQ(3.f, plus3_identity(1.f,1.f,1.f));
+  EXPECT_EQ(4.f, plus4_identity(1.f,1.f,1.f,1.f));
 
-  EXPECT_EQ(1.f,  a(1.f));
-  EXPECT_EQ(0.f,  b(-1.f,1.f));
-  EXPECT_EQ(-1.f, c(-1.f,1.f,-1.f));
-  EXPECT_EQ(0.f,  d(-1.f,1.f,-1.f,1.f));
+  EXPECT_EQ(1.f,  identity_identity(1.f));
+  EXPECT_EQ(0.f,  plus2_identity(-1.f,1.f));
+  EXPECT_EQ(-1.f, plus3_identity(-1.f,1.f,-1.f));
+  EXPECT_EQ(0.f,  plus4_identity(-1.f,1.f,-1.f,1.f));
 
-  EXPECT_EQ(2.f, (a + a) (2.f));
-  EXPECT_EQ(4.f, (a + b)(2.f,2.f));
-  EXPECT_EQ(6.f, (a + c)(2.f,2.f,2.f));
-  EXPECT_EQ(8.f, (a + d)(2.f,2.f,2.f,2.f));
+  EXPECT_EQ(2.f, (identity_identity + identity_identity) (2.f));
+  EXPECT_EQ(4.f, (identity_identity + plus2_identity)(2.f,2.f));
+  EXPECT_EQ(6.f, (identity_identity + plus3_identity)(2.f,2.f,2.f));
+  EXPECT_EQ(8.f, (identity_identity + plus4_identity)(2.f,2.f,2.f,2.f));
 }
 
 TEST(CompositionMultipleArgs, Func) {
@@ -501,17 +501,17 @@ TEST(CompositionMultipleArgs, Lambda) {
 
 ///////////////////////////////////////////////////////////////////////////
 
-template<typename A, typename B, typename C>
-inline void testNoArgsCompound(A a_, B b_, C c_)
+template<typename Identity, typename Void, typename Plus>
+inline void testNoArgsCompound(Identity one, Void voidf_, Plus plus)
 {
   using namespace fp;
   using namespace fp_operators;
 
-  auto a = compose2(b_, a_, a_);
-  auto b = compose2(c_, a_, a_);
+  auto voidf      = compose2(voidf_, one, one);
+  auto oneplusone = compose2(plus,   one, one);
 
-  EXPECT_EQ(2.f, b());
-  EXPECT_EQ(2.f, (b + a)());
+  EXPECT_EQ(1.f+1.f, oneplusone());
+  EXPECT_EQ(1.f+1.f, (oneplusone + voidf)());
 }
 
 TEST(CompositionCompoundNoArgs, Func) {
@@ -528,28 +528,28 @@ TEST(CompositionCompoundNoArgs, Lambda) {
 
 ///////////////////////////////////////////////////////////////////////////
 
-template<typename A, typename B>
-inline void testArgsCompound(A a_, B b_)
+template<typename Identity, typename Plus>
+inline void testArgsCompound(Identity identity, Plus plus)
 {
   using namespace fp;
   using namespace fp_operators;
 
-  auto a = compose2(b_, a_, a_);
-  auto b = compose2(b_, b_, b_);
-  auto c = compose2(b_, a, a);
+  auto pii = compose2(plus, identity, identity);
+  auto ppp = compose2(plus, plus, plus);
+  auto ppiipii = compose2(plus, pii, pii);
 
-  EXPECT_EQ(2.f, a(1.f,1.f));
-  EXPECT_EQ(4.f, b(1.f,1.f,1.f,1.f));
-  EXPECT_EQ(4.f, c(1.f,1.f,1.f,1.f));
+  EXPECT_EQ(1.f+1.f,             pii(1.f,1.f));
+  EXPECT_EQ((1.f+1.f)+(1.f+1.f), ppp(1.f,1.f,1.f,1.f));
+  EXPECT_EQ((1.f+1.f)+(1.f+1.f), ppiipii(1.f,1.f,1.f,1.f));
 
-  EXPECT_EQ(0.f,  a(1.f,-1.f));
-  EXPECT_EQ(0.f,  b(-1.f,1.f,-1.f,1.f));
-  EXPECT_EQ(0.f,  c(-1.f,1.f,-1.f,1.f));
+  EXPECT_EQ(1.f-1.f,                pii(1.f,-1.f));
+  EXPECT_EQ((-1.f+1.f)+(-1.f+1.f),  ppp(-1.f,1.f,-1.f,1.f));
+  EXPECT_EQ((-1.f+1.f)+(-1.f+1.f),  ppiipii(-1.f,1.f,-1.f,1.f));
 
   auto mult_2 = [](float x) -> float { return x*2; };
-  EXPECT_EQ(8.f,  (mult_2 + a)(2.f,2.f));
-  EXPECT_EQ(16.f, (mult_2 + b)(2.f,2.f,2.f,2.f));
-  EXPECT_EQ(16.f, (mult_2 + c)(2.f,2.f,2.f,2.f));
+  EXPECT_EQ((2.f+2.f)*2,             (mult_2 + pii)(2.f,2.f));
+  EXPECT_EQ(((2.f+2.f)+(2.f+2.f))*2, (mult_2 + ppp)(2.f,2.f,2.f,2.f));
+  EXPECT_EQ(((2.f+2.f)+(2.f+2.f))*2, (mult_2 + ppiipii)(2.f,2.f,2.f,2.f));
 }
 
 TEST(CompositionCompoundMultipleArgs, Func) {

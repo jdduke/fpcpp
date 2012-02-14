@@ -37,7 +37,7 @@ public:
   template<typename R, typename Args>
   R applyToTuple(const Args& args) {
     return f(apply_func<G0,Args,0,      arity_0>(g,args),
-      apply_func<G1,Args,arity_0,arity_1>(g1,args));
+             apply_func<G1,Args,arity_0,arity_1>(g1,args));
   }
 
 #if FP_VARIADIC
