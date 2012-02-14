@@ -1,21 +1,12 @@
 cmake_minimum_required (VERSION 2.6)
-project(FPCPP)
+project(fpcpp)
 
 set(CMAKE_DEBUG_POSTFIX "d")
 
 # Treat warnings as errors cmake option
 set(TREAT_WARNINGS_AS_ERRORS TRUE CACHE BOOL "Treat warnings as errors")
-set(ENABLE_EXPERIMENTAL_FC TRUE  CACHE BOOL "Enable experimental function composition routines.")
-set(ENABLE_VARIADIC_FC     FALSE CACHE BOOL "Enable variadic template use.")
 SET(BUILD_SAMPLES          TRUE  CACHE BOOL "Build samples")
 set(BUILD_TESTS            FALSE CACHE BOOL "Build unit tests")
-
-if(ENABLE_EXPERIMENTAL_FC)
-  add_definitions( "-DFC_EXPERIMENTAL" )
-endif()
-if(ENABLE_VARIADIC_FC)
-  add_definitions( "-DFC_VARIADIC" )
-endif()
 
 if(MSVC10)
   set(FPCPP_SUFFIX _vc10)
@@ -109,7 +100,6 @@ if(WIN32)
 endif()
 
 include_directories(${FPCPP_SOURCE_DIR}/include)
-include_directories(${FPCPP_SOURCE_DIR}/externals/fc/include)
 include_directories(${FPCPP_SOURCE_DIR}/externals)
 
 set(TTHREAD_LIB tthread)

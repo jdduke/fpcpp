@@ -9,9 +9,14 @@
 
 #include "fp_defines.h"
 #include "fp_common.h"
+
 #include "fp_prelude.h"
 #include "fp_prelude_lists.h"
 #include "fp_prelude_strings.h"
+
 #include "fp_curry.h"
+
+#include "fp_composition.h"
+#include "fp_composition_compound.h"
 
 #endif /* _FPCPP_H_ */

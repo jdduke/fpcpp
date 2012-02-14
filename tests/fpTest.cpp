@@ -6,7 +6,6 @@
 
 #include <gtest/gtest.h>
 
-#include <fc.h>
 #include <fpcpp.h>
 
 #include <array>
@@ -428,3 +427,139 @@ TEST(Curry, Everything) {
 
 ///////////////////////////////////////////////////////////////////////////
 
+template<typename A, typename B, typename C, typename D>
+void testNoArgs(A a_, B b_, C c_, D d_)
+{
+  using namespace fp;
+  using namespace fp_operators;
+
+  auto a = compose(a_,a_);
+  auto b = compose(b_,c_);
+  auto c = compose(c_,b_);
+  auto d = compose(d_,c_);
+
+  a();
+  b();
+  EXPECT_EQ(1.f, c(1.f));
+  EXPECT_EQ(1.f, d());
+  EXPECT_EQ(1.f, (d + a)());
+}
+
+TEST(CompositionNoArgs, Func) {
+  testNoArgs(f(Void_Void), f(Void_Float), f(Float_Void), f(Float_Float));
+}
+
+TEST(CompositionNoArgs, FuncObj) {
+  testNoArgs(s(Void_Void), s(Void_Float), s(Float_Void), s(Float_Float));
+}
+
+TEST(CompositionNoArgs, Lambda) {
+  testNoArgs(l(Void_Void), l(Void_Float), l(Float_Void), l(Float_Float));
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+template<typename A, typename B, typename C, typename D>
+void testArgs(A a_, B b_, C c_, D d_)
+{
+  using namespace fp;
+  using namespace fp_operators;
+
+  auto a = compose(a_,a_);
+  auto b = compose(a_,b_);
+  auto c = compose(a_,c_);
+  auto d = compose(a_,d_);
+
+  EXPECT_EQ(1.f, a(1.f));
+  EXPECT_EQ(2.f, b(1.f,1.f));
+  EXPECT_EQ(3.f, c(1.f,1.f,1.f));
+  EXPECT_EQ(4.f, d(1.f,1.f,1.f,1.f));
+
+  EXPECT_EQ(1.f,  a(1.f));
+  EXPECT_EQ(0.f,  b(-1.f,1.f));
+  EXPECT_EQ(-1.f, c(-1.f,1.f,-1.f));
+  EXPECT_EQ(0.f,  d(-1.f,1.f,-1.f,1.f));
+
+  EXPECT_EQ(2.f, (a + a) (2.f));
+  EXPECT_EQ(4.f, (a + b)(2.f,2.f));
+  EXPECT_EQ(6.f, (a + c)(2.f,2.f,2.f));
+  EXPECT_EQ(8.f, (a + d)(2.f,2.f,2.f,2.f));
+}
+
+TEST(CompositionMultipleArgs, Func) {
+  testArgs(f(Float_Float), f(Float_Float2), f(Float_Float3), f(Float_Float4));
+}
+
+TEST(CompositionMultipleArgs, FuncObj) {
+  testArgs(s(Float_Float), s(Float_Float2), s(Float_Float3), s(Float_Float4));
+}
+
+TEST(CompositionMultipleArgs, Lambda) {
+  testArgs(l(Float_Float), l(Float_Float2), l(Float_Float3), l(Float_Float4));
+}
+
+
+///////////////////////////////////////////////////////////////////////////
+
+template<typename A, typename B, typename C>
+inline void testNoArgsCompound(A a_, B b_, C c_)
+{
+  using namespace fp;
+  using namespace fp_operators;
+
+  auto a = compose2(b_, a_, a_);
+  auto b = compose2(c_, a_, a_);
+
+  EXPECT_EQ(2.f, b());
+  EXPECT_EQ(2.f, (b + a)());
+}
+
+TEST(CompositionCompoundNoArgs, Func) {
+  testNoArgsCompound(f(Float_Void), f(Void_Float2), f(Float_Float2));
+}
+
+TEST(CompositionCompoundNoArgs, FuncObj) {
+  testNoArgsCompound(s(Float_Void), s(Void_Float2), s(Float_Float2));
+}
+
+TEST(CompositionCompoundNoArgs, Lambda) {
+  testNoArgsCompound(l(Float_Void), l(Void_Float2), l(Float_Float2));
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+template<typename A, typename B>
+inline void testArgsCompound(A a_, B b_)
+{
+  using namespace fp;
+  using namespace fp_operators;
+
+  auto a = compose2(b_, a_, a_);
+  auto b = compose2(b_, b_, b_);
+  auto c = compose2(b_, a, a);
+
+  EXPECT_EQ(2.f, a(1.f,1.f));
+  EXPECT_EQ(4.f, b(1.f,1.f,1.f,1.f));
+  EXPECT_EQ(4.f, c(1.f,1.f,1.f,1.f));
+
+  EXPECT_EQ(0.f,  a(1.f,-1.f));
+  EXPECT_EQ(0.f,  b(-1.f,1.f,-1.f,1.f));
+  EXPECT_EQ(0.f,  c(-1.f,1.f,-1.f,1.f));
+
+  auto mult_2 = [](float x) -> float { return x*2; };
+  EXPECT_EQ(8.f,  (mult_2 + a)(2.f,2.f));
+  EXPECT_EQ(16.f, (mult_2 + b)(2.f,2.f,2.f,2.f));
+  EXPECT_EQ(16.f, (mult_2 + c)(2.f,2.f,2.f,2.f));
+}
+
+TEST(CompositionCompoundMultipleArgs, Func) {
+  testArgsCompound(f(Float_Float), f(Float_Float2));
+}
+
+TEST(CompositionCompoundMultipleArgs, FuncObj) {
+  testArgsCompound(s(Float_Float), s(Float_Float2));
+}
+
+TEST(CompositionCompoundMultipleArgs, Lambda) {
+  testArgsCompound(l(Float_Float), l(Float_Float2));
+}

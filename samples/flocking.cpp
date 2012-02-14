@@ -4,7 +4,6 @@
 // www.opensource.org/licenses/mit-license.php
 /////////////////////////////////////////////////////////////////////////////
 
-#include <fc.h>
 #include <fpcpp.h>
 
 #include <iostream>

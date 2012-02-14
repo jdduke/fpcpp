@@ -1,3 +1,5 @@
 add_executable(fpGameOfLife gameOfLife.cpp)
 add_executable(fpFlocking flocking.cpp)
-
+add_executable(fpComposition composition.cpp)
+add_executable(fpCompositionCompound compositionCompound.cpp)
+add_executable(fpCompositionString compositionString.cpp)

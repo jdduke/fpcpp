@@ -50,13 +50,13 @@ inline T pred(const T& t) {
 // comparing
 
 template <typename F> 
-inline auto comparing(F f) RETURNS( fc::compose2(std::less<result_type_of(F)>(), f, f) );
+inline auto comparing(F f) FP_RETURNS( fp::compose2(std::less<result_type_of(F)>(), f, f) );
 
 ///////////////////////////////////////////////////////////////////////////
 // flip
 
 template <typename F>
-inline auto flip(F f) RETURNS( std::bind(f, std::placeholders::_2, std::placeholders::_1) );
+inline auto flip(F f) FP_RETURNS( std::bind(f, std::placeholders::_2, std::placeholders::_1) );
 
 //RETURNS( [=](const argument_type_of(F,1) & v, const argument_type_of(F,0) & u) { return f(u,v); } );
 
