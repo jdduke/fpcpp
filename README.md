@@ -50,7 +50,7 @@ With which we can, for example, delete all MP3's referenced in an M3U playlist:
 Curry functions:
    
     let multiplyBy4 = curry(std::multiplies<int>(), 4);
-    let sixteen = multiplyBy4(4);
+    let sixteen     = multiplyBy4(4);
     
 Compose functions:
 
