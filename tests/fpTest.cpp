@@ -524,11 +524,11 @@ TEST(CompositionCompoundNoArgs, Func) {
 }
 
 TEST(CompositionCompoundNoArgs, FuncObj) {
-  testNoArgsCompound(s(Float_Void), s(Void_Float2), s(Float_Float2));
+  testNoArgsCompound(S_Float_Void(), S_Void_Float2(), S_Float_Float2());
 }
 
 TEST(CompositionCompoundNoArgs, Lambda) {
-  testNoArgsCompound(l(Float_Void), l(Void_Float2), l(Float_Float2));
+  testNoArgsCompound(L_Float_Void, L_Void_Float2, L_Float_Float2);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -562,11 +562,11 @@ TEST(CompositionCompoundMultipleArgs, Func) {
 }
 
 TEST(CompositionCompoundMultipleArgs, FuncObj) {
-  testArgsCompound(s(Float_Float), s(Float_Float2));
+  testArgsCompound(S_Float_Float(), S_Float_Float2());
 }
 
 TEST(CompositionCompoundMultipleArgs, Lambda) {
-  testArgsCompound(l(Float_Float), l(Float_Float2));
+  testArgsCompound(L_Float_Float, L_Float_Float2);
 }
 
 #endif /* FP_COMPOUND */
