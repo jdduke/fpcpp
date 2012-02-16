@@ -9,9 +9,10 @@
 
 #include "fp_defines.h"
 
+#include <array>
 #include <iterator>
-#include <vector>
 #include <tuple>
+#include <vector>
 
 namespace fp {
 
@@ -204,17 +205,25 @@ struct has_find {
 ///////////////////////////////////////////////////////////////////////////
 
 template <typename I, typename C>
-auto iter_value(I i, const C& c) -> decltype(*i) {
-  typedef decltype(*i) iter_value;
-  return (i != tail(c)) ? *i : iter_value();
+auto iter_value(I i, const C& c) -> value_type_of(C) {
+  typedef value_type_of(C) value_type;
+  return (i != tail(c)) ? *i : value_type();
 }
 
 ///////////////////////////////////////////////////////////////////////////
 
+#if 0
 template<typename T, size_t S>
 inline std::vector<T> make_vector(T (&A)[S]) {
   return std::vector<T>(A, A+S);
 }
+#else
+template<typename T, size_t S>
+inline std::vector<T> make_vector(const std::array<T,S>& a) {
+  std::vector<T> result(head(a), tail(a));
+  return result;
+}
+#endif
 
 ///////////////////////////////////////////////////////////////////////////
 

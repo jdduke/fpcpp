@@ -33,7 +33,7 @@ let iVec5_0_5 = fp::increasing_n(6, 0);
 let iVec5_5_0 = fp::decreasing_n(6, 5);
 
 template<typename MapOp, typename FilterOp, typename Source>
-bool filteredMap(MapOp mapOp, FilterOp filterOp, Source source, std::function<bool(result_type_of(MapOp))> successOp = &istrue) { 
+bool filteredMap(MapOp mapOp, FilterOp filterOp, Source source, std::function<bool(result_type_of(MapOp))> successOp = &fp::istrue) {
   using namespace fp;
   return all(successOp,
              map(mapOp,
@@ -58,17 +58,19 @@ TEST(Prelude, Fun) {
   using std::string;
 
   if (false) {
-    let mp3Filter = [](const string& mp3) { 
-      return (!mp3.empty())  && 
+    let mp3Filter = [](const string& mp3) {
+      return (!mp3.empty())  &&
              ( mp3[0] != '#') &&
              ( mp3.find_first_of(".mp3") != std::string::npos );
     };
     let mp3Delete = [=](const string& mp3) {
-      return remove(mp3.c_str()) == 0; 
+      return remove(mp3.c_str()) == 0;
     };
-    let successful = filteredMap(mp3Delete, mp3Filter, lines(ifstream("playlist.m3u")));
 
-    cout << "Deleting Playlist..." << successful ? "Success!" : "Failure!!";
+    ifstream ifs("playlist.m3u");
+    let successful = filteredMap(mp3Delete, mp3Filter, lines(ifs));
+
+    cout << "Deleting Playlist..." << (successful ? "Success!" : "Failure!!");
   }
 
   ///////////////////////////////////////////////////////////////////////////
@@ -150,20 +152,21 @@ TEST(Prelude, Zip) {
   let ifZip  = zip(iVec5_0_5, iVec5_5_0);
   let pairSum = [](const std::pair<int,int>& a) -> int { return a.first + a.second; };
   let pairIs5 = [&](const std::pair<int,int>& a) -> int { return pairSum(a) == 5 ? 1 : 0; };
-  EXPECT_EQ(fp::sum(fp::__map__(pairIs5, ifZip, std::vector<int>())), 6);
+  let emptyVec = std::vector<int>();
+  EXPECT_EQ(fp::sum(fp::__map__(pairIs5, ifZip, emptyVec)), 6);
 
 }
 
 TEST(Prelude, ZipWith) {
   using fp::zipWith;
 
-  int expectedSum[] = {4,4,4};
+  std::array<int,3> expectedSum = {4,4,4};
   EXPECT_EQ(fp::make_vector(expectedSum),    zipWith(std::plus<int>(), fp::increasing_n(3, 1), fp::decreasing_n(3, 3)));
 
-  float expectedPow[] = {5.0f,25.0f,125.0f,625.0f,3125.0f};
-  EXPECT_EQ(fp::make_vector(expectedPow),    zipWith(std::powf, std::vector<float>(5, 5.f), fp::increasing_n(5, 1.f)));
+  std::array<float,5> expectedPow = {5.0f,25.0f,125.0f,625.0f,3125.0f};
+  EXPECT_EQ(fp::make_vector(expectedPow),    zipWith(powf, std::vector<float>(5, 5.f), fp::increasing_n(5, 1.f)));
 
-  int expectedLambda[] = {7, 10, 13, 16};
+  std::array<int,4> expectedLambda = {7, 10, 13, 16};
   let lambda = [](int x, int y) -> int { return 2*x+y; };
   EXPECT_EQ(fp::make_vector(expectedLambda), zipWith(lambda, fp::increasing_n(4, 1), fp::increasing_n(4, 5)));
 }
@@ -369,7 +372,7 @@ TEST(Prelude, Take) {
 TEST(General, Comparing) {
   using fp::comparing;
 
-  static const std::string strings[] = {"one", "two", "three", "four", "five"};
+  const std::array<std::string, 5> strings = {"one", "two", "three", "four", "five"};
   let stringVec = fp::make_vector(strings);
   EXPECT_EQ("three", fp::maximumBy(fp::comparing(&fp::length<std::string>), stringVec));
 
@@ -386,13 +389,13 @@ TEST(General, Flip) {
 
 ///////////////////////////////////////////////////////////////////////////
 
-template<typename T>
+template <typename T>
 T multBy2(T x) {
   return x * (T)2;
 }
 
-template<typename T>
-T xor(T x, T y) {
+template <typename T>
+T exor(T x, T y) {
   return x ^ y;
 }
 
@@ -410,13 +413,13 @@ TEST(Curry, Everything) {
   EXPECT_EQ(2.f,   curry(&multBy2<float>, 1.f)());
   EXPECT_EQ(2.f,   curry2(std::plus<float>(),       1.f, 1.f)());
   EXPECT_EQ(2.f,   curry2(std::multiplies<float>(), 1.f, 2.f)());
-  EXPECT_EQ(99^77, curry2(&xor<int>, 99, 77)());
+  EXPECT_EQ(99^77, curry2(&exor<int>, 99, 77)());
   EXPECT_EQ(2.f,   curry3(&mult3<float>, 8.f, .5f, .5f)());
 
   // 1 arg
   EXPECT_EQ(2.f,   curry(std::plus<float>(),       1.f)(1.f));
   EXPECT_EQ(2.f,   curry(std::multiplies<float>(), 1.f)(2.f));
-  EXPECT_EQ(99^77, curry(&xor<int>, 99)(77));
+  EXPECT_EQ(99^77, curry(&exor<int>, 99)(77));
   EXPECT_EQ(2.f,   curry2(&mult3<float>, 8.f, .5f)(.5f));
 
   // 2 args
@@ -450,11 +453,11 @@ TEST(CompositionNoArgs, Func) {
 }
 
 TEST(CompositionNoArgs, FuncObj) {
-  testNoArgs(s(Void_Void), s(Void_Float), s(Float_Void), s(Float_Float));
+  testNoArgs(S_Void_Void(), S_Void_Float(), S_Float_Void(), S_Float_Float());
 }
 
 TEST(CompositionNoArgs, Lambda) {
-  testNoArgs(l(Void_Void), l(Void_Float), l(Float_Void), l(Float_Float));
+  testNoArgs(L_Void_Void, L_Void_Float, L_Float_Void, L_Float_Float);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -491,15 +494,17 @@ TEST(CompositionMultipleArgs, Func) {
 }
 
 TEST(CompositionMultipleArgs, FuncObj) {
-  testArgs(s(Float_Float), s(Float_Float2), s(Float_Float3), s(Float_Float4));
+  testArgs(S_Float_Float(), S_Float_Float2(), S_Float_Float3(), S_Float_Float4());
 }
 
 TEST(CompositionMultipleArgs, Lambda) {
-  testArgs(l(Float_Float), l(Float_Float2), l(Float_Float3), l(Float_Float4));
+  testArgs(L_Float_Float, L_Float_Float2, L_Float_Float3, L_Float_Float4);
 }
 
 
 ///////////////////////////////////////////////////////////////////////////
+
+#if FP_COMPOUND
 
 template<typename Identity, typename Void, typename Plus>
 inline void testNoArgsCompound(Identity one, Void voidf_, Plus plus)
@@ -563,3 +568,5 @@ TEST(CompositionCompoundMultipleArgs, FuncObj) {
 TEST(CompositionCompoundMultipleArgs, Lambda) {
   testArgsCompound(l(Float_Float), l(Float_Float2));
 }
+
+#endif /* FP_COMPOUND */

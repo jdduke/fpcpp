@@ -4,6 +4,8 @@
 // www.opensource.org/licenses/mit-license.php
 /////////////////////////////////////////////////////////////////////////////
 
+#if FP_COMPOUND
+
 #ifndef _FP_COMPOSITION_COMPOUND_UTILS_H_
 #define _FP_COMPOSITION_COMPOUND_UTILS_H_
 
@@ -190,3 +192,5 @@ struct compound_result34 {
 } /* namespace fp */
 
 #endif /* _FP_EXPERIMENTAL_UTILS_H_ */
+
+#endif /* FP_COMPOUND */

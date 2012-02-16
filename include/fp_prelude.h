@@ -12,6 +12,8 @@
 #include "fp_composition.h"
 #include "fp_composition_compound.h"
 
+#include <limits>
+
 namespace fp {
 
 // ///////////////////////////////////////////////////////////////////////////
@@ -51,8 +53,31 @@ inline T pred(const T& t) {
 ///////////////////////////////////////////////////////////////////////////
 // comparing
 
+#if FP_COMPOUND
+
 template <typename F>
 inline auto comparing(F f) FP_RETURNS( fp::compose2(std::less<result_type_of(F)>(), f, f) );
+
+#else
+
+template<typename F>
+struct comparing_helper {
+  comparing_helper(F f_) : f(f_) { }
+
+  template<typename T>
+  inline bool operator()(const T& u, const T& v) {
+    return f(u) < f(v);
+  }
+
+  F f;
+};
+
+template <typename F>
+inline comparing_helper<F> comparing(F f) {
+  return comparing_helper<F>(f);
+}
+
+#endif /* FP_COMPOUND */
 
 ///////////////////////////////////////////////////////////////////////////
 // flip

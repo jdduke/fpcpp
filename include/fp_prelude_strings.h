@@ -36,7 +36,7 @@ inline std::vector<T> split(const T& s, char delim) {
 };
 
 template<typename T>
-typename T concat(const std::vector<T>& elems, char delim = ' ') {
+T concat(const std::vector<T>& elems, char delim = ' ') {
   std::stringstream ss;
   std::for_each(head(elems), tail(elems), [=,&ss](const T& s) {
     ss << s << delim;
@@ -54,10 +54,10 @@ template<typename T>
 inline std::vector<T> lines(const T& s) {
   return split(s, '\n');
 }
-inline std::vector<std::string> lines(std::ifstream ifs) {
+inline std::vector<std::string> lines(std::ifstream& ifs) {
   std::vector<std::string> ifsLines;
   std::string line;
-  while (getline(ifs, line)) 
+  while (getline(ifs, line))
     ifsLines.push_back(line);
   return ifsLines;
 }

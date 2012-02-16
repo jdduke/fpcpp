@@ -12,6 +12,7 @@
 #include "fp_prelude.h"
 
 #include <algorithm>
+#include <functional>
 #include <numeric>
 #include <map>
 #include <sstream>
@@ -24,7 +25,7 @@ namespace fp {
 ///////////////////////////////////////////////////////////////////////////
 // List operations
 ///////////////////////////////////////////////////////////////////////////
- 
+
 ///////////////////////////////////////////////////////////////////////////
 // map
 
@@ -37,11 +38,13 @@ inline R& __map__(F f, const C& c, R& r) {
 template<typename F, typename C>
 inline auto map(F f, const C& c) -> std::vector< result_type_of(F) > {
   typedef std::vector< result_type_of(F) > result_type;
-  return __map__(f, c, result_type());
+  result_type result;
+  return __map__(f, c, result);
 }
 template<typename F>
 inline std::string map(F f, const std::string& s) {
-  let charVec = __map__(f, std::vector<char>(extent(s)), std::string());
+  std::vector<char> charVec;
+   __map__(f, std::vector<char>(extent(s)), charVec);
   return std::string(extent(charVec));
 }
 template<typename F>
@@ -159,19 +162,17 @@ inline bool any(F f, const C& c) {
 // and
 
 template<typename C>
-inline bool and(const C& c) {
-  return fold(extent(c), std::logical_and());
+inline bool andAll(const C& c) {
+  return fold(extent(c), std::logical_and< value_type_of(C) >());
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // or
 
 template<typename C>
-inline bool or(const C& c) {
-  return fold(extent(c), std::logical_or());
+inline bool orAll(const C& c) {
+  return fold(extent(c), std::logical_or< value_type_of(C) >());
 }
-
-
 
 ///////////////////////////////////////////////////////////////////////////
 // Infinite lists
@@ -221,19 +222,21 @@ inline R& __zipWith__(F f, const T& t, const U& u, R& r) {
 }
 template<typename F, typename T, typename U, typename V, typename R>
 inline R& __zipWith3__(F f, const T& t, const U& u, const V& v, R& r) {
-  std::transform3(extent(t), head(u), head(v), back(r), f);
+  transform3(extent(t), head(u), head(v), back(r), f);
   return r;
 }
 
 template<typename F, typename T, typename U>
 inline T zipWith(F f, const T& t, const U& u) {
-  return __zipWith__(f, t, u, T());
+  T result;
+  return __zipWith__(f, t, u, result);
 }
 FP_DEFINE_FUNC_OBJ(zipWith, zipWith_, _zipWith_)
 
 template<typename F, typename T, typename U, typename V>
 inline T zipWith3(F f, const T& t, const U& u, const V& v) {
-  return __zipWith3__(f, t, u, v, T());
+  T result;
+  return __zipWith3__(f, t, u, v, result);
 }
 FP_DEFINE_FUNC_OBJ(zipWith3, zipWith3_, _zipWith3_)
 
@@ -242,21 +245,21 @@ FP_DEFINE_FUNC_OBJ(zipWith3, zipWith3_, _zipWith3_)
 
 template<typename C0, typename C1>
 inline std::vector< typename tuple_traits<C0,C1>::type > zip(const C0& c1, const C1& c2) {
-  typedef typename traits<C0>::value_type T;
-  typedef typename traits<C1>::value_type U;
-  typedef typename tuple_traits<C0,C1>::type pair_type;
-  typedef std::vector< pair_type > result_type;
-  return __zipWith__([](const T& t, const U& u) { return std::make_pair(t,u); }, c1, c2, result_type());
+  typedef value_type_of(C0) T;
+  typedef value_type_of(C1) U;
+  typedef std::vector< std::pair<T,U> > result_type;
+  result_type result;
+  return __zipWith__([](const T& t, const U& u) { return std::make_pair(t,u); }, c1, c2, result);
 }
 
 template<typename C0, typename C1, typename C2>
 inline std::vector< typename triple_traits<C0,C1,C2>::type > zip3(const C0& c1, const C1& c2, const C2& c3) {
-  typedef typename traits<C0>::value_type T;
-  typedef typename traits<C1>::value_type U;
-  typedef typename traits<C2>::value_type V;
-  typedef typename triple_traits<C0,C1,C2>::type triple_type;
-  typedef std::vector< triple_type > result_type;
-  return __zipWith__([](const T& t, const U& u, const V& v) { return std::make_tuple(t,u,v); }, c1, c2, c3, result_type());
+  typedef value_type_of(C0) T;
+  typedef value_type_of(C1) U;
+  typedef value_type_of(C2) V;
+  typedef std::vector< std::tuple<T,U,V> > result_type;
+  result_type result;
+  return __zipWith__([](const T& t, const U& u, const V& v) { return std::make_tuple(t,u,v); }, c1, c2, c3, result);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -273,8 +276,8 @@ inline std::pair< std::vector<T>, std::vector<U> > unzip(const std::vector< std:
   std::vector<T> t;
   std::vector<U> u;
   for_each(extent(c), [&](const std::pair<T,U>& p) {
-    u.push_back(  fst(p) );
-    v.push_back( snd(p) );
+    t.push_back( fst(p) );
+    u.push_back( snd(p) );
   });
   return std::make_pair(t,u);
 }
@@ -378,8 +381,8 @@ FP_DEFINE_FUNC_OBJ(takeWhileF, takeWhileF_, _takeWhileF_);
 // take
 template<typename C>
 inline C take(size_t n, const C& c) {
-  let takeN = [=](const traits<C>::value_type&) { return n-- > 0; }
-  return takeWhile(takeN, c);
+  let takeN = [=](const value_type_of(C) &) mutable { return n-- > 0; };
+  return takeWhileF(takeN, c);
 }
 template<typename T>
 inline std::vector<T> take(size_t n, const std::vector<T>& v) {

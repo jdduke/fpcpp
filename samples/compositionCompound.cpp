@@ -44,9 +44,9 @@ OutputIterator transform_4(InputIterator1 first1, InputIterator1 last1,
 
 ///////////////////////////////////////////////////////////////////////////
 
-struct gen_rand { 
+struct gen_rand {
   gen_rand(float r) : factor(r/RAND_MAX) { }
-  float operator()() const { 
+  float operator()() const {
     return rand() * factor;
   }
   float factor;
@@ -71,7 +71,7 @@ float test_func2(float x, float y, float z, float w) {
 
 float test_func3() {
   static gen_rand rand_gen(RAND_VEC_RANGE);
-  return std::logf(std::sqrtf(rand_gen() * rand_gen()));
+  return logf(sqrtf(rand_gen() * rand_gen()));
 }
 
 float test_func4(float x) {
@@ -111,6 +111,8 @@ void benchmark3(T& data, T& result, F f, const char* desc, size_t iters = VEC_IT
 }
 
 void test() {
+
+#if FP_COMPOUND
 
   using namespace fp;
   using namespace fp_operators;
@@ -166,7 +168,7 @@ void test() {
     auto log_sqrt        = [](float x) -> float { return logf(sqrtf(x)); };
     auto test_lambda3    = [&]() -> float { return logf(sqrtf(rand_gen() * rand_gen())); };
     auto sqrt_mult_rand_rand  = log_sqrt + mult_rand_rand;
-    auto sqrt_mult_rand_rand2 = [](float x) { return logf(x); } 
+    auto sqrt_mult_rand_rand2 = [](float x) { return logf(x); }
                               + [](float x) { return sqrtf(x); }
                               + [](float x) { return x*x; }
                               + [&]()       { return rand_gen() * rand_gen(); };
@@ -202,6 +204,8 @@ void test() {
 
     std::cout << "Success = " << std::equal( result.begin(), result.end(), test_result.begin() ) << std::endl;
   }
+
+#endif /* FP_COMPOUND */
 
 }
 

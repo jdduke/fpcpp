@@ -2,8 +2,6 @@
 #define _FC_TEST_COMMON_H_
 
 #define f(f_) fp::make_function(f_)
-#define s(s_) S_ ## s_ ## ()
-#define l(l_) L_ ## l_
 
 inline void  Void_Void () { }
 struct S_Void_Void{ void operator()() { }; };
