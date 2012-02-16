@@ -36,8 +36,8 @@ public:
 
   template<typename R, typename Args>
   R applyToTuple(const Args& args) {
-    return f(apply_func<G0,Args,0,      arity_0>(g,args),
-             apply_func<G1,Args,arity_0,arity_1>(g1,args));
+    return f(apply_func<G0,Args,0,      arity_0>(this->g,args),
+             apply_func<G1,Args,arity_0,arity_1>(g1,     args));
   }
 
 #if FP_VARIADIC
@@ -50,7 +50,7 @@ public:
 #else
 
   template<typename T0>
-  auto operator()(const T0& t) -> typename compound_result21<F,G0,G1,T0>::type {
+  auto operator()(const T0& t0) -> typename compound_result21<F,G0,G1,T0>::type {
     typedef typename compound_result21<F,G0,G1,T0>::type result_type;
     return applyToTuple<result_type>(std::make_tuple(t0));
   }
@@ -63,7 +63,7 @@ public:
 
   template<typename T0, typename T1, typename T2>
   auto operator()(const T0& t0, const T1& t1, const T2& t2) -> typename compound_result23<F,G0,G1,T0,T1,T2>::type {
-    typedef typename compound_result23<F,G0,G1,T0,T1,T2,T3>::type result_type;
+    typedef typename compound_result23<F,G0,G1,T0,T1,T2>::type result_type;
     return applyToTuple<result_type>(std::make_tuple(t0,t1,t2));
   }
 
@@ -77,8 +77,8 @@ public:
 
 protected:
 
-  explicit composed_base2(F f_,   G0   g_, G1   g1_) : composed_base(f_,g_), g1(g1_) { }
-  explicit composed_base2(F&& f_, G0&& g_, G1&& g1_) : composed_base(f_,g_), g1(std:::move(g1_)) { }
+  explicit composed_base2(F f_,   G0   g_, G1   g1_) : composed_base<F,G0>(f_,g_), g1(g1_) { }
+  explicit composed_base2(F&& f_, G0&& g_, G1&& g1_) : composed_base<F,G0>(f_,g_), g1(std::forward(g1_)) { }
   composed_base2();
 
   G1 g1;
@@ -91,14 +91,14 @@ template<typename F, typename G0, typename G1, size_t ArgGC>
 class composed2 : public composed_base2<F,G0,G1> {
 public:
   composed2(F f_,   G0   g_, G1   g1_) : composed_base2<F,G0,G1>(f_,g_,g1_) { }
-  composed2(F&& f_, G0&& g_, G1&& g1_) : composed_base2<F,G0,G1>(std::forward(f_),std::forward(g_), ,std::forward(g1_)) { }
+  composed2(F&& f_, G0&& g_, G1&& g1_) : composed_base2<F,G0,G1>(std::forward(f_),std::forward(g_),std::forward(g1_)) { }
 };
 
 template<typename F, typename G0, typename G1>
 class composed2<F,G0,G1,0> : public composed_base2<F,G0,G1> {
 public:
   composed2(F f_,   G0   g_, G1   g1_) : composed_base2<F,G0,G1>(f_,g_,g1_) { }
-  composed2(F&& f_, G0&& g_, G1&& g1_) : composed_base2<F,G0,G1>(std::forward(f_),std::forward(g_), ,std::forward(g1_)) { }
+  composed2(F&& f_, G0&& g_, G1&& g1_) : composed_base2<F,G0,G1>(std::forward(f_),std::forward(g_),std::forward(g1_)) { }
 
   inline auto operator()() -> typename compound_result20<F,G0,G1>::type { return f(g(),g1()); }
 };
@@ -116,9 +116,9 @@ public:
 
   template<typename R, typename Args>
   R applyToTuple(const Args& args) {
-    return f(apply_func<G0,Args,0,              arity_0>(g,args),
-             apply_func<G1,Args,arity_0,        arity_1>(g1,args),
-             apply_func<G2,Args,arity_0+arity_1,arity_2>(g2,args));
+    return f(apply_func<G0,Args,0,              arity_0>(this->g, args),
+             apply_func<G1,Args,arity_0,        arity_1>(this->g1,args),
+             apply_func<G2,Args,arity_0+arity_1,arity_2>(this->g2,args));
   }
 
 
@@ -132,7 +132,7 @@ public:
 #else
 
   template <typename T0>
-  auto operator()(const T0& t) -> typename compound_result31<F,G0,G1,G2,T0>::type {
+  auto operator()(const T0& t0) -> typename compound_result31<F,G0,G1,G2,T0>::type {
     typedef typename compound_result31<F,G0,G1,G2,T0>::type result_type;
     return applyToTuple<result_type>(std::make_tuple(t0));
   }
@@ -145,7 +145,7 @@ public:
 
   template<typename T0, typename T1, typename T2>
   auto operator()(const T0& t0, const T1& t1, const T2& t2) -> typename compound_result33<F,G0,G1,G2,T0,T1,T2>::type {
-    typedef typename compound_result33<F,G0,G1,G2,T0,T1,T2,T3>::type result_type;
+    typedef typename compound_result33<F,G0,G1,G2,T0,T1,T2>::type result_type;
     return applyToTuple<result_type>(std::make_tuple(t0,t1,t2));
   }
 
@@ -159,8 +159,8 @@ public:
 
 protected:
 
-  explicit composed_base3(F f_,   G0   g_, G1   g1_, G2   g2_) : composed_base2(f_,g_,g1_), g2(g2_) { }
-  explicit composed_base3(F&& f_, G0&& g_, G1&& g1_, G1&& g2_) : composed_base2(f_,g_,g1_), g2(std:::move(g2_)) { }
+  explicit composed_base3(F f_,   G0   g_, G1   g1_, G2   g2_) : composed_base2<F,G0,G1>(f_,g_,g1_), g2(g2_) { }
+  explicit composed_base3(F&& f_, G0&& g_, G1&& g1_, G1&& g2_) : composed_base2<F,G0,G1>(f_,g_,g1_), g2(std::move(g2_)) { }
   composed_base3();
 
   G2 g2;

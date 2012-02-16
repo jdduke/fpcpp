@@ -9,6 +9,8 @@
 
 #include "fp_defines.h"
 #include "fp_common.h"
+#include "fp_composition.h"
+#include "fp_composition_compound.h"
 
 namespace fp {
 
@@ -17,7 +19,7 @@ namespace fp {
 
 template<typename T>
 inline T rand_range(T t0 = std::numeric_limits<T>::min(), T t1 = std::numeric_limits<T>::max()) {
-  return t0 + static_cast<T>(static_cast<double>(rand())/(RAND_MAX+1)) * (t1 - t0);
+  return t0 + static_cast<T>(static_cast<double>(rand())/((unsigned long long)RAND_MAX+1)) * (t1 - t0);
 }
 template<typename T>
 struct rand_range_ {
@@ -49,7 +51,7 @@ inline T pred(const T& t) {
 ///////////////////////////////////////////////////////////////////////////
 // comparing
 
-template <typename F> 
+template <typename F>
 inline auto comparing(F f) FP_RETURNS( fp::compose2(std::less<result_type_of(F)>(), f, f) );
 
 ///////////////////////////////////////////////////////////////////////////

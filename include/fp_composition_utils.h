@@ -49,6 +49,49 @@ template <typename T> struct function_traits;
 template <typename T0, typename T1, typename T2> struct function_traits2;
 template <typename T0, typename T1, typename T2, typename T3> struct function_traits3;
 
+///////////////////////////////////////////////////////////////////////////
+
+#if FP_VARIADIC
+
+template <typename T>
+struct function_traits : public function_traits<decltype(&T::operator())> {};
+
+template <typename C, typename R, typename... Args>
+struct function_traits<R(C::*)(Args...) const> {
+  static const size_t arity = sizeof...(Args);
+  typedef R result_type;
+  template <size_t i>
+  struct arg {
+    typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
+  };
+};
+
+template <typename C, typename R, typename... Args>
+struct function_traits<R(C::*)(Args...)> {
+  static const size_t arity = sizeof...(Args);
+  typedef R result_type;
+  template <size_t i>
+  struct arg {
+    typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
+  };
+};
+
+template<typename... Args>
+struct results;
+
+template<typename F, typename... Args>
+struct results<F,Args...> {
+  typedef typename std::result_of< F(Args...) >::type type;
+};
+
+template<typename F, typename G, typename... Args>
+struct compound_result {
+  typedef typename results<G,Args...>::type U;
+  typedef typename results<F,U>::type type;
+};
+
+#else
+
 template <typename T>
 struct function_traits : public function_traits< decltype( &T::operator() ) > {};
 
@@ -75,49 +118,6 @@ struct function_traits< composed2<F,G0,G1,ArgG> > : public function_traits2<F,G0
 
 template <typename F, typename G0, typename G1, typename G2, size_t ArgG>
 struct function_traits< composed3<F,G0,G1,G2,ArgG> > : public function_traits3<F,G0,G1,G2> {};
-
-///////////////////////////////////////////////////////////////////////////
-
-#if FP_VARIADIC
-
-template <typename T>
-struct function_traits : public function_traits<decltype(&T::operator())> {};
-
-template <typename C, typename R, typename... Args>
-struct function_traits<R(C::*)(Args...) const> {
-  static const size_t arity = sizeof...(Args) };
-  typedef R result_type;
-  template <size_t i>
-  struct arg {
-    typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
-  };
-};
-
-template <typename C, typename R, typename... Args>
-struct function_traits<R(C::*)(Args...)> {
-  static const size_t arity = sizeof...(Args) };
-  typedef R result_type;
-  template <size_t i>
-  struct arg {
-    typedef typename std::tuple_element<i, std::tuple<Args...>>::type type;
-  };
-};
-
-template<typename... Args>
-struct results;
-
-template<typename F, typename... Args>
-struct results<F,Args...> {
-  typedef typename std::result_of< F(Args...) >::type type;
-};
-
-template<typename F, typename G, typename... Args>
-struct compound_result {
-  typedef typename results<G,Args...>::type U;
-  typedef typename results<F,U>::type type;
-};
-
-#else
 
 template <typename C, typename R>
 struct function_traits<R(C::*)() const> {
@@ -221,6 +221,8 @@ struct function_traits<R(C::*)(T0,T1,T2,T3,T4)> {
   typedef T4 t4_type;
 };
 
+#endif
+
 ///////////////////////////////////////////////////////////////////////////
 
 template<typename F>
@@ -305,10 +307,8 @@ struct compound_result4<F,0,G,T0,T1,T2,T3> {
 
 template<typename F, typename G>
 struct composed_traits {
-	typedef composed<F,G,function_traits<F>::arity,function_traits<G>::arity> type;
+  typedef composed<F,G,function_traits<F>::arity,function_traits<G>::arity> type;
 };
-
-#endif /* FP_VARIADIC */
 
 ///////////////////////////////////////////////////////////////////////////
 

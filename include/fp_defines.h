@@ -29,7 +29,7 @@
 #define FP_VARIADIC 0
 #else
 #define FP_DECLVAL  1
-#define FP_VARIADIC 1
+#define FP_VARIADIC 0
 #endif
 
 #if !defined(FP_OPERATORS)

@@ -174,9 +174,9 @@ struct type_to_type {
 
 template <typename T>
 struct is_container {
-  template <typename U, typename it_t = typename traits<U>::iterator > 
+  template <typename U, typename it_t = typename traits<U>::iterator >
   struct sfinae  {
-    template < typename U, typename IT, IT (U::*)() const, IT (U::*)() const >
+    template < typename F, typename IT, IT (F::*)() const, IT (F::*)() const >
     struct type_ {};
     typedef type_<U,it_t,static_cast<it_t (U::*)() const>(&U::begin),static_cast<it_t (U::*)() const>(&U::end)> type;
   };
@@ -220,11 +220,11 @@ inline std::vector<T> make_vector(T (&A)[S]) {
 
 template<class InputIterator1, class InputIterator2, class InputIterator3,
          class OutputIterator, class TernaryOperation>
-OutputIterator transform3(InputIterator1 first1, 
+OutputIterator transform3(InputIterator1 first1,
                           InputIterator1 last1,
-                          InputIterator2 first2, 
+                          InputIterator2 first2,
                           InputIterator3 first3,
-                          OutputIterator d_first, 
+                          OutputIterator d_first,
                           TernaryOperation ternary_op)
 {
     while (first1 != last1) {
