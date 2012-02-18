@@ -23,7 +23,7 @@ inline void idle(size_t microseconds) { usleep(microseconds*1000); }
 ///////////////////////////////////////////////////////////////////////////
 
 enum {
-  BOIDS        = 1,
+  BOIDS        = 25,
   X            = 80,
   Y            = 30,
   NEIGHBORHOOD = 15,
