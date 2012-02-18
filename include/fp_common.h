@@ -249,6 +249,10 @@ inline void copyWhile(InputIterator first, InputIterator last, OutputIterator re
   }
 }
 
+/////////////////////////////////////////////////////////////////////////////
+
+inline const char* cstr( const std::string& s ) { return s.c_str(); }
+
 } /* namespace fp */
 
 #endif /* _FP_COMMON_H_ */

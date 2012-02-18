@@ -19,4 +19,6 @@
 #include "fp_composition.h"
 #include "fp_composition_compound.h"
 
+#include "fp_io.h"
+
 #endif /* _FPCPP_H_ */
