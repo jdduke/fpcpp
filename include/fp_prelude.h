@@ -21,7 +21,7 @@ namespace fp {
 
 template<typename T>
 inline T rand_range(T t0 = std::numeric_limits<T>::min(), T t1 = std::numeric_limits<T>::max()) {
-  return t0 + static_cast<T>(static_cast<double>(rand())/((unsigned long long)RAND_MAX+1)) * (t1 - t0);
+  return (T)(t0 + static_cast<double>(rand())/((unsigned long long)RAND_MAX+1) * (t1 - t0));
 }
 template<typename T>
 struct rand_range_ {
