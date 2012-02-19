@@ -210,7 +210,15 @@ inline auto cycle(const C& c) -> std::function< value_type_of(C) (size_t)> {
   return [=](size_t i) { return c[i % length(c)]; };
 }
 
-
+///////////////////////////////////////////////////////////////////////////
+// until
+template <typename P, typename F, typename T>
+inline T until(P condition, F op, T value) {
+  while ( !condition( value ) ) {
+    value = op( value );
+  }
+  return value;
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // Zipping and unzipping lists

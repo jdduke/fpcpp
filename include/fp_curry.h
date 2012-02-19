@@ -51,6 +51,13 @@ FP_CURRY_DEFINE_HELPER(4)
 FP_CURRY_DEFINE_HELPER(5)
 #endif
 
+template<typename F> struct uncurry_helper {
+  typedef function_traits<F> f_traits;
+  typedef typename f_traits::result_type result_type;
+  typedef std::pair< typename f_traits::t0_type, typename f_traits::t1_type > pair_type;
+  typedef std::function< result_type ( pair_type ) > f_type;
+};
+
 template<typename F> struct curry_helper : public curry_helper_impl<fp::function_traits<F>::arity> { };
 
 template<typename F, typename T>
@@ -64,6 +71,13 @@ inline auto curry3(F f, T t, T1 t1, T2 t2) FP_RETURNS( fp::curry_helper<F>::bind
 
 template<typename F, typename T, typename T1, typename T2, typename T3>
 inline auto curry4(F f, T t, T1 t1, T2 t2, T3 t3) FP_RETURNS( fp::curry_helper<F>::bind4(f,t,t1,t2,t3) );
+
+template<typename F>
+inline auto uncurry(F f) -> typename uncurry_helper<F>::f_type {
+  return [=]( typename uncurry_helper<F>::pair_type p ) {
+    return f( fst(p), snd(p) );
+  };
+}
 
 } /* namespace fp */
 

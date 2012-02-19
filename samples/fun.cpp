@@ -9,45 +9,48 @@
 #include <iostream>
 
 using std::string;
+using std::vector;
 
-void pascalsTriangle() {
+// lambdas don't inherit "using" qualifiers, for better or worse...
 
-  fp::print( "Pascal's Triangle" );
+void pascalsTriangle( size_t count ) {
 
-  typedef std::vector<int> Row;
+  using namespace fp;
+
+  print( "Pascal's Triangle" );
+
+  typedef vector<int> Row;
 
   let nextRow = [](const Row& r) {
-    return fp::zipWith( std::plus<int>(), fp::cons(0, r), fp::append(r, 0) );
+    return fp::zipWith( std::plus<int>(), fp::cons( 0, r ), fp::append( r, 0 ) );
   };
 
-  let pascals = fp::iterate( nextRow, Row(1,1) );
+  let pascals = iterate( nextRow, Row(1,1) );
 
-  fp::mapM( fp::print<Row>,
-            fp::takeF(6, pascals) );
+  mapM( print<Row>,
+        takeF( count, pascals ) );
 }
 
-template<typename F, typename T>
-bool groupon(F f, T x, T y) {
-  return f(x) == f(y);
-}
+void anagrams( const fp::FilePath& filePath ) {
 
-void anagrams() {
+  using namespace fp;
 
-  fp::print( "\nAnagrams" );
+  print( "\nAnagrams" );
 
   typedef std::pair<string,string> stringpair;
   typedef std::vector<stringpair> stringpairlist;
-  
-  let f     = fp::readFile( "./../../../samples/unixdict.txt" );
-  let words = fp::lines( f );
-  let wix   = fp::groupBy( fp::compose2(std::equal_to<string>(), fp::fst<string,string>, fp::fst<string,string>),
-                           fp::sort( fp::zip( fp::map( fp::sort<string>, words ), words) ) );
-  let mxl   = fp::maximum( fp::map( fp::length< stringpairlist >, wix ) );
 
-  fp::mapM( [](const stringpairlist& sl) {
+  let fstr    = fst<string,string>;
+  let f       = readFile( filePath );
+  let words   = lines( f );
+  let groupon = compose2( std::equal_to<string>(), fstr, fstr );
+  let wix     = groupBy( groupon, sort( zip( map( sort<string>, words ), words) ) );
+  let mxl     = maximum( map( length< stringpairlist >, wix ) );
+
+  mapM( []( const stringpairlist& sl ) {
     fp::print( fp::map( fp::snd<string,string>, sl ) );
-  },  fp::filter( [=](const stringpairlist& sl) { 
-        return fp::length(sl) == mxl; 
+  },  fp::filter( [=]( const stringpairlist& sl ) { 
+        return fp::length( sl ) == mxl; 
       },  wix) );
 
   /* Compare with Haskell:
@@ -64,11 +67,38 @@ void anagrams() {
   */
 }
 
+template <typename T>
+void nthRoot( int n, T x ) {
+
+  using namespace fp;
+
+  print( show("\nNthRoot: ") +  show(n) + " " + show(x) );
+
+  typedef std::pair<T,T> Guess;
+
+  let root = fst( until( uncurry( std::equal_to<T>() ), [=]( Guess g ) -> Guess { 
+    T x0 = fp::snd(g); return Guess( x0, (x0*(n-1)+(x/pow(x0,n-1)))*(1./n) ); 
+  }, Guess( x, x/n ) ) );
+
+  print( root );
+
+
+  /* Compare with Haskell:
+
+    n `nthRoot` x = fst $ until (uncurry(==)) (\(_,x0) -> (x0,((n-1)*x0+x/x0**(n-1))/n)) (x,x/n)
+
+  */
+
+}
+
+
 int main(int argc, char **argv) {
 
-  pascalsTriangle();
+  pascalsTriangle( 6 );
 
-  anagrams();
+  nthRoot( 5, 34. );
+
+  anagrams( "./../../../samples/unixdict.txt" );
 
   return 0;
 }
