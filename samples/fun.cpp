@@ -40,7 +40,7 @@ void anagrams() {
   
   let f     = fp::readFile( "./../../../samples/unixdict.txt" );
   let words = fp::lines( f );
-  let wix   = fp::groupBy( [](const stringpair& a, const stringpair& b) { return fp::fst(a) == fp::fst(b); },
+  let wix   = fp::groupBy( fp::compose2(std::equal_to<string>(), fp::fst<string,string>, fp::fst<string,string>),
                            fp::sort( fp::zip( fp::map( fp::sort<string>, words ), words) ) );
   let mxl   = fp::maximum( fp::map( fp::length< stringpairlist >, wix ) );
 

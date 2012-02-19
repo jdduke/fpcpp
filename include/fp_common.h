@@ -112,23 +112,24 @@ inline size_t null(T (&A)[S]) {
 
 ///////////////////////////////////////////////////////////////////////////
 
-template<typename T, typename U>
-inline T fst(const std::pair<T,U>& p) {
-  return p.first;
-}
-template<typename T, typename U>
-inline U snd(const std::pair<T,U>& p) {
-  return p.second;
-}
-
-///////////////////////////////////////////////////////////////////////////
-
 template <typename T>
 struct remove_const_ref {
   typedef typename std::remove_const< typename std::remove_reference<T>::type >::type type;
 };
 
 ///////////////////////////////////////////////////////////////////////////
+
+template<typename T, typename U>
+inline auto fst(const std::pair<T,U>& p) -> nonconstref_type_of(T) {
+  return p.first;
+}
+template<typename T, typename U>
+inline auto snd(const std::pair<T,U>& p) -> nonconstref_type_of(U) {
+  return p.second;
+}
+
+///////////////////////////////////////////////////////////////////////////
+
 
 template <typename T>
 struct traits {

@@ -362,7 +362,7 @@ inline std::vector<C> groupBy(F f, const C& c) {
   let it = head(c);
   while (it != tail(c)) {
     C newGroup;
-    it = copyWhile(it, tail(c), back(newGroup), [=]( const value_type_of(C) & t ) {
+    it = copyWhile(it, tail(c), back(newGroup), [&]( const value_type_of(C) & t ) {
       return f(*it,t);
     });
     result.push_back( newGroup );

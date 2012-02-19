@@ -27,37 +27,37 @@ template<typename F, typename G0, typename G1, typename G2, size_t ArgGC> class 
 template< size_t arg_c >
 struct apply_helper {
   template< typename F, typename Args, size_t arg_0 >
-  static auto apply( F& f, const Args& args ) FP_RETURNS( f() );
+  static auto apply( F& f, const Args& args ) FP_RETURNS_NOREF( f() );
 };
 
 template<>
 struct apply_helper<1> {
   template< typename F, typename Args, size_t arg_0 >
-  static auto apply( F& f, const Args& args ) FP_RETURNS( f( std::get<arg_0>(args) ) );
+  static auto apply( F f, const Args& args ) FP_RETURNS_NOREF( f( std::get<arg_0>(args) ) );
 };
 
 template<>
 struct apply_helper<2> {
   template< typename F, typename Args, size_t arg_0 >
-  static auto apply( F& f, const Args& args ) FP_RETURNS( f( std::get<arg_0>(args), std::get<arg_0+1>(args) ) );
+  static auto apply( F& f, const Args& args ) FP_RETURNS_NOREF( f( std::get<arg_0>(args), std::get<arg_0+1>(args) ) );
 };
 
 template<>
 struct apply_helper<3> {
   template< typename F, typename Args, size_t arg_0 >
-  static auto apply( F& f, const Args& args ) FP_RETURNS( f( std::get<arg_0>(args), std::get<arg_0+1>(args), std::get<arg_0+2>(args) ) );
+  static auto apply( F& f, const Args& args ) FP_RETURNS_NOREF( f( std::get<arg_0>(args), std::get<arg_0+1>(args), std::get<arg_0+2>(args) ) );
 };
 
 template<>
 struct apply_helper<4> {
   template< typename F, typename Args, size_t arg_0 >
-  static auto apply( F& f, const Args& args ) FP_RETURNS( f( std::get<arg_0>(args), std::get<arg_0+1>(args), std::get<arg_0+2>(args), std::get<arg_0+3>(args) ) );
+  static auto apply( F& f, const Args& args ) FP_RETURNS_NOREF( f( std::get<arg_0>(args), std::get<arg_0+1>(args), std::get<arg_0+2>(args), std::get<arg_0+3>(args) ) );
 };
 
 template<>
 struct apply_helper<5> {
   template< typename F, typename Args, size_t arg_0 >
-  static auto apply( F& f, const Args& args ) FP_RETURNS( f( std::get<arg_0>(args), std::get<arg_0+1>(args), std::get<arg_0+2>(args), std::get<arg_0+3>(args), std::get<arg_0+4>(args) ) );
+  static auto apply( F& f, const Args& args ) FP_RETURNS_NOREF( f( std::get<arg_0>(args), std::get<arg_0+1>(args), std::get<arg_0+2>(args), std::get<arg_0+3>(args), std::get<arg_0+4>(args) ) );
 };
 
 template< typename F, typename Args, size_t arg_0, size_t arg_c >

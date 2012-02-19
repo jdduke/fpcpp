@@ -20,6 +20,7 @@
 
 // auto function(<arguments>) RETURNS(<some-expression>);
 #define FP_RETURNS(...) -> decltype(__VA_ARGS__) { return (__VA_ARGS__); } typedef int FP_CONCAT(RETURNS_, __LINE__)
+#define FP_RETURNS_NOREF(...) -> nonconstref_type_of(decltype(__VA_ARGS__)) { return (__VA_ARGS__); } typedef int FP_CONCAT(RETURNS_, __LINE__)
 #define FP_DEFINE_FUNC_OBJ(funcName, funcObjName1, funcObjName2)   FP_DEFINE_CURRIED_HELPER(funcName, funcObjName1)
 #define FP_DEFINE_FUNC_OBJ_T(funcName, funcObjName1, funcObjName2) FP_DEFINE_CURRIED_HELPER(funcName, funcObjName1)
 
