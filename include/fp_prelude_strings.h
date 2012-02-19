@@ -91,34 +91,40 @@ auto unwords(const T& elems) -> decltype(concat(elems, ' ')) {
 ///////////////////////////////////////////////////////////////////////////
 // show
 template<typename T>
-inline std::string show(const T& t) {
+inline typename std::enable_if<!is_container<T>::value, std::string>::type show(const T& t) {
   std::stringstream ss;
   ss << t;
   return ss.str();
 }
 
-template<typename T>
-inline std::string show(const std::vector<T>& v) {
-#if 1
-  std::string result("[");
+std::string show(const std::vector<char>& c) {
+  return std::string(head(c), tail(c));
+}
+
+std::string show(const std::string& s) {
+  return s;
+}
+
+template<typename C>
+inline typename std::enable_if<is_container<C>::value, std::string>::type show(const C& c) {
+  typedef value_type_of(C) T;
+#if 0
+  std::string result("[ ");
   return result.append( foldl1( [](const std::string& s0, const std::string& s1) -> std::string {
     std::string result(s0);
     return result.append(", ").append(s1);
   }, map([](const T& t) {
     return show(t);
-  }, v) ) ).append("]");
+  }, c) ) ).append(" ]");
 #else
-  std::string result;
-  std::for_each( extent(v), [&](const T& t) {
-    result.append( show(t) );
+  std::string result("[ ");
+  std::for_each( extent(c), [&](const T& t) {
+    result.append( show(t) ).append(" ");
   });
-  return result;
+  return result.append("]");
 #endif
 }
 
-std::string show(const std::vector<char>& c) {
-  return std::string(head(c), tail(c));
-}
 
 ///////////////////////////////////////////////////////////////////////////
 // print

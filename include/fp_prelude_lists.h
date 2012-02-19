@@ -239,8 +239,9 @@ inline R& __zipWith3__(F f, const T& t, const U& u, const V& v, R& r) {
 }
 
 template <typename F, typename T, typename U>
-inline T zipWith(F f, const T& t, const U& u) {
-  T result;
+inline auto zipWith(F f, const T& t, const U& u) -> std::vector<result_type_of(F)> {
+  typedef result_type_of(F) result_type;
+  std::vector<result_type> result;
   return __zipWith__(f, t, u, result);
 }
 FP_DEFINE_FUNC_OBJ(zipWith, zipWith_, _zipWith_)

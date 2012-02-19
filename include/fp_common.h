@@ -175,18 +175,15 @@ struct type_to_type {
 ///////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-struct is_container {
-  template <typename U, typename it_t = typename traits<U>::iterator >
-  struct sfinae  {
-    template < typename F, typename IT, IT (F::*)() const, IT (F::*)() const >
-    struct type_ {};
-    typedef type_<U,it_t,static_cast<it_t (U::*)() const>(&U::begin),static_cast<it_t (U::*)() const>(&U::end)> type;
-  };
-
-  template <typename U> static char test(typename sfinae<U>::type*);
-  template <typename U> static long test(...);
-
-  static const bool value = sizeof(test<T>(0)) == 1;
+class is_container {
+  typedef char true_type;
+  struct false_type{ true_type _[2]; };
+  template <typename U>
+  static true_type has_iterator_checker(typename U::iterator *);
+  template <typename U>
+  static false_type has_iterator_checker(...);
+public:
+  static const size_t value = (sizeof(has_iterator_checker<T>(0)) == sizeof(true_type));
 };
 
 template <typename T, typename T2>
