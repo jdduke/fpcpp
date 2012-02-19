@@ -10,6 +10,8 @@
 #include <fp_curry_defines.h>
 #include <fp_composition_utils.h>
 
+#include <tuple>
+
 namespace fp {
 
 template<size_t FArgC> struct curry_helper_impl { };
@@ -51,11 +53,24 @@ FP_CURRY_DEFINE_HELPER(4)
 FP_CURRY_DEFINE_HELPER(5)
 #endif
 
-template<typename F> struct uncurry_helper {
-  typedef function_traits<F> f_traits;
-  typedef typename f_traits::result_type result_type;
-  typedef std::pair< typename f_traits::t0_type, typename f_traits::t1_type > pair_type;
-  typedef std::function< result_type ( pair_type ) > f_type;
+template<typename F> 
+struct uncurry_f {
+  typedef result_type_of(F) R;
+
+  uncurry_f(F f_) : f(f_) { }
+
+  template<typename T0, typename T1>
+  inline R operator()(const std::pair<T0,T1>& p2) {
+    return f( fst(p2), snd(p2) );
+  }
+  template<typename T0, typename T1, typename T2>
+  inline R operator()(const std::tuple<T0,T1,T2>& p3) {
+    return f( std::get<0>(p3), std::get<1>(p3), std::get<2>(p3) );
+  }
+  template<typename T0, typename T1, typename T2, typename T3>
+  inline R operator()(const std::tuple<T0,T1,T2,T3>& p4) {
+    return f( std::get<0>(p4), std::get<1>(p4), std::get<2>(p4), std::get<3>(p4) );
+  }
 };
 
 template <typename F> struct curry_helper : public curry_helper_impl<fp::function_traits<F>::arity> { };
@@ -72,12 +87,19 @@ inline auto curry3(F f, T t, T1 t1, T2 t2) FP_RETURNS( fp::curry_helper<F>::bind
 template<typename F, typename T, typename T1, typename T2, typename T3>
 inline auto curry4(F f, T t, T1 t1, T2 t2, T3 t3) FP_RETURNS( fp::curry_helper<F>::bind4(f,t,t1,t2,t3) );
 
+#if 1
+template<typename F>
+inline uncurry_f<F> uncurry(F f) {
+  return uncurry_f<F>(f);
+}
+#else
 template<typename F>
 inline auto uncurry(F f) -> typename uncurry_helper<F>::f_type {
   return [=]( typename uncurry_helper<F>::pair_type p ) {
     return f( fst(p), snd(p) );
   };
 }
+#endif
 
 } /* namespace fp */
 

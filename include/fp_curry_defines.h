@@ -33,17 +33,25 @@
 #define FP_CURRY_HELPER(FUNC,PREFIX) FUNC(PREFIX)
 #define FP_CURRY(ARG,PREFIX)         FP_CURRY_HELPER(FP_CURRY##ARG, PREFIX)
 
-#define FP_DEFINE_CURRIED_HELPER_IMPL(a,b)    \
+#define FP_DEFINE_CURRIED_HELPER(a,b)    \
   template <typename F>                       \
   inline auto b(F f) FP_RETURNS(a);
+#define FP_DEFINE_CURRIED_HELPER2(a,b)   \
+  template <typename F, typename T>           \
+  inline auto b(F f, T t) FP_RETURNS(a);
 
 #define FP_CURRIED(func0,func1)                                                                                             \
   fp::curry(func0<decltype(func1),                                                                                          \
   std::vector<typename remove_const_ref<typename fp::function_traits< decltype(func1) >::t0_type>::type> >, \
   func1)
+#define FP_CURRIED2(func0,func2,value)                                                                                             \
+  fp::curry2(func0<decltype(func2), decltype(value), std::vector<typename remove_const_ref<typename fp::function_traits< decltype(func1) >::t0_type>::type> >, \
+  func2, value)
 
-#define FP_DEFINE_CURRIED_HELPER(funcName, funcName2)  FP_DEFINE_CURRIED_HELPER_IMPL( FP_CURRIED(funcName, f), funcName2 )
-#define FP_DEFINE_FUNC_OBJ(funcName, funcObjName1, funcObjName2)   FP_DEFINE_CURRIED_HELPER(funcName, funcObjName1)
-#define FP_DEFINE_FUNC_OBJ_T(funcName, funcObjName1, funcObjName2) FP_DEFINE_CURRIED_HELPER(funcName, funcObjName1)
+#define FP_DEFINE_CURRIED(funcName, funcName2) \
+  FP_DEFINE_CURRIED_HELPER(  FP_CURRIED(funcName, f), funcName2 )
+#define FP_DEFINE_CURRIED_T(funcName, funcName2, funcName3) \
+  FP_DEFINE_CURRIED_HELPER(  FP_CURRIED( funcName, f),    funcName2 ) \
+  FP_DEFINE_CURRIED_HELPER2( FP_CURRIED2(funcName, f, t), funcName3 )
 
 #endif /* _FP_CURRY_DEFINES_H_ */

@@ -146,6 +146,7 @@ std::vector< std::complex<T> > fft( std::vector<T> v ) {
 
 ///////////////////////////////////////////////////////////////////////////
 
+float integrate( )
 int main(int argc, char **argv) {
 
   using namespace fp;

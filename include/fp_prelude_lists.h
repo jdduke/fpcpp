@@ -58,7 +58,7 @@ template <typename F>
 inline std::string map(F f, const char* s) {
   return map(f, std::string(s));
 }
-FP_DEFINE_FUNC_OBJ(map, map_, _map_);
+FP_DEFINE_CURRIED(map, map_);
 
 ///////////////////////////////////////////////////////////////////////////
 // filter
@@ -69,7 +69,7 @@ inline C filter(F f, C c) {
   std::copy_if(extent(c), back(result), f);
   return result;
 }
-FP_DEFINE_FUNC_OBJ(filter, filter_, _filter_);
+FP_DEFINE_CURRIED(filter, filter_);
 
 
 
@@ -103,13 +103,13 @@ template <typename F, typename T, typename C>
 inline T foldl(F f, T t, const C& c) {
   return fold(extent(c), t, f);
 }
-FP_DEFINE_FUNC_OBJ_T(foldl, foldl_, _foldl_);
+FP_DEFINE_CURRIED_T(foldl, foldl_, _foldl_);
 
 template <typename F, typename C>
 inline auto foldl1(F f, const C& c) -> value_type_of(C) {
   return fold(extent(c), f);
 }
-FP_DEFINE_FUNC_OBJ_T(foldl1, foldl1_, _foldl1_);
+FP_DEFINE_CURRIED(foldl1, foldl1_);
 
 /////////////////////////////////////////////////////////////////////////////
 // foldr
@@ -118,13 +118,13 @@ template <typename F, typename T, typename C>
 inline T foldr(F f, T t, const C& c) {
   return fold(rextent(c), t, f);
 }
-FP_DEFINE_FUNC_OBJ_T(foldr, foldr_, _foldr_);
+FP_DEFINE_CURRIED_T(foldr, foldr_, _foldr_);
 
 template <typename F, typename C>
 inline auto foldr1(F f, const C& c) -> value_type_of(C) {
   return fold(rextent(c), f);
 }
-FP_DEFINE_FUNC_OBJ_T(foldr1, foldr1_, _foldr1_);
+FP_DEFINE_CURRIED(foldr1, foldr1_);
 
 
 
@@ -246,14 +246,14 @@ inline auto zipWith(F f, const T& t, const U& u) -> std::vector<result_type_of(F
   std::vector<result_type> result;
   return __zipWith__(f, t, u, result);
 }
-FP_DEFINE_FUNC_OBJ(zipWith, zipWith_, _zipWith_)
+FP_DEFINE_CURRIED_T(zipWith, zipWith_, _zipWith_)
 
 template <typename F, typename T, typename U, typename V>
 inline T zipWith3(F f, const T& t, const U& u, const V& v) {
   T result;
   return __zipWith3__(f, t, u, v, result);
 }
-FP_DEFINE_FUNC_OBJ(zipWith3, zipWith3_, _zipWith3_)
+FP_DEFINE_CURRIED_T(zipWith3, zipWith3_, _zipWith3_)
 
 ///////////////////////////////////////////////////////////////////////////
 // zip
@@ -410,7 +410,7 @@ inline C takeWhile(F f, const C& c) {
   copyWhile(extent(c), back(result), f);
   return result;
 }
-FP_DEFINE_FUNC_OBJ(takeWhile, takeWhile_, _takeWhile_);
+FP_DEFINE_CURRIED(takeWhile, takeWhile_);
 
 template <typename F, typename Source>
 inline auto takeWhileF(F f, Source source) -> std::vector< decltype(source()) > {
@@ -421,7 +421,7 @@ inline auto takeWhileF(F f, Source source) -> std::vector< decltype(source()) > 
     back_iter = value;
   return result;
 }
-FP_DEFINE_FUNC_OBJ(takeWhileF, takeWhileF_, _takeWhileF_);
+FP_DEFINE_CURRIED(takeWhileF, takeWhileF_);
 
 ///////////////////////////////////////////////////////////////////////////
 // take
@@ -450,7 +450,7 @@ inline C dropWhile(F f, const C& c) {
   std::copy(std::find_if_not(extent(c), f), tail(c), back(result));
   return result;
 }
-FP_DEFINE_FUNC_OBJ(dropWhile, dropWhile_, _dropWhile_);
+FP_DEFINE_CURRIED(dropWhile, dropWhile_);
 
 ///////////////////////////////////////////////////////////////////////////
 // drop
