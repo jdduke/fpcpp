@@ -12,11 +12,10 @@ Generate pi using Monte Carlo sampling:
 
     double pi(size_t samples = 1000) {
         using namespace fp;
-        typedef std::pair<double,double> point;
-        let dxs = map([](const point& p) { return p.first*p.first + p.second*p.second; },
-                      zip(take(samples, rand_range(-1.0,1.0)),
-                          take(samples, rand_range(-1.0,1.0))));
-        return 4.0 * filter([](double d) { return d <= 1.0; }, dxs).size() / dxs.size();
+        return 4.0 * length(filter([](double d) { return d <= 1.0; }, 
+                                   map([](const pair<double,double>& p) { return fst(p)*fst(p) + snd(p)*snd(p); },
+                                       zip(take(samples, rand_range(-1.0,1.0)),
+                                           take(samples, rand_range(-1.0,1.0))))) / samples;
     }
 
 Map an operation across a filtered source and check for success: 
