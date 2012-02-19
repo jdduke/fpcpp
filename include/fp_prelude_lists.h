@@ -35,25 +35,29 @@ inline R& __map__(F f, const C& c, R& r) {
   return r;
 }
 
+// This code is abominable... 
 template <typename F, typename C>
-inline typename std::enable_if< !std::is_same<void,result_type_of(F)>::value, std::vector<result_type_of(F)> >::type
-map(F f, const C& c) {
-  typedef std::vector< result_type_of(F) > result_type;
+inline auto
+map(F f, const C& c) -> typename std::enable_if< !std::is_same<void,decltype(f(head(c)))>::value, std::vector< nonconstref_type_of(decltype(f(head(c))))> >::type {
+  typedef std::vector< nonconstref_type_of(decltype(f(head(c)))) > result_type;
   result_type result;
   return __map__(f, c, result);
 }
 
 template <typename F, typename C>
-inline typename std::enable_if< std::is_same<void,result_type_of(F)>::value, std::vector<result_type_of(F)> >::type
-  map(F f, const C& c) {
-    std::for_each(extent(c), f);
+inline typename std::enable_if< std::is_same<void,result_type_of(F)>::value, void>::type
+//inline auto
+map(F f, const C& c) { //-> typename std::enable_if< std::is_same<void,decltype(f(head(c)))>::value, void >::type {
+  std::for_each(extent(c), f);
 }
+
 template <typename F>
 inline std::string map(F f, const std::string& s) {
   std::vector<char> charVec;
    __map__(f, std::vector<char>(extent(s)), charVec);
-  return std::string(extent(charVec));
+  return show(charVec);
 }
+
 template <typename F>
 inline std::string map(F f, const char* s) {
   return map(f, std::string(s));
@@ -81,7 +85,7 @@ FP_DEFINE_CURRIED(filter, filter_);
 ///////////////////////////////////////////////////////////////////////////
 // fold
 
-template <typename It, typename Op>
+template<typename It, typename Op>
 inline auto fold(It first, It last, Op op) -> typename std::iterator_traits<It>::value_type {
   if (first != last) {
     auto value = *first;
@@ -91,7 +95,7 @@ inline auto fold(It first, It last, Op op) -> typename std::iterator_traits<It>:
   }
 }
 
-template <typename It, typename T, typename Op>
+template<typename It, typename T, typename Op>
 inline T fold(It first, It last, T t, Op op) {
   return std::accumulate(first, last, t, op);
 }
@@ -231,12 +235,12 @@ inline T until(P condition, F op, T value) {
 
 template <typename F, typename T, typename U, typename R>
 inline R& __zipWith__(F f, const T& t, const U& u, R& r) {
-  std::transform(extent(t), head(u), back(r), f);
+  std::transform(extent(t), begin(u), back(r), f);
   return r;
 }
 template <typename F, typename T, typename U, typename V, typename R>
 inline R& __zipWith3__(F f, const T& t, const U& u, const V& v, R& r) {
-  transform3(extent(t), head(u), head(v), back(r), f);
+  transform3(extent(t), begin(u), begin(v), back(r), f);
   return r;
 }
 
@@ -282,7 +286,7 @@ inline std::vector< typename triple_traits<C0,C1,C2>::type > zip3(const C0& c1, 
 
 template<typename F, typename T, typename U, typename R>
 inline R& __unzip__(F f, const T& t, const U& u, R& r) {
-  std::transform(extent(t), head(u), back(r), f);
+  std::transform(extent(t), begin(u), back(r), f);
   return r;
 }
 
@@ -343,7 +347,7 @@ inline value_type_of(C) minimum(const C& c) {
 template <typename C>
 inline C reverse( const C& c ) {
   C result( c );
-  std::reverse( head(c), tail(c) );
+  std::reverse( extent(c) );
   return c;
 }
 #else
@@ -377,10 +381,10 @@ inline C sort(C c) {
 template <typename F, typename C>
 inline std::vector<C> groupBy(F f, const C& c) {
   std::vector<C> result;
-  let it = head(c);
-  while (it != tail(c)) {
+  let it = begin(c);
+  while (it != end(c)) {
     C newGroup;
-    it = copyWhile(it, tail(c), back(newGroup), [&]( const value_type_of(C) & t ) {
+    it = copyWhile(it, end(c), back(newGroup), [&]( const value_type_of(C) & t ) {
       return f(*it,t);
     });
     result.push_back( newGroup );
@@ -406,7 +410,7 @@ inline C group(const C& c) {
 template <typename F, typename C>
 inline C takeWhile(F f, const C& c) {
   C result;
-  //std::copy(head(t), std::find_if(extent(t), std::not1<F>(f)), back(result));
+  //std::copy(begin(t), std::find_if(extent(t), std::not1<F>(f)), back(result));
   copyWhile(extent(c), back(result), f);
   return result;
 }
@@ -432,7 +436,7 @@ inline C take(size_t n, const C& c) {
 }
 template <typename T>
 inline std::vector<T> take(size_t n, const std::vector<T>& v) {
-  return n < length(v) ? std::vector<T>(head(v), head(v) + n) : v;
+  return n < length(v) ? std::vector<T>(begin(v), begin(v) + n) : v;
 }
 
 template <typename F>
@@ -447,7 +451,7 @@ inline auto takeF(size_t n, F f) -> std::vector< decltype(f()) > {
 template <typename F, typename C>
 inline C dropWhile(F f, const C& c) {
   C result;
-  std::copy(std::find_if_not(extent(c), f), tail(c), back(result));
+  std::copy(std::find_if_not(extent(c), f), end(c), back(result));
   return result;
 }
 FP_DEFINE_CURRIED(dropWhile, dropWhile_);
@@ -457,12 +461,12 @@ FP_DEFINE_CURRIED(dropWhile, dropWhile_);
 
 template <typename C>
 inline C drop(size_t n, const C& c) {
+#if 1
+  return n < length(c) ? C( begin(c) + n, end(c) ) : C();
+#else
   let dropN = [=](const typename traits<C>::value_type&) mutable { return n-- > 0; };
   return dropWhile(dropN, c);
-}
-template <typename T>
-inline std::vector<T> drop(size_t n, const std::vector<T>& v) {
-  return n < length(v) ? std::vector<T>(head(v) + n, tail(v)) : std::vector<T>();
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -501,7 +505,7 @@ inline std::pair<C,C> spanNot(F f, const C& c) {
 
 template <typename T, typename C>
 inline bool elem(const T& t, const C& c) {
-  return std::find(extent(c), t) != tail(c);
+  return std::find(extent(c), t) != end(c);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -531,7 +535,7 @@ inline bool lookup(const K& k, const C& c) {
 template <typename F>
 inline auto generate_n(size_t n, F f) -> std::vector< decltype(f()) > {
   std::vector< decltype(f()) > t(n);
-  std::generate_n(head(t), n, f);
+  std::generate_n(begin(t), n, f);
   return t;
 }
 
@@ -567,7 +571,7 @@ template <typename T>
 inline fp_enable_if_container(T,T)
 concat(const T& t0, const T& t1) {
   T result(t0);
-  std::copy(head(t1), tail(t1), back(result));
+  std::copy(extent(t1), back(result));
   return result;
 }
 template <typename T>
@@ -582,7 +586,7 @@ concat(const T& t0, const T& t1) {
 template <typename C, typename T>
 inline C append(const C& c, const T& t) {
   C result(c);
-  result.insert(tail(result), t);
+  result.insert(end(result), t);
   return result;
 }
 

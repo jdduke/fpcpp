@@ -35,10 +35,10 @@ inline float Float_Float4 (float x, float y, float z, float w) { return x + y + 
 struct S_Float_Float4 { float operator()(float x, float y, float z, float w) { return Float_Float4(x,y,z,w); } };
 auto   L_Float_Float4 = [](float x, float y, float z, float w) { return Float_Float4(x,y,z,w); };
 
-auto add_2          = [](float x) -> float { return x + 2.f; };
-auto sub_3          = [](float x) -> float { return x - 3.f; };
-auto mult_4         = [](float x) -> float { return x * 4.f; };
-auto div_5          = [](float x) -> float { return x / 5.f; };
+auto add_2          = [](float x)  { return x + 2; };
+auto sub_3          = [](double x) { return x - 3; };
+auto mult_4         = [](int x)    { return x * 4; };
+auto div_5          = [](int x)    { return x / 5.f; };
 
 
 #endif

@@ -71,6 +71,9 @@ struct uncurry_f {
   inline R operator()(const std::tuple<T0,T1,T2,T3>& p4) {
     return f( std::get<0>(p4), std::get<1>(p4), std::get<2>(p4), std::get<3>(p4) );
   }
+
+private:
+  F f;
 };
 
 template <typename F> struct curry_helper : public curry_helper_impl<fp::function_traits<F>::arity> { };

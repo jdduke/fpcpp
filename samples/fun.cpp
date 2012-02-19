@@ -13,7 +13,6 @@
 
 using std::string;
 using std::vector;
-using std::make_pair;
 
 typedef vector<int> Row;
 
@@ -101,7 +100,7 @@ std::pair< std::vector<T>, std::vector<T> > split( const std::vector<T>& s ) {
   if      ( length(s) == 0 ) return make_pair( FFTVec(), FFTVec() );
   else if ( length(s) == 1 ) return make_pair( FFTVec(1, s[0]), FFTVec() );
   else {
-    let xt_yt = split( FFTVec( head(s) + 2, tail(s) ) );
+    let xt_yt = split( drop(2, s) );
     return make_pair( cons( s[0], fst(xt_yt)), cons( s[1], snd(xt_yt) ) );
   }
 }
@@ -146,7 +145,6 @@ std::vector< std::complex<T> > fft( std::vector<T> v ) {
 
 ///////////////////////////////////////////////////////////////////////////
 
-float integrate( )
 int main(int argc, char **argv) {
 
   using namespace fp;
@@ -156,7 +154,8 @@ int main(int argc, char **argv) {
   ///////////////////////////////////////////////////////////////////////////
 
   print( "PascalsTriangle( 6 )" );
-  map( print<Row>, pascalsTriangle( 6 ) );
+  print( pascalsTriangle( 6 ) );
+  //map( print<Row>, pascalsTriangle( 6 ) );p
 
   ///////////////////////////////////////////////////////////////////////////
 
@@ -166,7 +165,8 @@ int main(int argc, char **argv) {
   ///////////////////////////////////////////////////////////////////////////
 
   print( "\nAnagrams( Unix Dict )" );
-  map( print<StringList>, anagrams( "./../../../samples/unixdict.txt" ) );
+  print( anagrams( "./../../../samples/unixdict.txt" ) );
+  //map( print<StringList>, anagrams( "./../../../samples/unixdict.txt" ) );
 
   ///////////////////////////////////////////////////////////////////////////
 

@@ -251,11 +251,11 @@ TEST(Prelude, Random) {
   EXPECT_GE(5.f, fp::minimum(randFloats));
 
   std::array<int, numRandBins> buckets = {0,0,0,0,0,0,0,0,0,0};
-  std::for_each(fp::head(randFloats), fp::tail(randFloats), [&buckets](float x) {
+  std::for_each(extent(randFloats), [&buckets](float x) {
     ++buckets[(size_t)std::floor(x)];
   });
 
-  std::for_each(fp::head(buckets), fp::tail(buckets), [=](int x) {
+  std::for_each(extent(buckets), [=](int x) {
     EXPECT_GE(maxRandsPerBin, x);
     EXPECT_LE(minRandsPerBin, x);
   });
@@ -273,10 +273,9 @@ TEST(Prelude, EnumFrom) {
 
   let a_z       = fp::takeWhileF([](char x) -> bool { return x <= 'z'; }, enumFrom('a'));
   let a_z2      = fp::takeF(26, enumFrom('a'));
-  let vectostring = [](std::vector<char> s) { return std::string(fp::head(s), fp::tail(s)); };
   const std::string atoz("abcdefghijklmnopqrstuvwxyz");
-  EXPECT_EQ(vectostring(a_z),  atoz);
-  EXPECT_EQ(vectostring(a_z2), atoz);
+  EXPECT_EQ(fp::show(a_z),  atoz);
+  EXPECT_EQ(fp::show(a_z2), atoz);
 
   ///////////////////////////////////////////////////////////////////////////
 

@@ -36,15 +36,17 @@
 
 // Keywords
 #define let auto
-#define extent(c)  fp::head((c)),  fp::tail((c))
-#define rextent(c) fp::rhead((c)), fp::rtail((c))
+#define extent(c)  fp::begin((c)),  fp::end((c))
+#define rextent(c) fp::rbegin((c)), fp::rend((c))
 
-// Template helpers
+// Template type helpers
 #define value_type_of(TYPE)            typename fp::traits<TYPE>::value_type
 #define result_type_of(TYPE)           typename fp::function_traits<TYPE>::result_type
 #define argument_type_of(TYPE,ARGC)    typename fp::function_traits<TYPE>::t ## ARGC ## _type
 #define nonconstref_type_of(TYPE)      typename fp::remove_const_ref<TYPE>::type
-#define fp_enable_if(CONDITION,RTYPE)  typename std::enable_if<CONDITION,RTYPE>::type
+
+// Template conditional type helpers
+#define fp_enable_if(CONDITION,RTYPE)          typename std::enable_if<CONDITION,RTYPE>::type
 #define fp_enable_if_container(TYPE,RTYPE)     fp_enable_if(fp::is_container<TYPE>::value, RTYPE)
 #define fp_enable_if_not_container(TYPE,RTYPE) fp_enable_if(!fp::is_container<TYPE>::value, RTYPE)
 #define fp_enable_if_void(TYPE)                fp_enable_if(std::is_same<void,TYPE>::value,  void)

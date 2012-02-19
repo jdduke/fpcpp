@@ -37,15 +37,23 @@ inline std::vector<T> split(const T& s, char delim) {
   return split_helper(s, delim, elems);
 };
 
-template<typename T>
-std::string concat(const std::vector<T>& elems, char delim = ' ') {
+template<typename C>
+std::string concat(const C& c, const char* infix = " ", const char* prefix = "", const char* suffix = "") {
+  if (length(c) == 0)
+    return "";
+  
   std::stringstream ss;
-  //mapM([&](const T& t) { ss << t; if (tail(elems) != next(&t)) ss << delim; }, elems);
-  for (let s = head(elems); s != tail(elems); ++s) {
-    ss << *s;
-    if (next(s) != tail(elems))
-      ss << delim;
+  ss << prefix;
+  let it = begin(c);
+  if (it != end(c)) {
+    while (true) {
+      ss << show(*it);
+      if (++it == end(c)) break;
+      ss << infix;
+    }
   }
+  ss << suffix;
+
   return ss.str();
 }
 
@@ -98,32 +106,24 @@ inline fp_enable_if_not_container(T,std::string) show(const T& t) {
   return ss.str();
 }
 
-std::string show(const std::vector<char>& c) {
-  return std::string(head(c), tail(c));
+inline std::string show(const std::vector<char>& c) {
+  return std::string(extent(c));
 }
 
-std::string show(const std::string& s) {
+inline std::string show(const std::string& s) {
   return s;
 }
 
 template<typename C>
 inline fp_enable_if_container(C,std::string) show(const C& c) {
+
   typedef value_type_of(C) T;
-#if 0
-  std::string result("[ ");
-  return result.append( foldl1( [](const std::string& s0, const std::string& s1) -> std::string {
-    std::string result(s0);
-    return result.append(", ").append(s1);
-  }, map([](const T& t) {
-    return show(t);
-  }, c) ) ).append(" ]");
-#else
-  std::string result("[ ");
-  std::for_each( extent(c), [&](const T& t) {
-    result.append( show(t) ).append(" ");
-  });
-  return result.append("]");
-#endif
+  const bool is_nonstring_container = is_container<T>::value && !std::is_same<std::string,T>::value;
+  const char* infix  = is_nonstring_container ? ",\n" : ", ";
+  const char* prefix = is_nonstring_container ? "["   : "[";
+  const char* suffix = is_nonstring_container ? "]\n" : "]";
+
+  return concat( c, infix, prefix, suffix );
 }
 
 
@@ -142,6 +142,7 @@ template<typename T>
 inline void print(const T& t) {
   putStrLen( show(t) );
 }
+FP_DEFINE_FUNCTION_OBJECT(print, print_);
 
 } /* namespace fp */
 
