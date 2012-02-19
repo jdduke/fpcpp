@@ -28,24 +28,6 @@ Map an operation across a filtered source and check for success:
                    map(mapOp,
                        filter(filterOp,
                               source)));
-    }
-    
-With which we can, for example, delete all MP3's referenced in an M3U playlist:
-
-    let deleteM3UFiles = [](const string& fileName) -> bool {
-        
-        let isMp3 = [](const string& s) { 
-            return (!s.empty())  && 
-                   ( s[0] != '#') &&
-                   ( s.find_first_of(".mp3") != string::npos );
-        };
-      
-        let deleteFile = [=](const string& mp3) {
-            return remove(mp3.c_str()) == 0; 
-        };
-      
-        return filteredMap(istrue, deleteFile, isMp3, lines(std::ifstream(fileName)));                                   
-    }
     
 Curry functions:
    
