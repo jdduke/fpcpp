@@ -7,6 +7,8 @@
 #ifndef _FP_CURRY_DEFINES_H_
 #define _FP_CURRY_DEFINES_H_
 
+#include "fp_defines.h"
+
 #define FP_PREFIX1  f, t
 #define FP_PREFIX2 FP_PREFIX1 , t1
 #define FP_PREFIX3 FP_PREFIX2 , t2
@@ -33,9 +35,7 @@
 
 #define FP_DEFINE_CURRIED_HELPER_IMPL(a,b)    \
   template <typename F>                       \
-  inline auto b(F f) -> decltype( a ) {       \
-  return a;                                   \
-  }
+  inline auto b(F f) FP_RETURNS(a);
 
 #define FP_CURRIED(func0,func1)                                                                                             \
   fp::curry(func0<decltype(func1),                                                                                          \
@@ -43,5 +43,7 @@
   func1)
 
 #define FP_DEFINE_CURRIED_HELPER(funcName, funcName2)  FP_DEFINE_CURRIED_HELPER_IMPL( FP_CURRIED(funcName, f), funcName2 )
+#define FP_DEFINE_FUNC_OBJ(funcName, funcObjName1, funcObjName2)   FP_DEFINE_CURRIED_HELPER(funcName, funcObjName1)
+#define FP_DEFINE_FUNC_OBJ_T(funcName, funcObjName1, funcObjName2) FP_DEFINE_CURRIED_HELPER(funcName, funcObjName1)
 
 #endif /* _FP_CURRY_DEFINES_H_ */

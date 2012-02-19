@@ -21,7 +21,7 @@ void pascalsTriangle( size_t count ) {
 
   typedef vector<int> Row;
 
-  let nextRow = [](const Row& r) {
+  let nextRow = []( const Row& r ) {
     return fp::zipWith( std::plus<int>(), fp::cons( 0, r ), fp::append( r, 0 ) );
   };
 
@@ -72,12 +72,13 @@ void nthRoot( int n, T x ) {
 
   using namespace fp;
 
+
   print( show("\nNthRoot: ") +  show(n) + " " + show(x) );
 
   typedef std::pair<T,T> Guess;
 
   let root = fst( until( uncurry( std::equal_to<T>() ), [=]( Guess g ) -> Guess { 
-    T x0 = fp::snd(g); return Guess( x0, (x0*(n-1)+(x/pow(x0,n-1)))*(1./n) ); 
+    T x0 = fp::snd( g ); return Guess( x0, (x0*(n-1)+(x/pow(x0,n-1)))*(1./n) ); 
   }, Guess( x, x/n ) ) );
 
   print( root );

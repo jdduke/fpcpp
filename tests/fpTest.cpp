@@ -430,7 +430,7 @@ TEST(Curry, Everything) {
 
 ///////////////////////////////////////////////////////////////////////////
 
-template<typename Void, typename VoidFloat, typename One, typename Identity>
+template <typename Void, typename VoidFloat, typename One, typename Identity>
 void testNoArgs(Void voidf, VoidFloat voidfF, One one, Identity identity)
 {
   using namespace fp;
@@ -462,7 +462,7 @@ TEST(CompositionNoArgs, Lambda) {
 
 ///////////////////////////////////////////////////////////////////////////
 
-template<typename Identity, typename Plus2, typename Plus3, typename Plus4>
+template <typename Identity, typename Plus2, typename Plus3, typename Plus4>
 void testArgs(Identity identity, Plus2 plus2, Plus3 plus3, Plus4 plus4)
 {
   using namespace fp;
@@ -506,7 +506,7 @@ TEST(CompositionMultipleArgs, Lambda) {
 
 #if FP_COMPOUND
 
-template<typename Identity, typename Void, typename Plus>
+template <typename Identity, typename Void, typename Plus>
 inline void testNoArgsCompound(Identity one, Void voidf_, Plus plus)
 {
   using namespace fp;

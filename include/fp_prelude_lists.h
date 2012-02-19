@@ -29,31 +29,31 @@ namespace fp {
 ///////////////////////////////////////////////////////////////////////////
 // map
 
-template<typename F, typename C, typename R>
+template <typename F, typename C, typename R>
 inline R& __map__(F f, const C& c, R& r) {
   std::transform(extent(c), back(r), f);
   return r;
 }
 
-template<typename F, typename C>
+template <typename F, typename C>
 inline auto map(F f, const C& c) -> std::vector< result_type_of(F) > {
   typedef std::vector< result_type_of(F) > result_type;
   result_type result;
   return __map__(f, c, result);
 }
-template<typename F>
+template <typename F>
 inline std::string map(F f, const std::string& s) {
   std::vector<char> charVec;
    __map__(f, std::vector<char>(extent(s)), charVec);
   return std::string(extent(charVec));
 }
-template<typename F>
+template <typename F>
 inline std::string map(F f, const char* s) {
   return map(f, std::string(s));
 }
 FP_DEFINE_FUNC_OBJ(map, map_, _map_);
 
-template<typename F, typename C>
+template <typename F, typename C>
 inline F mapM(F f, const C& c) {
   return std::for_each(extent(c), f);
 }
@@ -61,7 +61,7 @@ inline F mapM(F f, const C& c) {
 ///////////////////////////////////////////////////////////////////////////
 // filter
 
-template<typename F, typename C>
+template <typename F, typename C>
 inline C filter(F f, C c) {
   C result;
   std::copy_if(extent(c), back(result), f);
@@ -79,7 +79,7 @@ FP_DEFINE_FUNC_OBJ(filter, filter_, _filter_);
 ///////////////////////////////////////////////////////////////////////////
 // fold
 
-template<typename It, typename Op>
+template <typename It, typename Op>
 inline auto fold(It first, It last, Op op) -> typename std::iterator_traits<It>::value_type {
   if (first != last) {
     auto value = *first;
@@ -89,7 +89,7 @@ inline auto fold(It first, It last, Op op) -> typename std::iterator_traits<It>:
   }
 }
 
-template<typename It, typename T, typename Op>
+template <typename It, typename T, typename Op>
 inline T fold(It first, It last, T t, Op op) {
   return std::accumulate(first, last, t, op);
 }
@@ -97,13 +97,13 @@ inline T fold(It first, It last, T t, Op op) {
 /////////////////////////////////////////////////////////////////////////////
 // foldl
 
-template<typename F, typename T, typename C>
+template <typename F, typename T, typename C>
 inline T foldl(F f, T t, const C& c) {
   return fold(extent(c), t, f);
 }
 FP_DEFINE_FUNC_OBJ_T(foldl, foldl_, _foldl_);
 
-template<typename F, typename C>
+template <typename F, typename C>
 inline auto foldl1(F f, const C& c) -> value_type_of(C) {
   return fold(extent(c), f);
 }
@@ -112,13 +112,13 @@ FP_DEFINE_FUNC_OBJ_T(foldl1, foldl1_, _foldl1_);
 /////////////////////////////////////////////////////////////////////////////
 // foldr
 
-template<typename F, typename T, typename C>
+template <typename F, typename T, typename C>
 inline T foldr(F f, T t, const C& c) {
   return fold(rextent(c), t, f);
 }
 FP_DEFINE_FUNC_OBJ_T(foldr, foldr_, _foldr_);
 
-template<typename F, typename C>
+template <typename F, typename C>
 inline auto foldr1(F f, const C& c) -> value_type_of(C) {
   return fold(rextent(c), f);
 }
@@ -133,7 +133,7 @@ FP_DEFINE_FUNC_OBJ_T(foldr1, foldr1_, _foldr1_);
 ///////////////////////////////////////////////////////////////////////////
 // sum
 
-template<class C>
+template <class C>
 auto sum(const C& c) -> value_type_of(C) {
   return std::accumulate(extent(c), value_type_of(C)());
 }
@@ -141,7 +141,7 @@ auto sum(const C& c) -> value_type_of(C) {
 ///////////////////////////////////////////////////////////////////////////
 // product
 
-template<class C>
+template <class C>
 auto product(const C& c) -> value_type_of(C) {
   return fold(extent(c), std::multiplies< value_type_of(C)>());
 }
@@ -149,7 +149,7 @@ auto product(const C& c) -> value_type_of(C) {
 ///////////////////////////////////////////////////////////////////////////
 // all
 
-template<typename F, typename C>
+template <typename F, typename C>
 inline bool all(F f, const C& c) {
   return std::all_of(extent(c), f);
 }
@@ -157,7 +157,7 @@ inline bool all(F f, const C& c) {
 ///////////////////////////////////////////////////////////////////////////
 // any
 
-template<typename F, typename C>
+template <typename F, typename C>
 inline bool any(F f, const C& c) {
   return std::any_of(extent(c), f);
 }
@@ -165,7 +165,7 @@ inline bool any(F f, const C& c) {
 ///////////////////////////////////////////////////////////////////////////
 // and
 
-template<typename C>
+template <typename C>
 inline bool andAll(const C& c) {
   return fold(extent(c), std::logical_and< value_type_of(C) >());
 }
@@ -173,7 +173,7 @@ inline bool andAll(const C& c) {
 ///////////////////////////////////////////////////////////////////////////
 // or
 
-template<typename C>
+template <typename C>
 inline bool orAll(const C& c) {
   return fold(extent(c), std::logical_or< value_type_of(C) >());
 }
@@ -184,28 +184,28 @@ inline bool orAll(const C& c) {
 
 ///////////////////////////////////////////////////////////////////////////
 // iterate
-template<typename F, typename T>
+template <typename F, typename T>
 inline std::function< T(void) > iterate(F f, T t) {
   return [=]() mutable -> T { T r = t; t = f(t); return r; };
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // repeat
-template<typename T>
+template <typename T>
 inline std::function< T(void) > iterate(T t) {
   return [=]() mutable { return t; };
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // replicate
-template<typename T>
+template <typename T>
 inline std::vector<T> replicate(size_t n, T t) {
   return std::vector<T>(n, t);
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // cycle
-template<typename C>
+template <typename C>
 inline auto cycle(const C& c) -> std::function< value_type_of(C) (size_t)> {
   return [=](size_t i) { return c[i % length(c)]; };
 }
@@ -227,25 +227,25 @@ inline T until(P condition, F op, T value) {
 /////////////////////////////////////////////////////////////////////////////
 // zipWith
 
-template<typename F, typename T, typename U, typename R>
+template <typename F, typename T, typename U, typename R>
 inline R& __zipWith__(F f, const T& t, const U& u, R& r) {
   std::transform(extent(t), head(u), back(r), f);
   return r;
 }
-template<typename F, typename T, typename U, typename V, typename R>
+template <typename F, typename T, typename U, typename V, typename R>
 inline R& __zipWith3__(F f, const T& t, const U& u, const V& v, R& r) {
   transform3(extent(t), head(u), head(v), back(r), f);
   return r;
 }
 
-template<typename F, typename T, typename U>
+template <typename F, typename T, typename U>
 inline T zipWith(F f, const T& t, const U& u) {
   T result;
   return __zipWith__(f, t, u, result);
 }
 FP_DEFINE_FUNC_OBJ(zipWith, zipWith_, _zipWith_)
 
-template<typename F, typename T, typename U, typename V>
+template <typename F, typename T, typename U, typename V>
 inline T zipWith3(F f, const T& t, const U& u, const V& v) {
   T result;
   return __zipWith3__(f, t, u, v, result);
@@ -328,7 +328,7 @@ inline value_type_of(C) minimumBy(F f, const C& c) {
   return iter_value( std::min_element(extent(c), f), c);
 }
 
-template<typename C>
+template <typename C>
 inline value_type_of(C) minimum(const C& c) {
   return iter_value( std::min_element(extent(c)), c);
 }
@@ -336,17 +336,24 @@ inline value_type_of(C) minimum(const C& c) {
 ///////////////////////////////////////////////////////////////////////////
 // reverse
 
-template<typename C>
-inline C reverse(const C& c_) {
-  C c(c_);
-  std::reverse(head(c), tail(c));
+#if 0
+template <typename C>
+inline C reverse( const C& c ) {
+  C result( c );
+  std::reverse( head(c), tail(c) );
   return c;
 }
+#else
+template <typename C>
+inline C reverse(const C& c) {
+  return foldl( flip( cons<value_type_of(C),C> ), C(), c );
+}
+#endif
 
 ///////////////////////////////////////////////////////////////////////////
 // sortBy
 
-template<typename F, typename C>
+template <typename F, typename C>
 inline C sortBy(F f, C c) {
   std::sort(extent(c), f);
   return c;
@@ -355,7 +362,7 @@ inline C sortBy(F f, C c) {
 ///////////////////////////////////////////////////////////////////////////
 // sort
 
-template<typename C>
+template <typename C>
 inline C sort(C c) {
   std::sort(extent(c));
   return c;
@@ -364,7 +371,7 @@ inline C sort(C c) {
 ///////////////////////////////////////////////////////////////////////////
 // groupBy
 
-template<typename F, typename C>
+template <typename F, typename C>
 inline std::vector<C> groupBy(F f, const C& c) {
   std::vector<C> result;
   let it = head(c);
@@ -381,7 +388,7 @@ inline std::vector<C> groupBy(F f, const C& c) {
 ///////////////////////////////////////////////////////////////////////////
 // group
 
-template<typename C>
+template <typename C>
 inline C group(const C& c) {
   return groupBy(std::equal_to< value_type_of(C) >(), c);
 }
@@ -393,7 +400,7 @@ inline C group(const C& c) {
 //////////////////////////////////////////////////////////////////////////
 // takeWhile
 
-template<typename F, typename C>
+template <typename F, typename C>
 inline C takeWhile(F f, const C& c) {
   C result;
   //std::copy(head(t), std::find_if(extent(t), std::not1<F>(f)), back(result));
@@ -402,7 +409,7 @@ inline C takeWhile(F f, const C& c) {
 }
 FP_DEFINE_FUNC_OBJ(takeWhile, takeWhile_, _takeWhile_);
 
-template<typename F, typename Source>
+template <typename F, typename Source>
 inline auto takeWhileF(F f, Source source) -> std::vector< decltype(source()) > {
   typedef decltype(source()) t_type;
   std::vector<t_type> result;
@@ -415,17 +422,17 @@ FP_DEFINE_FUNC_OBJ(takeWhileF, takeWhileF_, _takeWhileF_);
 
 ///////////////////////////////////////////////////////////////////////////
 // take
-template<typename C>
+template <typename C>
 inline C take(size_t n, const C& c) {
   let takeN = [=](const value_type_of(C) &) mutable { return n-- > 0; };
   return takeWhileF(takeN, c);
 }
-template<typename T>
+template <typename T>
 inline std::vector<T> take(size_t n, const std::vector<T>& v) {
   return n < length(v) ? std::vector<T>(head(v), head(v) + n) : v;
 }
 
-template<typename F>
+template <typename F>
 inline auto takeF(size_t n, F f) -> std::vector< decltype(f()) > {
   let takeN = [=]( decltype(f()) ) mutable { return n-- > 0; };
   return takeWhileF(takeN, f);
@@ -434,7 +441,7 @@ inline auto takeF(size_t n, F f) -> std::vector< decltype(f()) > {
 ///////////////////////////////////////////////////////////////////////////
 // dropWhile
 
-template<typename F, typename C>
+template <typename F, typename C>
 inline C dropWhile(F f, const C& c) {
   C result;
   std::copy(std::find_if_not(extent(c), f), tail(c), back(result));
@@ -445,12 +452,12 @@ FP_DEFINE_FUNC_OBJ(dropWhile, dropWhile_, _dropWhile_);
 ///////////////////////////////////////////////////////////////////////////
 // drop
 
-template<typename C>
+template <typename C>
 inline C drop(size_t n, const C& c) {
   let dropN = [=](const typename traits<C>::value_type&) mutable { return n-- > 0; };
   return dropWhile(dropN, c);
 }
-template<typename T>
+template <typename T>
 inline std::vector<T> drop(size_t n, const std::vector<T>& v) {
   return n < length(v) ? std::vector<T>(head(v) + n, tail(v)) : std::vector<T>();
 }
@@ -458,7 +465,7 @@ inline std::vector<T> drop(size_t n, const std::vector<T>& v) {
 ///////////////////////////////////////////////////////////////////////////
 // splitAt
 
-template<typename C>
+template <typename C>
 inline std::pair<C,C> splitAt(size_t n, const C& c) {
   return std::make_pair( take(n, c), drop(n, c) );
 }
@@ -466,7 +473,7 @@ inline std::pair<C,C> splitAt(size_t n, const C& c) {
 ///////////////////////////////////////////////////////////////////////////
 // span
 
-template<typename F, typename C>
+template <typename F, typename C>
 inline std::pair<C,C> span(F f, const C& c) {
   return std::make_pair( takeWhile(f, c), dropWhile(f, c) );
 }
@@ -474,7 +481,7 @@ inline std::pair<C,C> span(F f, const C& c) {
 ///////////////////////////////////////////////////////////////////////////
 // break
 
-template<typename F, typename C>
+template <typename F, typename C>
 inline std::pair<C,C> spanNot(F f, const C& c) {
   return span( std::not1(f), c );
 }
@@ -489,7 +496,7 @@ inline std::pair<C,C> spanNot(F f, const C& c) {
 ///////////////////////////////////////////////////////////////////////////
 // elem
 
-template<typename T, typename C>
+template <typename T, typename C>
 inline bool elem(const T& t, const C& c) {
   return std::find(extent(c), t) != tail(c);
 }
@@ -497,7 +504,7 @@ inline bool elem(const T& t, const C& c) {
 ///////////////////////////////////////////////////////////////////////////
 // notElem
 
-template<typename T, typename C>
+template <typename T, typename C>
 inline bool notElem(const T& t, const C& c) {
   return !elem(t, c);
 }
@@ -505,7 +512,7 @@ inline bool notElem(const T& t, const C& c) {
 ///////////////////////////////////////////////////////////////////////////
 // lookup
 
-template<typename K, typename C>
+template <typename K, typename C>
 inline bool lookup(const K& k, const C& c) {
   return iter_value( c.find(k), c );
 }
@@ -518,7 +525,7 @@ inline bool lookup(const K& k, const C& c) {
 
 ///////////////////////////////////////////////////////////////////////////
 // generate_n
-template<typename F>
+template <typename F>
 inline auto generate_n(size_t n, F f) -> std::vector< decltype(f()) > {
   std::vector< decltype(f()) > t(n);
   std::generate_n(head(t), n, f);
@@ -527,7 +534,7 @@ inline auto generate_n(size_t n, F f) -> std::vector< decltype(f()) > {
 
 ///////////////////////////////////////////////////////////////////////////
 // increasing_n
-template<typename T>
+template <typename T>
 inline std::vector<T> increasing_n(size_t n, T t0 = (T)0) {
   return generate_n(n, [&]() -> T {
     T r = t0; t0 = succ(t0); return r;
@@ -536,7 +543,7 @@ inline std::vector<T> increasing_n(size_t n, T t0 = (T)0) {
 
 ///////////////////////////////////////////////////////////////////////////
 // decreasing_n
-template<typename T>
+template <typename T>
 inline std::vector<T> decreasing_n(size_t n, T t0 = (T)0) {
   return generate_n(n, [&]() -> T {
     T r = t0; t0 = pred(t0); return r;
@@ -545,7 +552,7 @@ inline std::vector<T> decreasing_n(size_t n, T t0 = (T)0) {
 
 ///////////////////////////////////////////////////////////////////////////
 // enumFrom
-template<typename T>
+template <typename T>
 std::function<T(void)> enumFrom(T t) {
   return iterate(&succ<T>, t);
   //return [=]() mutable -> T { T r = t; t = succ(t); return r; };
@@ -553,7 +560,7 @@ std::function<T(void)> enumFrom(T t) {
 
 ///////////////////////////////////////////////////////////////////////////
 // concat
-template<typename T>
+template <typename T>
 inline typename std::enable_if<is_container<T>::value, T>::type
 concat(const T& t0, const T& t1) {
   T result(t0);
@@ -563,7 +570,7 @@ concat(const T& t0, const T& t1) {
 
 ///////////////////////////////////////////////////////////////////////////
 // append
-template<typename C, typename T>
+template <typename C, typename T>
 inline C append(const C& c, const T& t) {
   C result(c);
   result.insert(tail(result), t);
@@ -572,7 +579,7 @@ inline C append(const C& c, const T& t) {
 
 ///////////////////////////////////////////////////////////////////////////
 // cons
-template<typename T, typename C>
+template <typename T, typename C>
 inline C cons(const T& t, const C& c) {
   return concat( append(C(), t), c );
 }

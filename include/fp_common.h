@@ -18,34 +18,34 @@ namespace fp {
 
 ///////////////////////////////////////////////////////////////////////////
 
-template<typename C>
+template <typename C>
 inline auto head(C& c) -> decltype(std::begin(c)){
   return std::begin(c);
 }
-template<typename C>
+template <typename C>
 inline auto head(const C& c) -> decltype(std::begin(c)){
   return std::begin(c);
 }
-template<typename C>
+template <typename C>
 inline auto chead(const C& c) -> decltype(c.begin()) {
   return c.begin();
 }
-template<typename C>
+template <typename C>
 inline auto rhead(C& c) -> decltype(c.rbegin()) {
   return c.rbegin();
 }
 
 ///////////////////////////////////////////////////////////////////////////
 
-template<typename C>
+template <typename C>
 inline auto tail(C& c) -> decltype(std::end(c)) {
   return std::end(c);
 }
-template<typename C>
+template <typename C>
 inline auto tail(const C& c) -> decltype(std::end(c)) {
   return std::end(c);
 }
-template<typename C>
+template <typename C>
 inline auto ctail(const C& c) -> decltype(c.end()) {
   return c.end();
 }
@@ -123,7 +123,7 @@ template<typename T, typename U>
 inline auto fst(const std::pair<T,U>& p) -> nonconstref_type_of(T) {
   return p.first;
 }
-template<typename T, typename U>
+template <typename T, typename U>
 inline auto snd(const std::pair<T,U>& p) -> nonconstref_type_of(U) {
   return p.second;
 }
@@ -214,12 +214,12 @@ auto iter_value(I i, const C& c) -> value_type_of(C) {
 ///////////////////////////////////////////////////////////////////////////
 
 #if 0
-template<typename T, size_t S>
+template <typename T, size_t S>
 inline std::vector<T> make_vector(T (&A)[S]) {
   return std::vector<T>(A, A+S);
 }
 #else
-template<typename T, size_t S>
+template <typename T, size_t S>
 inline std::vector<T> make_vector(const std::array<T,S>& a) {
   std::vector<T> result(head(a), tail(a));
   return result;
@@ -228,7 +228,7 @@ inline std::vector<T> make_vector(const std::array<T,S>& a) {
 
 ///////////////////////////////////////////////////////////////////////////
 
-template<class InputIterator1, class InputIterator2, class InputIterator3,
+template <class InputIterator1, class InputIterator2, class InputIterator3,
          class OutputIterator, class TernaryOperation>
 OutputIterator transform3(InputIterator1 first1,
                           InputIterator1 last1,
@@ -243,7 +243,7 @@ OutputIterator transform3(InputIterator1 first1,
     return d_first;
 }
 
-template<typename InputIterator, typename OutputIterator, typename UnaryOperation>
+template <typename InputIterator, typename OutputIterator, typename UnaryOperation>
 inline InputIterator copyWhile(InputIterator first, InputIterator last, OutputIterator result, UnaryOperation unary_op) {
   while ((first != last) && unary_op(*first)) {
     *result++ = *first++;

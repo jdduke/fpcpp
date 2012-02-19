@@ -58,15 +58,15 @@ template<typename F> struct uncurry_helper {
   typedef std::function< result_type ( pair_type ) > f_type;
 };
 
-template<typename F> struct curry_helper : public curry_helper_impl<fp::function_traits<F>::arity> { };
+template <typename F> struct curry_helper : public curry_helper_impl<fp::function_traits<F>::arity> { };
 
-template<typename F, typename T>
+template <typename F, typename T>
 inline auto curry(F f, T t) FP_RETURNS( fp::curry_helper<F>::bind(f,t) );
 
-template<typename F, typename T, typename T1>
+template <typename F, typename T, typename T1>
 inline auto curry2(F f, T t, T1 t1) FP_RETURNS( fp::curry_helper<F>::bind2(f,t,t1) );
 
-template<typename F, typename T, typename T1, typename T2>
+template <typename F, typename T, typename T1, typename T2>
 inline auto curry3(F f, T t, T1 t1, T2 t2) FP_RETURNS( fp::curry_helper<F>::bind3(f,t,t1,t2) );
 
 template<typename F, typename T, typename T1, typename T2, typename T3>

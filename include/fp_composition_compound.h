@@ -28,7 +28,7 @@ inline auto compose3(F f, G0 g0, G1 g1, G2 g2) -> typename composed_traits3<F,G0
 
 ///////////////////////////////////////////////////////////////////////////
 
-template<typename F, typename G0, typename G1>
+template <typename F, typename G0, typename G1>
 class composed_base2 : public composed_base<F,G0> {
 public:
   typedef composed_base<F,G0> parent_type;
@@ -36,7 +36,7 @@ public:
   static const size_t arity_0 = function_traits<G0>::arity;
   static const size_t arity_1 = function_traits<G1>::arity;
 
-  template<typename R, typename Args>
+  template <typename R, typename Args>
   R applyToTuple(const Args& args) {
     return f(apply_func<G0,Args,0,      arity_0>(this->g,args),
              apply_func<G1,Args,arity_0,arity_1>(g1,     args));
@@ -44,32 +44,32 @@ public:
 
 #if FP_VARIADIC
 
-  template<typename... Args>
+  template <typename... Args>
   auto operator()(Args... args) -> typename compound_result2<F,G0,G1,Args...>::type {
     return apply<typename compound_result2<F,G0,G1,Args...>::type>(std::make_tuple(args...));
   }
 
 #else
 
-  template<typename T0>
+  template <typename T0>
   auto operator()(const T0& t0) -> typename compound_result21<F,G0,G1,T0>::type {
     typedef typename compound_result21<F,G0,G1,T0>::type result_type;
     return applyToTuple<result_type>(std::make_tuple(t0));
   }
 
-  template<typename T0, typename T1>
+  template <typename T0, typename T1>
   auto operator()(const T0& t0, const T1& t1) -> typename compound_result22<F,G0,G1,T0,T1>::type {
     typedef typename compound_result22<F,G0,G1,T0,T1>::type result_type;
     return applyToTuple<result_type>(std::make_tuple(t0,t1));
   }
 
-  template<typename T0, typename T1, typename T2>
+  template <typename T0, typename T1, typename T2>
   auto operator()(const T0& t0, const T1& t1, const T2& t2) -> typename compound_result23<F,G0,G1,T0,T1,T2>::type {
     typedef typename compound_result23<F,G0,G1,T0,T1,T2>::type result_type;
     return applyToTuple<result_type>(std::make_tuple(t0,t1,t2));
   }
 
-  template<typename T0, typename T1, typename T2, typename T3>
+  template <typename T0, typename T1, typename T2, typename T3>
   auto operator()(const T0& t0, const T1& t1, const T2& t2, const T3& t3) -> typename compound_result24<F,G0,G1,T0,T1,T2,T3>::type {
     typedef typename compound_result24<F,G0,G1,T0,T1,T2,T3>::type result_type;
     return applyToTuple<result_type>(std::make_tuple(t0,t1,t2,t3));
@@ -89,14 +89,14 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////////
 
-template<typename F, typename G0, typename G1, size_t ArgGC>
+template <typename F, typename G0, typename G1, size_t ArgGC>
 class composed2 : public composed_base2<F,G0,G1> {
 public:
   composed2(F f_,   G0   g_, G1   g1_) : composed_base2<F,G0,G1>(f_,g_,g1_) { }
   composed2(F&& f_, G0&& g_, G1&& g1_) : composed_base2<F,G0,G1>(std::forward(f_),std::forward(g_),std::forward(g1_)) { }
 };
 
-template<typename F, typename G0, typename G1>
+template <typename F, typename G0, typename G1>
 class composed2<F,G0,G1,0> : public composed_base2<F,G0,G1> {
 public:
   composed2(F f_,   G0   g_, G1   g1_) : composed_base2<F,G0,G1>(f_,g_,g1_) { }
