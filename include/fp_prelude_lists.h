@@ -383,11 +383,10 @@ inline std::vector<C> groupBy(F f, const C& c) {
   std::vector<C> result;
   let it = begin(c);
   while (it != end(c)) {
-    C newGroup;
-    it = copyWhile(it, end(c), back(newGroup), [&]( const value_type_of(C) & t ) {
+    result.push_back( C() );
+    it = copyWhile(it, end(c), back(result.back()), [&]( const value_type_of(C) & t ) {
       return f(*it,t);
     });
-    result.push_back( newGroup );
   }
   return result;
 }

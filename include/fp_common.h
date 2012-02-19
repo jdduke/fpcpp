@@ -143,6 +143,9 @@ inline std::vector<T> make_vector(const std::array<T,S>& a) {
 
 inline const char* cstr( const std::string& s ) { return s.c_str(); }
 
+template<typename T>
+float fromIntegral(T t) { return (float)t; }
+
 } /* namespace fp */
 
 #endif /* _FP_COMMON_H_ */

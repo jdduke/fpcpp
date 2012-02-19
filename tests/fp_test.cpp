@@ -44,10 +44,34 @@ bool filteredMap(MapOp mapOp, FilterOp filterOp, Source source, std::function<bo
 double pi(size_t samples = 1000) {
   using namespace fp;
   typedef std::pair<double,double> point;
-  let dxs = map([](const point& p) { return p.first*p.first + p.second*p.second; },
-                zip(takeF(samples, rand_range_<double>(-1.0,1.0)),
-                    takeF(samples, rand_range_<double>(-1.0,1.0))));
-  return 4.0*filter([](double d) { return d <= 1.0; }, dxs).size()/dxs.size();
+  return 4.* length(filter([](double d) { return d <= 1.0; }, 
+                           map([](const point& p) { return p.first*p.first + p.second*p.second; },
+                               zip(takeF(samples, rand_range_<double>(-1.0,1.0)),
+                                   takeF(samples, rand_range_<double>(-1.0,1.0)))))) / samples;
+}
+
+double pi_(size_t samples = 1000) {
+
+  using namespace fp;
+
+  let sample = []() -> int { 
+    let x = rand_range(-1.,1.); 
+    let y = rand_range(-1.,1.);
+    let dist2 = x*x + y*y;
+    return dist2 < 1. ? 1 : 0;
+  };
+
+  return 4. * foldl1(std::plus<int>(), takeF(samples, sample)) / samples;
+  /*
+  get_pi throws = do results <- replicateM throws one_trial
+    return (4 * fromIntegral (foldl' (+) 0 results) / fromIntegral throws)
+  where
+    one_trial = do rand_x <- randomRIO (-1, 1)
+    rand_y <- randomRIO (-1, 1)
+    let dist :: Double
+    dist = sqrt (rand_x*rand_x + rand_y*rand_y)
+    return (if dist < 1 then 1 else 0)
+    */
 }
 
 TEST(Prelude, Fun) {
@@ -76,6 +100,7 @@ TEST(Prelude, Fun) {
   ///////////////////////////////////////////////////////////////////////////
 
   EXPECT_NEAR(3.14, pi(), .1);
+  EXPECT_NEAR(3.14, pi_(), .1);
 
 }
 

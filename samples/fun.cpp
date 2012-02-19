@@ -161,10 +161,12 @@ int main(int argc, char **argv) {
 
   print( "\nNthRoot( 5, 34 )" );
   print( nthRoot( 5, 34. ) );
+  print( "\nNthRoot( 3, 27 )" );
+  print( nthRoot( 3, 27. ) );
 
   ///////////////////////////////////////////////////////////////////////////
 
-  print( "\nAnagrams( Unix Dict )" );
+  print( "\nAnagrams( UnixDict )" );
   print( anagrams( "./../../../samples/unixdict.txt" ) );
   //map( print<StringList>, anagrams( "./../../../samples/unixdict.txt" ) );
 
