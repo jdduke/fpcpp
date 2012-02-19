@@ -9,6 +9,7 @@
 
 #include "fp_defines.h"
 #include "fp_prelude.h"
+#include "fp_prelude_lists.h"
 
 #include <sstream>
 #include <fstream>
@@ -36,13 +37,15 @@ inline std::vector<T> split(const T& s, char delim) {
 };
 
 template<typename T>
-T concat(const std::vector<T>& elems, char delim = ' ') {
+std::string concat(const std::vector<T>& elems, char delim = ' ') {
   std::stringstream ss;
-  std::for_each(head(elems), tail(elems), [=,&ss](const T& s) {
-    ss << s << delim;
-  });
-  let str = ss.str();
-  return str.length() > 0 ? str.substr(0, str.length()-1) : "";
+  //mapM([&](const T& t) { ss << t; if (tail(elems) != next(&t)) ss << delim; }, elems);
+  for (let s = head(elems); s != tail(elems); ++s) {
+    ss << *s;
+    if (next(s) != tail(elems))
+      ss << delim;
+  }
+  return ss.str();
 }
 
 inline bool istrue(bool b) { return b; }
@@ -88,19 +91,41 @@ auto unwords(const T& elems) -> decltype(concat(elems, ' ')) {
 ///////////////////////////////////////////////////////////////////////////
 // show
 template<typename T>
-inline typename std::enable_if<!is_container<T>::value, std::string>::type show(const T& t) {
+inline std::string show(const T& t) {
   std::stringstream ss;
   ss << t;
   return ss.str();
 }
 
-template<typename C>
-inline typename std::enable_if<is_container<C>::value, std::string>::type show(const C& c) {
-  return concat(c, ' ');
+template<typename T>
+inline std::string show(const std::vector<T>& v) {
+#if 1
+  std::string result("[");
+  return result.append( foldl1( [](const std::string& s0, const std::string& s1) -> std::string {
+    std::string result(s0);
+    return result.append(", ").append(s1);
+  }, map([](const T& t) {
+    return show(t);
+  }, v) ) ).append("]");
+#else
+  std::string result;
+  std::for_each( extent(v), [&](const T& t) {
+    result.append( show(t) );
+  });
+  return result;
+#endif
 }
 
 std::string show(const std::vector<char>& c) {
   return std::string(head(c), tail(c));
+}
+
+///////////////////////////////////////////////////////////////////////////
+// print
+
+template<typename T>
+void print(const T& t) {
+  std::cout << show(t) << std::endl;
 }
 
 } /* namespace fp */

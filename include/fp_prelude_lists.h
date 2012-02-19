@@ -51,8 +51,12 @@ template<typename F>
 inline std::string map(F f, const char* s) {
   return map(f, std::string(s));
 }
-//FP_DEFINE_FUNC_OBJ(map, map_, _map_);
+FP_DEFINE_FUNC_OBJ(map, map_, _map_);
 
+template<typename F, typename C>
+inline F mapM(F f, const C& c) {
+  return std::for_each(extent(c), f);
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // filter
@@ -94,7 +98,7 @@ inline T fold(It first, It last, T t, Op op) {
 // foldl
 
 template<typename F, typename T, typename C>
-inline auto foldl(F f, T t, const C& c) -> value_type_of(C) {
+inline T foldl(F f, T t, const C& c) {
   return fold(extent(c), t, f);
 }
 FP_DEFINE_FUNC_OBJ_T(foldl, foldl_, _foldl_);
@@ -109,7 +113,7 @@ FP_DEFINE_FUNC_OBJ_T(foldl1, foldl1_, _foldl1_);
 // foldr
 
 template<typename F, typename T, typename C>
-inline auto foldr(F f, T t, const C& c) -> value_type_of(C) {
+inline T foldr(F f, T t, const C& c) {
   return fold(rextent(c), t, f);
 }
 FP_DEFINE_FUNC_OBJ_T(foldr, foldr_, _foldr_);
@@ -349,6 +353,30 @@ inline C sort(C c) {
   return c;
 }
 
+///////////////////////////////////////////////////////////////////////////
+// groupBy
+
+template<typename F, typename C>
+inline std::vector<C> groupBy(F f, const C& c) {
+  std::vector<C> result;
+  let it = head(c);
+  while (it != tail(c)) {
+    C newGroup;
+    it = copyWhile(it, tail(c), back(newGroup), [=]( const value_type_of(C) & t ) {
+      return f(*it,t);
+    });
+    result.push_back( newGroup );
+  }
+  return result;
+}
+
+///////////////////////////////////////////////////////////////////////////
+// group
+
+template<typename C>
+inline C group(const C& c) {
+  return groupBy(std::equal_to< value_type_of(C) >(), c);
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // Sublists
@@ -528,8 +556,7 @@ concat(const T& t0, const T& t1) {
 ///////////////////////////////////////////////////////////////////////////
 // append
 template<typename C, typename T>
-inline typename std::enable_if<is_container<C>::value && !is_container<T>::value, C>::type
-append(const C& c, const T& t) {
+inline C append(const C& c, const T& t) {
   C result(c);
   result.insert(tail(result), t);
   return result;
@@ -538,8 +565,7 @@ append(const C& c, const T& t) {
 ///////////////////////////////////////////////////////////////////////////
 // cons
 template<typename T, typename C>
-inline typename std::enable_if<!is_container<T>::value && is_container<C>::value, C>::type
-cons(const T& t, const C& c) {
+inline C cons(const T& t, const C& c) {
   return concat( append(C(), t), c );
 }
 

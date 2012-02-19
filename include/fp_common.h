@@ -113,11 +113,11 @@ inline size_t null(T (&A)[S]) {
 ///////////////////////////////////////////////////////////////////////////
 
 template<typename T, typename U>
-T fst(const std::pair<T,U>& p) {
+inline T fst(const std::pair<T,U>& p) {
   return p.first;
 }
 template<typename T, typename U>
-U snd(const std::pair<T,U>& p) {
+inline U snd(const std::pair<T,U>& p) {
   return p.second;
 }
 
@@ -243,10 +243,11 @@ OutputIterator transform3(InputIterator1 first1,
 }
 
 template<typename InputIterator, typename OutputIterator, typename UnaryOperation>
-inline void copyWhile(InputIterator first, InputIterator last, OutputIterator result, UnaryOperation unary_op) {
+inline InputIterator copyWhile(InputIterator first, InputIterator last, OutputIterator result, UnaryOperation unary_op) {
   while ((first != last) && unary_op(*first)) {
     *result++ = *first++;
   }
+  return first;
 }
 
 /////////////////////////////////////////////////////////////////////////////

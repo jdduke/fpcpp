@@ -33,6 +33,10 @@ namespace fp {
 
 typedef std::string FilePath;
 
+std::ifstream readFile( const FilePath& filePath ) {
+  return std::ifstream( filePath );
+}
+
 bool removeFile( const FilePath& filePath ) {
   return remove( cstr(filePath) ) == 0;
 }
