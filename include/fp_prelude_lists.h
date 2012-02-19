@@ -36,10 +36,17 @@ inline R& __map__(F f, const C& c, R& r) {
 }
 
 template <typename F, typename C>
-inline auto map(F f, const C& c) -> std::vector< result_type_of(F) > {
+inline typename std::enable_if< !std::is_same<void,result_type_of(F)>::value, std::vector<result_type_of(F)> >::type
+map(F f, const C& c) {
   typedef std::vector< result_type_of(F) > result_type;
   result_type result;
   return __map__(f, c, result);
+}
+
+template <typename F, typename C>
+inline typename std::enable_if< std::is_same<void,result_type_of(F)>::value, std::vector<result_type_of(F)> >::type
+  map(F f, const C& c) {
+    std::for_each(extent(c), f);
 }
 template <typename F>
 inline std::string map(F f, const std::string& s) {
@@ -52,11 +59,6 @@ inline std::string map(F f, const char* s) {
   return map(f, std::string(s));
 }
 FP_DEFINE_FUNC_OBJ(map, map_, _map_);
-
-template <typename F, typename C>
-inline F mapM(F f, const C& c) {
-  return std::for_each(extent(c), f);
-}
 
 ///////////////////////////////////////////////////////////////////////////
 // filter
@@ -562,11 +564,17 @@ std::function<T(void)> enumFrom(T t) {
 ///////////////////////////////////////////////////////////////////////////
 // concat
 template <typename T>
-inline typename std::enable_if<is_container<T>::value, T>::type
+inline fp_enable_if_container(T,T)
 concat(const T& t0, const T& t1) {
   T result(t0);
   std::copy(head(t1), tail(t1), back(result));
   return result;
+}
+template <typename T>
+inline fp_enable_if_not_container(T,std::vector<T>)
+concat(const T& t0, const T& t1) {
+  std::vector<T> result(1, t0);
+  return result.append(t1);
 }
 
 ///////////////////////////////////////////////////////////////////////////

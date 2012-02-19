@@ -21,6 +21,8 @@ typedef std::pair<string,string> StringPair;
 typedef vector<string>           StringList;
 typedef vector<StringPair>       StringPairList;
 
+///////////////////////////////////////////////////////////////////////////
+
 std::vector< Row > pascalsTriangle( size_t count ) {
 
   using namespace fp;
@@ -34,6 +36,8 @@ std::vector< Row > pascalsTriangle( size_t count ) {
   return takeF( count, pascals );
 
 }
+
+///////////////////////////////////////////////////////////////////////////
 
 std::vector< StringList > anagrams( const fp::FilePath& filePath ) {
 
@@ -66,6 +70,8 @@ std::vector< StringList > anagrams( const fp::FilePath& filePath ) {
   */
 }
 
+///////////////////////////////////////////////////////////////////////////
+
 template<typename T>
 T nthRoot( int n, T x ) {
 
@@ -84,6 +90,8 @@ T nthRoot( int n, T x ) {
   */
 
 }
+
+///////////////////////////////////////////////////////////////////////////
 
 template< typename T >
 std::pair< std::vector<T>, std::vector<T> > split( const std::vector<T>& s ) {
@@ -136,6 +144,8 @@ std::vector< std::complex<T> > fft( std::vector<T> v ) {
   */
 }
 
+///////////////////////////////////////////////////////////////////////////
+
 int main(int argc, char **argv) {
 
   using namespace fp;
@@ -145,7 +155,7 @@ int main(int argc, char **argv) {
   ///////////////////////////////////////////////////////////////////////////
 
   print( "PascalsTriangle( 6 )" );
-  mapM( print<Row>, pascalsTriangle( 6 ) );
+  map( print<Row>, pascalsTriangle( 6 ) );
 
   ///////////////////////////////////////////////////////////////////////////
 
@@ -155,7 +165,7 @@ int main(int argc, char **argv) {
   ///////////////////////////////////////////////////////////////////////////
 
   print( "\nAnagrams( Unix Dict )" );
-  mapM( print<StringList>, anagrams( "./../../../samples/unixdict.txt" ) );
+  map( print<StringList>, anagrams( "./../../../samples/unixdict.txt" ) );
 
   ///////////////////////////////////////////////////////////////////////////
 

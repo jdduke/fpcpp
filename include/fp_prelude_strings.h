@@ -13,6 +13,7 @@
 
 #include <sstream>
 #include <fstream>
+#include <iostream>
 
 namespace fp {
 
@@ -91,7 +92,7 @@ auto unwords(const T& elems) -> decltype(concat(elems, ' ')) {
 ///////////////////////////////////////////////////////////////////////////
 // show
 template<typename T>
-inline typename std::enable_if<!is_container<T>::value, std::string>::type show(const T& t) {
+inline fp_enable_if_not_container(T,std::string) show(const T& t) {
   std::stringstream ss;
   ss << t;
   return ss.str();
@@ -106,7 +107,7 @@ std::string show(const std::string& s) {
 }
 
 template<typename C>
-inline typename std::enable_if<is_container<C>::value, std::string>::type show(const C& c) {
+inline fp_enable_if_container(C,std::string) show(const C& c) {
   typedef value_type_of(C) T;
 #if 0
   std::string result("[ ");
@@ -129,9 +130,17 @@ inline typename std::enable_if<is_container<C>::value, std::string>::type show(c
 ///////////////////////////////////////////////////////////////////////////
 // print
 
+inline void putStr(const std::string& s) {
+  std::cout << s;
+}
+
+inline void putStrLen(const std::string& s) {
+  std::cout << s << std::endl;
+}
+
 template<typename T>
-void print(const T& t) {
-  std::cout << show(t) << std::endl;
+inline void print(const T& t) {
+  putStrLen( show(t) );
 }
 
 } /* namespace fp */
