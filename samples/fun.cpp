@@ -13,12 +13,13 @@
 
 using std::string;
 using std::vector;
+using std::pair;
 
 typedef vector<int> Row;
 
-typedef std::pair<string,string> StringPair;
-typedef vector<string>           StringList;
-typedef vector<StringPair>       StringPairList;
+typedef pair<string,string> StringPair;
+typedef vector<string>      StringList;
+typedef vector<StringPair>  StringPairList;
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -145,6 +146,83 @@ std::vector< std::complex<T> > fft( std::vector<T> v ) {
 
 ///////////////////////////////////////////////////////////////////////////
 
+struct HTree;
+typedef pair<char,string> Code;
+typedef pair<size_t,char> Freq;
+typedef pair<size_t,HTree> FreqTree;
+typedef vector< Code > Encoding;
+typedef vector< Freq > Frequencies;
+typedef vector< FreqTree > FreqTrees;
+
+struct HTree { 
+  HTree() : left(nullptr), right(nullptr), value(0) { }
+  HTree(const HTree& l, const HTree& r) : left(&l), right(&r), value(0) { }
+  HTree(char c) : left(nullptr), right(nullptr), value(c) { }
+  const HTree* left;
+  const HTree* right;
+  char value;
+};
+
+inline Encoding serialize( const HTree* t ) {
+  using namespace fp;
+  if (nullptr == t) {
+    return Encoding();
+  } else if (t->value) {
+    return Encoding(1, Code(t->value, "") );
+  } else {
+    let leftS  = serialize(t->left);
+    let rightS = serialize(t->right);
+
+    let cons0 = [](std::string& s) { return fp::cons('0', s); };
+    let cons1 = [](std::string& s) { return fp::cons('1', s); };
+    let apply0 = [&](const Code& c) { return Code(fp::fst(c), cons0(fp::snd(c))); };
+    let apply1 = [&](const Code& c) { return Code(fp::fst(c), cons1(fp::snd(c))); };
+
+    return concat( map( apply0, leftS), 
+                   map( apply1, leftS) );
+  }
+}
+
+vector<string> huffman( std::string s ) {
+
+  using namespace fp;
+
+  std::vector<HTree> htree;
+
+  let freq = []( const vector<char>& s ) -> Frequencies {
+    return fp::map( fp::mapArrowF_( fp::lengthF(), fp::headF() ), fp::group( fp::sort(s) ) );
+  };
+  let hstep = []( const FreqTrees& fts ) -> FreqTrees {
+    using namespace fp;
+    if (length(fts) < 2)
+      return FreqTrees();
+
+    let wt1 = index(0, fts);
+    let wt2 = index(1, fts);
+
+    return FreqTrees();
+
+    // TODO: Implement
+    /*return insertBy( comparing(fst<size_t,HTree>), 
+                     make_pair(wt1.first+wt2.second, HTree(wt1.second,wt2.second)) );*/
+
+  };
+  let huffmanTree = [&]( const Frequencies& fs ) -> HTree* {
+    using namespace fp;
+    htree.resize( length(fs) );
+    // TODO: implement
+    //return fp::snd( fp::head( fp::until() ))
+    return &htree.front();
+  };
+  let vecs = make_vector(s);
+  return map( []( const pair<char,std::string>& p ) {
+    return fp::show('\'') + fp::fst(p) + "\' : " + fp::fst(p);
+  }, serialize( huffmanTree( freq( vecs ) ) ) );
+
+}
+
+///////////////////////////////////////////////////////////////////////////
+
 int main(int argc, char **argv) {
 
   using namespace fp;
@@ -177,6 +255,9 @@ int main(int argc, char **argv) {
   print( fft( make_vector( fftIn ) ) );
 
   ///////////////////////////////////////////////////////////////////////////
+
+  print( show("\nhuffman( \"this is an example for huffman encoding\" )") );
+  print( huffman( "this is an example for huffman encoding" ) );
 
   print( "" );
 

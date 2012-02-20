@@ -38,6 +38,8 @@
     b() { }                                                       \
     template<typename T>                                          \
     auto operator()(T t) FP_RETURNS( a(t) );                      \
+    template<typename T>                                          \
+    auto operator()(const T& t) FP_RETURNS( a(t) );               \
     template<typename F, typename T>                              \
     auto operator()(F f, T t) FP_RETURNS( a(f,t) );               \
     template<typename F, typename T, typename C>                  \

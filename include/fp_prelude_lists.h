@@ -45,9 +45,7 @@ map(F f, const C& c) -> typename std::enable_if< !std::is_same<void,decltype(f(h
 }
 
 template <typename F, typename C>
-inline typename std::enable_if< std::is_same<void,result_type_of(F)>::value, void>::type
-//inline auto
-map(F f, const C& c) { //-> typename std::enable_if< std::is_same<void,decltype(f(head(c)))>::value, void >::type {
+void mapV(F f, const C& c) { //-> typename std::enable_if< std::is_same<void,decltype(f(head(c)))>::value, void >::type {
   std::for_each(extent(c), f);
 }
 
@@ -395,7 +393,7 @@ inline std::vector<C> groupBy(F f, const C& c) {
 // group
 
 template <typename C>
-inline C group(const C& c) {
+inline std::vector<C> group(const C& c) {
   return groupBy(std::equal_to< value_type_of(C) >(), c);
 }
 
@@ -524,6 +522,18 @@ inline bool lookup(const K& k, const C& c) {
 }
 
 
+///////////////////////////////////////////////////////////////////////////
+// Indexing lists
+///////////////////////////////////////////////////////////////////////////
+
+///////////////////////////////////////////////////////////////////////////
+// index
+
+template<typename Index, typename C>
+inline fp_enable_if_container(C,value_type_of(C)) index(Index i, const C& c) {
+  return c[i];
+}
+
 
 ///////////////////////////////////////////////////////////////////////////
 // Generating lists
@@ -595,6 +605,57 @@ template <typename T, typename C>
 inline C cons(const T& t, const C& c) {
   return concat( append(C(), t), c );
 }
+inline std::string cons(char t, std::string s) {
+  return s.insert(0, 1, t);
+}
+inline std::string cons(std::string s0, const std::string& s1) {
+  return s0.append(s1);
+}
+struct consF {
+  template<typename T, typename C>
+  inline auto operator()(const T& t, const C& c) FP_RETURNS( cons(t,c) );
+};
+
+///////////////////////////////////////////////////////////////////////////
+// Pair/Tuple
+
+using std::pair;
+using std::make_pair;
+
+template<typename T, typename U>
+inline nonconstref_type_of(T) fst(const pair<T,U>& p) {
+  return p.first;
+}
+template <typename T, typename U>
+inline nonconstref_type_of(U) snd(const pair<T,U>& p) {
+  return p.second;
+}
+template<typename T, typename U>
+inline pair<U,T> swap(const pair<T,U>& p) {
+  return make_pair(p.first,p.second);
+}
+template<typename F0, typename F1, typename T, typename U>
+inline auto mapPair(F0 f0, F1 f1, const std::pair<T,U>& p) FP_RETURNS( make_pair( f0(p.first), f1(p.second) ) );
+
+template<typename F, typename T, typename U>
+inline auto mapFst(F f, const std::pair<T,U>& p) FP_RETURNS( make_pair( f(p.first), p.second ) );
+FP_DEFINE_CURRIED(mapFst, mapFst_);
+
+template<typename F0, typename F1, typename T>
+inline auto mapArrow(F0 f0, F1 f1, const T& T) FP_RETURNS( make_pair( f0(t), f1(t) ) );
+
+// TODO: Factor this out into some nice common code for re-use
+template<typename F0, typename F1>
+struct mapArrowF {
+  mapArrowF(F0 f0_, F1 f1_) : f0(f0_), f1(f1_) { }
+  template<typename T> 
+  inline auto operator()(const T& t) FP_RETURNS( make_pair( f0(t), f1(t) ) );
+
+  F0 f0;
+  F1 f1;
+};
+template<typename F0, typename F1>
+mapArrowF<F0,F1> mapArrowF_(F0 f0, F1 f1) { return mapArrowF<F0,F1>(f0,f1); }
 
 } /* namespace fp */
 
