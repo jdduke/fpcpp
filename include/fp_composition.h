@@ -114,6 +114,16 @@ namespace fp_operators {
     return f;
   }
 #endif
+
+#if FP_SHIFT_OPERATOR
+  template<typename F, typename G>
+  inline auto operator <<(F f, G g) -> typename std::enable_if<fp::is_functor<F>::value&&fp::is_functor<G>::value, decltype( fp::compose(f,g) )>::type {
+    return fp::compose(f,g);
+  }
+  template<typename F, typename G>
+  inline auto operator >>(G g, F f) FP_RETURNS( f << g );
+#endif
+
 } /* namespace fp_operators */
 
 #endif /* _FP_COMPOSITION_H_ */

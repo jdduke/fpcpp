@@ -23,12 +23,21 @@ template <typename T>
 class is_container {
   typedef char true_type;
   struct false_type{ true_type _[2]; };
-  template <typename U>
-  static true_type has_iterator_checker(typename U::iterator *);
-  template <typename U>
-  static false_type has_iterator_checker(...);
+  template <typename C> static true_type has_iterator_checker(typename C::iterator *);
+  template <typename C> static false_type has_iterator_checker(...);
 public:
   static const size_t value = (sizeof(has_iterator_checker<T>(0)) == sizeof(true_type));
+};
+
+template <typename T>
+class is_functor {
+  typedef char true_type;
+  struct false_type{ true_type _[2]; };
+  template <typename F> static true_type  has_operator(decltype(&T::operator()));
+  template <typename F> static false_type has_operator(...);
+
+public:
+  static const size_t value = (sizeof(has_operator<T>(0)) == sizeof(true_type));
 };
 
 ///////////////////////////////////////////////////////////////////////////

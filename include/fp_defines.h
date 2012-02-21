@@ -27,15 +27,18 @@
 #define FP_OPERATORS 1
 #endif
 #if FP_OPERATORS
-#define FP_PLUS_OPERATOR 1
-#define FP_DOT_OPERATOR 1
+#define FP_PLUS_OPERATOR  1
+#define FP_DOT_OPERATOR   1
+#define FP_SHIFT_OPERATOR 1
 #else
-#define FP_PLUS_OPERATOR 0
-#define FP_DOT_OPERATOR 0
+#define FP_PLUS_OPERATOR  0
+#define FP_DOT_OPERATOR   0
+#define FP_SHIFT_OPERATOR 0
 #endif
 
 // Keywords
-#define let auto
+#define let  auto
+#define in_ return
 #define extent(c)  fp::begin((c)),  fp::end((c))
 #define rextent(c) fp::rbegin((c)), fp::rend((c))
 

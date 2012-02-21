@@ -12,12 +12,6 @@
 
 #include <fpcpp.h>
 
-bool hello() { 
-  std::cout << "Hello "; return true; 
-}
-void world(bool print) {
-  if(print) std::cout << " World " << std::endl; 
-}
 template <typename T> void print(const char* prefix, const T& result) {
   std::cout << prefix << result << std::endl;
 }
@@ -28,11 +22,20 @@ void test() {
   using namespace fp_operators;
 
   {
-    auto hello_world = make_function(world) + make_function(hello);
+    let hello = []() -> bool { 
+      std::cout << "Hello "; return true; 
+    };
+    let world = [](bool print) {
+      if(print) std::cout << " World " << std::endl; 
+    };
+    
+    auto hello_world  = world << hello;
+    auto hello_world2 = hello >> world;
     hello_world();
+    hello_world2();
 
-    auto hello2 = []()     -> bool { return hello(); };
-    auto world2 = [](bool b)       { world(b);       };
+    auto hello2 = [=]()     -> bool { return hello(); };
+    auto world2 = [=](bool b)       { world(b);       };
     compose(world2, hello2)();
 
     (world2 + hello2)();
@@ -44,7 +47,7 @@ void test() {
     auto g = [](float x, float y, float z) -> float { return x*x + y*y + z*z; };
     auto f = [](float l2) -> float                  { return std::sqrt(l2); };
     auto fg  = compose(f, g);
-    auto fg2 = f+g;
+    auto fg2 = f<<g;
     auto fg3  = [](float l2) -> float                  { return std::sqrt(l2); }
               + [](float x, float y, float z) -> float { return x*x + y*y + z*z; };
     auto fg4  = compose([](float l2) -> float                  { return std::sqrt(l2); },
@@ -58,8 +61,8 @@ void test() {
                          [](float x, float y, float z) -> float { return x*x + y*y + z*z;   } );
     auto hfg2 = compose(h,compose(f,g));
     auto hfg3 = compose(h,f) + g;
-    auto hfg4 = hf+g;
-    auto hfg5 = h+f+g;
+    auto hfg4 = hf + g;
+    auto hfg5 = h + f + g;
     auto hfg6 = h <o> f <o> g;
     auto hfg7 = (compose(h,f)+g);
     auto fffg  = (f+f).with(f).with(g);

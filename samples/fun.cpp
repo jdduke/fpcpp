@@ -210,7 +210,7 @@ vector<string> huffman( std::string s ) {
   let huffmanTree = [&]( const Frequencies& fs ) -> HTree* {
     using namespace fp;
     htree.resize( length(fs) );
-    // TODO: implement
+    // inTODO: implement
     //return fp::snd( fp::head( fp::until() ))
     return &htree.front();
   };
