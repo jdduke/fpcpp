@@ -10,25 +10,50 @@
 #include <complex>
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include <deque>
 
-using std::string;
-using std::vector;
-using std::pair;
+#include "timer.h"
 
-typedef vector<int> Row;
+using fp::string;
+using fp::types;
+using fp::pair;
 
-typedef pair<string,string> StringPair;
-typedef vector<string>      StringList;
-typedef vector<StringPair>  StringPairList;
+typedef types<int>::list Row;
+typedef types<Row>::list Rows;
+
+typedef pair<string,string>      StringPair;
+typedef types<string>::list      StringList;
+typedef types<StringList>::list  StringLists;
+typedef types<StringPair>::list  StringPairList;
+
+#if defined(_DEBUG)
+#define ITER_MULT 5
+#else
+#define ITER_MULT 5
+#endif
+
+#define ENABLE_BENCHMARK 1
+#if ENABLE_BENCHMARK
+#define BENCHMARK(desc,func,iters) {   \
+    timed_run timed(desc);             \
+    for (size_t i = 0; i < iters; ++i) \
+       func;                           \
+  }
+
+#define run_impl(func,iters) BENCHMARK(#func ## "\t" ## #iters,func,iters)
+#define run(func,iters) run_impl(func,iters)
+#else
+#define run(func,iters) fp::print(#func); fp::print(func)
+#endif
 
 ///////////////////////////////////////////////////////////////////////////
 
-std::vector< Row > pascalsTriangle( size_t count ) {
+Rows pascalsTriangle( size_t count ) {
 
   using namespace fp;
 
   let nextRow = []( const Row& r ) {
-    return fp::zipWith( std::plus<int>(), fp::cons( 0, r ), fp::append( r, 0 ) );
+    return fp::zipWith( std::plus<int>(), fp::cons( (int)0, r ), fp::append( r, 0 ) );
   };
 
   let pascals = iterate( nextRow, Row(1,1) );
@@ -39,7 +64,7 @@ std::vector< Row > pascalsTriangle( size_t count ) {
 
 ///////////////////////////////////////////////////////////////////////////
 
-std::vector< StringList > anagrams( const fp::FilePath& filePath ) {
+StringLists anagrams( const fp::FilePath& filePath ) {
 
   using namespace fp;
 
@@ -94,31 +119,31 @@ T nthRoot( int n, T x ) {
 ///////////////////////////////////////////////////////////////////////////
 
 template< typename T >
-std::pair< std::vector<T>, std::vector<T> > split( const std::vector<T>& s ) {
+typename types< typename types<T>::list, typename types<T>::list >::pair fftSplit( const typename types<T>::list& s ) {
   using namespace fp;
-  typedef std::vector<T> FFTVec;
+  typedef typename types<T>::list FFTVec;
 
   if      ( length(s) == 0 ) return make_pair( FFTVec(), FFTVec() );
-  else if ( length(s) == 1 ) return make_pair( FFTVec(1, s[0]), FFTVec() );
+  else if ( length(s) == 1 ) return make_pair( FFTVec(1, head(s)), FFTVec() );
   else {
-    let xt_yt = split( drop(2, s) );
-    return make_pair( cons( s[0], fst(xt_yt)), cons( s[1], snd(xt_yt) ) );
+    let xt_yt = fftSplit<T>( drop(2, s) );
+    return make_pair( cons( index(0,s), fst(xt_yt)), cons( index(1,s), snd(xt_yt) ) );
   }
 }
 
 template<typename T> 
-std::vector< std::complex<T> > fft( std::vector<T> v ) {
+typename types< std::complex<T> >::list fft( const typename types<T>::list& v ) {
   using namespace fp;
   typedef std::complex<T> CT;
-  typedef std::vector< CT > FFTVec;
+  typedef types< CT >::list FFTVec;
 
   if      ( length(v) == 0 ) return FFTVec();
-  else if ( length(v) == 1 ) return FFTVec( 1, v[0] );
+  else if ( length(v) == 1 ) return FFTVec( 1, head(v) );
   else {
     let n        = length( v );
-    let evenOdds = split( v );
-    let ys       = fft( fst( evenOdds) );
-    let zs       = fft( snd( evenOdds) );
+    let evenOdds = fftSplit<T>( v );
+    let ys       = fft<T>( fst( evenOdds) );
+    let zs       = fft<T>( snd( evenOdds) );
     let cx = [=](CT z, T k) { return z*std::polar((T)1, (T)(-2. * M_PI * (double)k/n)); };
     let ts = zipWith( cx, zs, increasing_n( length(zs), (T)0 ) );
 
@@ -150,9 +175,9 @@ struct HTree;
 typedef pair<char,string> Code;
 typedef pair<size_t,char> Freq;
 typedef pair<size_t,HTree> FreqTree;
-typedef vector< Code > Encoding;
-typedef vector< Freq > Frequencies;
-typedef vector< FreqTree > FreqTrees;
+typedef types< Code >::list     Encoding;
+typedef types< Freq >::list     Frequencies;
+typedef types< FreqTree >::list FreqTrees;
 
 struct HTree { 
   HTree() : left(nullptr), right(nullptr), value(0) { }
@@ -183,13 +208,13 @@ inline Encoding serialize( const HTree* t ) {
   }
 }
 
-vector<string> huffman( std::string s ) {
+StringList huffman( string s ) {
 
   using namespace fp;
 
-  std::vector<HTree> htree;
+  types<HTree>::list htree;
 
-  let freq = []( const vector<char>& s ) -> Frequencies {
+  let freq = []( const types<char>::list& s ) -> Frequencies {
     return fp::map( fp::mapArrowF_( fp::lengthF(), fp::headF() ), fp::group( fp::sort(s) ) );
   };
   let hstep = []( const FreqTrees& fts ) -> FreqTrees {
@@ -214,7 +239,7 @@ vector<string> huffman( std::string s ) {
     //return fp::snd( fp::head( fp::until() ))
     return &htree.front();
   };
-  let vecs = make_vector(s);
+  let vecs = list(s);
   return map( []( const pair<char,std::string>& p ) {
     return fp::show('\'') + fp::fst(p) + "\' : " + fp::fst(p);
   }, serialize( huffmanTree( freq( vecs ) ) ) );
@@ -231,32 +256,27 @@ int main(int argc, char **argv) {
 
   ///////////////////////////////////////////////////////////////////////////
 
-  print( "PascalsTriangle( 6 )" );
-  print( pascalsTriangle( 6 ) );
-  //map( print<Row>, pascalsTriangle( 6 ) );p
+  run( pascalsTriangle( 6 ), 10000 * ITER_MULT );
 
   ///////////////////////////////////////////////////////////////////////////
 
-  print( "\nNthRoot( 5, 34 )" );
-  print( nthRoot( 5, 34. ) );
-  print( "\nNthRoot( 3, 27 )" );
-  print( nthRoot( 3, 27. ) );
+  run( nthRoot( 5, 34. ),    100000 * ITER_MULT );
+  run( nthRoot( 6, 25. ),    100000 * ITER_MULT );
+  run( nthRoot( 7, 100. ),   100000 * ITER_MULT );
+
+  ///////////////////////////////////////////////////////////////////////////
+  static const char* unixdict = "./../../../samples/unixdict.txt";
+  run( anagrams( unixdict ), 5 * ITER_MULT );
 
   ///////////////////////////////////////////////////////////////////////////
 
-  print( "\nAnagrams( UnixDict )" );
-  print( anagrams( "./../../../samples/unixdict.txt" ) );
-  //map( print<StringList>, anagrams( "./../../../samples/unixdict.txt" ) );
+  std::array<float, 8> fftValues = {1, 1, 1, 1, 0, 0, 0, 0};
+  let fftIn = fp::list( fftValues );
+  run( fft<float>( fftIn /*=1,1,1,1,0,0,0,0*/ ), 5000 * ITER_MULT );
 
   ///////////////////////////////////////////////////////////////////////////
 
-  std::array<float, 8> fftIn = {1, 1, 1, 1, 0, 0, 0, 0};
-  print( show("\nFFT( ") + show( fftIn ) + show(" )") );
-  print( fft( make_vector( fftIn ) ) );
-
-  ///////////////////////////////////////////////////////////////////////////
-
-  print( show("\nhuffman( \"this is an example for huffman encoding\" )") );
+  print( show("\n\nHuffman( \"this is an example for huffman encoding\" )") );
   print( huffman( "this is an example for huffman encoding" ) );
 
   print( "" );

@@ -12,6 +12,9 @@
 #include <array>
 #include <iterator>
 #include <tuple>
+
+#include <deque>
+#include <list>
 #include <vector>
 
 namespace fp {
@@ -57,7 +60,7 @@ template <typename T >
 struct traits_helper<T,true> {
   typedef decltype( begin( std::declval<T>() ) )       iterator;
   typedef decltype( begin( std::declval<const T>() ) ) const_iterator;
-  typedef typename remove_const_ref< decltype( head( std::declval<T>() ) ) >::type value_type;
+  typedef typename remove_const_ref< decltype( *begin( std::declval<T>() ) ) >::type value_type;
 };
 
 template <typename T>
@@ -90,6 +93,15 @@ struct triple_traits {
   typedef typename traits<U>::value_type u;
   typedef typename traits<V>::value_type v;
   typedef std::tuple<t,u,v> type;
+};
+
+///////////////////////////////////////////////////////////////////////////
+// types
+
+template<typename T, typename U = T>
+struct types {
+  typedef fp_list<T>      list;
+  typedef std::pair<T,U>  pair;
 };
 
 ///////////////////////////////////////////////////////////////////////////

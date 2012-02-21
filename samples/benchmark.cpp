@@ -13,7 +13,6 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include <vector>
 
 #include <fpcpp.h>
 
@@ -50,13 +49,6 @@ struct gen_rand {
     return rand() * factor;
   }
   float factor;
-};
-
-struct timed_run {
-  timed_run( const char* desc ) : desc(desc) { }
-  ~timed_run( ) { std::cout << desc << timer.elapsed() << " (s)" << std::endl; }
-  sample_timer timer;
-  const char* desc;
 };
 
 ///////////////////////////////////////////////////////////////////////////
@@ -117,7 +109,7 @@ void test() {
   using namespace fp;
   using namespace fp_operators;
   gen_rand rand_gen(RAND_VEC_RANGE);
-  std::vector<float> rand_vec(RAND_VEC_SIZE);
+  fp::types<float>::list rand_vec(RAND_VEC_SIZE);
   std::generate_n(std::begin(rand_vec), RAND_VEC_SIZE, rand_gen);
 
   {
@@ -128,8 +120,8 @@ void test() {
       return (x * y) + (z * w);
     };
 
-    std::vector<float> result(rand_vec.size());
-    std::vector<float> test_result(rand_vec.size());
+    fp::types<float>::list result(rand_vec.size());
+    fp::types<float>::list test_result(rand_vec.size());
 
     // warmup
     benchmark(rand_vec, result,      test_lambda1, "Warmup - ");
@@ -151,8 +143,8 @@ void test() {
       return (x + y + z) * (2.0f * w);
     };
 
-    std::vector<float> result(rand_vec.size());
-    std::vector<float> test_result(rand_vec.size());
+    fp::types<float>::list result(rand_vec.size());
+    fp::types<float>::list test_result(rand_vec.size());
 
     benchmark(rand_vec, result,      mult_add_double, "COMPOSED: (x + y + z) * (2.0f * w) - ");
     benchmark(rand_vec, result,      test_lambda2,    "LAMBDA:   (x + y + z) * (2.0f * w) - ");
@@ -173,8 +165,8 @@ void test() {
                               + [](float x) { return x*x; }
                               + [&]()       { return rand_gen() * rand_gen(); };
 
-    std::vector<float> result(rand_vec.size());
-    std::vector<float> test_result(rand_vec.size());
+    fp::types<float>::list result(rand_vec.size());
+    fp::types<float>::list test_result(rand_vec.size());
 
     benchmark2(sqrt_mult_rand_rand,  "COMPOSED:  log(sqrt(rand()*rand())) - ", VEC_ITERS * 25);
     benchmark2(sqrt_mult_rand_rand2, "COMPOSED2: log(sqrt(rand()*rand())) - ", VEC_ITERS * 25);
@@ -195,8 +187,8 @@ void test() {
       return ((((((((((((((((x + 2.f) - 3.f) * 4.f) / 5.f) + 2.f) - 3.f) * 4.f) / 5.f) + 2.f) - 3.f) * 4.f) / 5.f) + 2.f) - 3.f) * 4.f) / 5.f);
     };
 
-    std::vector<float> result(rand_vec.size());
-    std::vector<float> test_result(rand_vec.size());
+    fp::types<float>::list result(rand_vec.size());
+    fp::types<float>::list test_result(rand_vec.size());
 
     benchmark3(rand_vec, result,      chain4,        "COMPOSED: (f(f(f(f(x)))) with f(x) = ((((x+2)-2)*2)/2) - ");
     benchmark3(rand_vec, result,      test_lambda4,  "LAMBDA:   (f(f(f(f(x)))) with f(x) = ((((x+2)-2)*2)/2) - ");

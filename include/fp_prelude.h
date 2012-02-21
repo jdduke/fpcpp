@@ -33,7 +33,7 @@ struct rand_range_ {
 ///////////////////////////////////////////////////////////////////////////
 // rand_n
 template<typename T>
-inline std::vector<T> rand_n(size_t n, T t0 = std::numeric_limits<T>::min(), T t1 = std::numeric_limits<T>::max()) {
+inline typename types<T>::list rand_n(size_t n, T t0 = std::numeric_limits<T>::min(), T t1 = std::numeric_limits<T>::max()) {
   return generate_n(n, rand_range_<T>(t0,t1));
 }
 

@@ -22,6 +22,14 @@
 #define FP_COMPOUND 0
 #endif
 
+#define USE_DEQUE_FOR_LISTS 0
+#if USE_DEQUE_FOR_LISTS
+#define fp_list    std::deque
+#else
+#define fp_list    std::vector
+//#define fp_list   std::list
+#endif
+
 // Composition operator defines
 #if !defined(FP_OPERATORS)
 #define FP_OPERATORS 1

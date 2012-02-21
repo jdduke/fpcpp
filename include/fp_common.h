@@ -13,9 +13,11 @@
 #include <array>
 #include <iterator>
 #include <tuple>
-#include <vector>
+#include <string>
 
 namespace fp {
+
+using std::string;
 
 ///////////////////////////////////////////////////////////////////////////
 // List helpers
@@ -59,7 +61,7 @@ inline C tail(const C& c) {
 
 template <typename C>
 inline C last(C&& c) {
-  return 
+  return drop(l, c);
 }
 template <typename C>
 inline C last(const C& c) {
@@ -103,23 +105,20 @@ inline size_t null(T (&A)[S]) {
 
 ///////////////////////////////////////////////////////////////////////////
 
-#if 0
 template <typename T, size_t S>
-inline std::vector<T> make_vector(T (&A)[S]) {
-  return std::vector<T>(A, A+S);
-}
-#else
-template <typename T, size_t S>
-inline std::vector<T> make_vector(const std::array<T,S>& a) {
-  std::vector<T> result(extent(a));
+inline typename types<T>::list list(const std::array<T,S>& a) {
+  typename types<T>::list result(extent(a));
   return result;
 }
-#endif
-inline std::vector<char> make_vector(const std::string& s) {
-  return std::vector<char>(extent(s));
+template <typename T>
+inline typename types<T>::list list() {
+  return typename types<T>::list();
+}
+inline types<char>::list list(const string& s) {
+  return types<char>::list(extent(s));
 }
 
-inline const char* cstr( const std::string& s ) { return s.c_str(); }
+inline const char* cstr( const string& s ) { return s.c_str(); }
 
 template<typename T>
 float fromIntegral(T t) { return (float)t; }

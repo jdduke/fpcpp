@@ -16,7 +16,6 @@
 using std::string;
 using std::regex;
 using std::regex_match;
-using std::vector;
 
 regex extensionRegex(const string& extension) {
   string result("^.*.\\.(");
@@ -92,7 +91,7 @@ std::array<string, NUM_PLAYLIST_TYPES> PlaylistTypeExtensions = {
   "wpl"
 };
 
-typedef vector< string > Playlist;
+typedef fp::types< string >::list Playlist;
 
 ///////////////////////////////////////////////////////////////////////////
 

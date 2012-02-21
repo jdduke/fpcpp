@@ -13,8 +13,8 @@
 
 #include <algorithm>
 #include <functional>
+#include <list>
 #include <numeric>
-#include <map>
 #include <sstream>
 #include <fstream>
 #include <tuple>
@@ -35,11 +35,12 @@ inline R& __map__(F f, const C& c, R& r) {
   return r;
 }
 
-// This code is abominable... 
+// This code is abominable...
 template <typename F, typename C>
 inline auto
-map(F f, const C& c) -> typename std::enable_if< !std::is_same<void,decltype(f(head(c)))>::value, std::vector< nonconstref_type_of(decltype(f(head(c))))> >::type {
-  typedef std::vector< nonconstref_type_of(decltype(f(head(c)))) > result_type;
+map(F f, const C& c) -> typename std::enable_if< !std::is_same<void,decltype(f(head(c)))>::value, 
+                                                 typename types< nonconstref_type_of(decltype(f(head(c)))) >::list >::type {
+  typedef typename types< nonconstref_type_of(decltype(f(head(c)))) >::list result_type;
   result_type result;
   return __map__(f, c, result);
 }
@@ -50,15 +51,16 @@ void mapV(F f, const C& c) { //-> typename std::enable_if< std::is_same<void,dec
 }
 
 template <typename F>
-inline std::string map(F f, const std::string& s) {
-  std::vector<char> charVec;
-   __map__(f, std::vector<char>(extent(s)), charVec);
-  return show(charVec);
+inline string map(F f, const string& s) {
+  typedef typename types<char>::list char_list;
+  char_list charList;
+   __map__(f, char_list(extent(s)), charList);
+  return show(charList);
 }
 
 template <typename F>
-inline std::string map(F f, const char* s) {
-  return map(f, std::string(s));
+inline string map(F f, const char* s) {
+  return map(f, string(s));
 }
 FP_DEFINE_CURRIED(map, map_);
 
@@ -203,9 +205,7 @@ inline std::function< T(void) > iterate(T t) {
 ///////////////////////////////////////////////////////////////////////////
 // replicate
 template <typename T>
-inline std::vector<T> replicate(size_t n, T t) {
-  return std::vector<T>(n, t);
-}
+inline auto replicate(size_t n, T t) FP_RETURNS( typename types<T>::list(n, t) );
 
 ///////////////////////////////////////////////////////////////////////////
 // cycle
@@ -243,9 +243,9 @@ inline R& __zipWith3__(F f, const T& t, const U& u, const V& v, R& r) {
 }
 
 template <typename F, typename T, typename U>
-inline auto zipWith(F f, const T& t, const U& u) -> std::vector<result_type_of(F)> {
+inline auto zipWith(F f, const T& t, const U& u) -> typename types<result_type_of(F)>::list {
   typedef result_type_of(F) result_type;
-  std::vector<result_type> result;
+  typename types<result_type>::list result;
   return __zipWith__(f, t, u, result);
 }
 FP_DEFINE_CURRIED_T(zipWith, zipWith_, _zipWith_)
@@ -261,20 +261,20 @@ FP_DEFINE_CURRIED_T(zipWith3, zipWith3_, _zipWith3_)
 // zip
 
 template<typename C0, typename C1>
-inline std::vector< typename tuple_traits<C0,C1>::type > zip(const C0& c1, const C1& c2) {
+inline typename types< typename tuple_traits<C0,C1>::type >::list zip(const C0& c1, const C1& c2) {
   typedef value_type_of(C0) T;
   typedef value_type_of(C1) U;
-  typedef std::vector< std::pair<T,U> > result_type;
+  typedef typename types< std::pair<T,U> >::list result_type;
   result_type result;
   return __zipWith__([](const T& t, const U& u) { return std::make_pair(t,u); }, c1, c2, result);
 }
 
 template<typename C0, typename C1, typename C2>
-inline std::vector< typename triple_traits<C0,C1,C2>::type > zip3(const C0& c1, const C1& c2, const C2& c3) {
+inline typename types< typename triple_traits<C0,C1,C2>::type >::list zip3(const C0& c1, const C1& c2, const C2& c3) {
   typedef value_type_of(C0) T;
   typedef value_type_of(C1) U;
   typedef value_type_of(C2) V;
-  typedef std::vector< std::tuple<T,U,V> > result_type;
+  typedef typename types< std::tuple<T,U,V> >::list result_type;
   result_type result;
   return __zipWith__([](const T& t, const U& u, const V& v) { return std::make_tuple(t,u,v); }, c1, c2, c3, result);
 }
@@ -289,9 +289,9 @@ inline R& __unzip__(F f, const T& t, const U& u, R& r) {
 }
 
 template<typename T, typename U>
-inline std::pair< std::vector<T>, std::vector<U> > unzip(const std::vector< std::pair<T,U> >& c) {
-  std::vector<T> t;
-  std::vector<U> u;
+inline std::pair< typename types<T>::list, typename types<U>::list > unzip(const typename types< std::pair<T,U> >::list& c) {
+  typename types<T>::list t;
+  typename types<U>::list u;
   for_each(extent(c), [&](const std::pair<T,U>& p) {
     t.push_back( fst(p) );
     u.push_back( snd(p) );
@@ -300,10 +300,10 @@ inline std::pair< std::vector<T>, std::vector<U> > unzip(const std::vector< std:
 }
 
 template<typename T, typename U, typename V>
-inline std::tuple< std::vector<T>, std::vector<U>, std::vector<V> > unzip3(const std::vector< std::tuple<T,U,V> >& c) {
-  std::vector<T> t;
-  std::vector<U> u;
-  std::vector<V> v;
+inline std::tuple< typename types<T>::list, typename types<U>::list, typename types<V>::list > unzip3(const typename types< std::tuple<T,U,V> >::list& c) {
+  typename types<T>::list t;
+  typename types<U>::list u;
+  typename types<V>::list v;
   for_each(extent(c), [&](const std::tuple<T,U,V>& val) {
     t.push_back( std::get<0>(val) );
     u.push_back( std::get<1>(val) );
@@ -373,12 +373,20 @@ inline C sort(C c) {
   return c;
 }
 
+#if !USE_DEQUE_FOR_LISTS
+template <typename T>
+inline typename std::enable_if<!is_container<T>::value,std::list<T> >::type sort(std::list<T> l) {
+  l.sort();
+  return l;
+}
+#endif
+
 ///////////////////////////////////////////////////////////////////////////
 // groupBy
 
 template <typename F, typename C>
-inline std::vector<C> groupBy(F f, const C& c) {
-  std::vector<C> result;
+inline typename types<C>::list groupBy(F f, const C& c) {
+  typename types<C>::list result;
   let it = begin(c);
   while (it != end(c)) {
     result.push_back( C() );
@@ -393,7 +401,7 @@ inline std::vector<C> groupBy(F f, const C& c) {
 // group
 
 template <typename C>
-inline std::vector<C> group(const C& c) {
+inline typename types<C>::list group(const C& c) {
   return groupBy(std::equal_to< value_type_of(C) >(), c);
 }
 
@@ -414,9 +422,9 @@ inline C takeWhile(F f, const C& c) {
 FP_DEFINE_CURRIED(takeWhile, takeWhile_);
 
 template <typename F, typename Source>
-inline auto takeWhileF(F f, Source source) -> std::vector< decltype(source()) > {
+inline auto takeWhileF(F f, Source source) -> typename types< decltype(source()) >::list {
   typedef decltype(source()) t_type;
-  std::vector<t_type> result;
+  typename types<t_type>::list result;
   auto   back_iter = back(result);
   for (t_type value = source(); f(value); value=source())
     back_iter = value;
@@ -428,17 +436,17 @@ FP_DEFINE_CURRIED(takeWhileF, takeWhileF_);
 // take
 template <typename C>
 inline C take(size_t n, const C& c) {
-  let takeN = [=](const value_type_of(C) &) mutable { return n-- > 0; };
-  return takeWhileF(takeN, c);
+  let takeN = [=](...) mutable { return n-- > 0; };
+  return takeWhile(takeN, c);
 }
 template <typename T>
-inline std::vector<T> take(size_t n, const std::vector<T>& v) {
-  return n < length(v) ? std::vector<T>(begin(v), begin(v) + n) : v;
+inline typename types<T>::list take(size_t n, const typename types<T>::list& v) {
+  return n < length(v) ? typename types<T>::list(begin(v), begin(v) + n) : v;
 }
 
 template <typename F>
-inline auto takeF(size_t n, F f) -> std::vector< decltype(f()) > {
-  let takeN = [=]( decltype(f()) ) mutable { return n-- > 0; };
+inline auto takeF(size_t n, F f) -> typename types< decltype(f()) >::list {
+  let takeN = [=](...) mutable { return n-- > 0; };
   return takeWhileF(takeN, f);
 }
 
@@ -534,6 +542,12 @@ inline fp_enable_if_container(C,value_type_of(C)) index(Index i, const C& c) {
   return c[i];
 }
 
+template<typename Index, typename T>
+inline T index(Index i, const std::list<T>& l) {
+  let it = begin(l);
+  std::advance(it, i);
+  return it != end(l) ? *it : T();
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // Generating lists
@@ -542,8 +556,8 @@ inline fp_enable_if_container(C,value_type_of(C)) index(Index i, const C& c) {
 ///////////////////////////////////////////////////////////////////////////
 // generate_n
 template <typename F>
-inline auto generate_n(size_t n, F f) -> std::vector< decltype(f()) > {
-  std::vector< decltype(f()) > t(n);
+inline auto generate_n(size_t n, F f) -> typename types< decltype(f()) >::list {
+  typename types< decltype(f()) >::list t(n);
   std::generate_n(begin(t), n, f);
   return t;
 }
@@ -551,7 +565,7 @@ inline auto generate_n(size_t n, F f) -> std::vector< decltype(f()) > {
 ///////////////////////////////////////////////////////////////////////////
 // increasing_n
 template <typename T>
-inline std::vector<T> increasing_n(size_t n, T t0 = (T)0) {
+inline typename types<T>::list increasing_n(size_t n, T t0 = (T)0) {
   return generate_n(n, [&]() -> T {
     T r = t0; t0 = succ(t0); return r;
   });
@@ -560,7 +574,7 @@ inline std::vector<T> increasing_n(size_t n, T t0 = (T)0) {
 ///////////////////////////////////////////////////////////////////////////
 // decreasing_n
 template <typename T>
-inline std::vector<T> decreasing_n(size_t n, T t0 = (T)0) {
+inline typename types<T>::list decreasing_n(size_t n, T t0 = (T)0) {
   return generate_n(n, [&]() -> T {
     T r = t0; t0 = pred(t0); return r;
   });
@@ -584,19 +598,18 @@ concat(const T& t0, const T& t1) {
   return result;
 }
 template <typename T>
-inline fp_enable_if_not_container(T,std::vector<T>)
+inline fp_enable_if_not_container(T,typename types<T>::list)
 concat(const T& t0, const T& t1) {
-  std::vector<T> result(1, t0);
+  typename types<T>::list result(1, t0);
   return result.append(t1);
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // append
 template <typename C, typename T>
-inline C append(const C& c, const T& t) {
-  C result(c);
-  result.insert(end(result), t);
-  return result;
+inline C append(C c, const T& t) {
+  c.insert(end(c), t);
+  return c;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -605,10 +618,15 @@ template <typename T, typename C>
 inline C cons(const T& t, const C& c) {
   return concat( append(C(), t), c );
 }
-inline std::string cons(char t, std::string s) {
+template <typename T>
+inline std::deque<T> cons(const T& t, std::deque<T> c) {
+  c.push_front(t);
+  return c;
+}
+inline string cons(char t, string s) {
   return s.insert(0, 1, t);
 }
-inline std::string cons(std::string s0, const std::string& s1) {
+inline string cons(string s0, const string& s1) {
   return s0.append(s1);
 }
 struct consF {
@@ -648,7 +666,7 @@ inline auto mapArrow(F0 f0, F1 f1, const T& T) FP_RETURNS( make_pair( f0(t), f1(
 template<typename F0, typename F1>
 struct mapArrowF {
   mapArrowF(F0 f0_, F1 f1_) : f0(f0_), f1(f1_) { }
-  template<typename T> 
+  template<typename T>
   inline auto operator()(const T& t) FP_RETURNS( make_pair( f0(t), f1(t) ) );
 
   F0 f0;

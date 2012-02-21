@@ -34,10 +34,12 @@ enum {
 
 using fp::fst;
 using fp::snd;
-typedef std::pair<float,float> P;
-typedef std::pair<float,float> D;
-typedef std::pair< P, D >      Boid;
-typedef std::vector<Boid>      Boids;
+using fp::index;
+using fp::types;
+typedef types<float,float>::pair P;
+typedef types<float,float>::pair D;
+typedef types<P, D>::pair        Boid;
+typedef types<Boid>::list        Boids;
 
 P pos(const Boid& b) { return fst(b); }
 D dir(const Boid& b) { return snd(b); }
@@ -177,9 +179,9 @@ int main(int argc, char **argv) {
 
     Grid grid;
     for (size_t i = 0; i < fp::length(boids); ++i) {
-      let x = (int)fst( pos(boids[i]) ) % X;
-      let y = (int)snd( pos(boids[i]) ) % Y;
-      grid[y][x] = grid[y][x] + dir( boids[i] );
+      let x = (int)fst( pos(index(i,boids)) ) % X;
+      let y = (int)snd( pos(index(i,boids)) ) % Y;
+      grid[y][x] = grid[y][x] + dir( index(i,boids) );
     }
     let showRow  = [=](const Row& r) -> std::string { return fp::show(fp::map( showCell, r) ); };
     std::cout << std::endl << fp::foldl1( [](const std::string& a, const std::string& b) {

@@ -45,6 +45,9 @@
     template<typename F, typename T, typename C>                  \
     auto operator()(F f, T t, const C& c) FP_RETURNS( a(f,t,c) ); \
   };
+
+#if 1
+
 #define FP_DEFINE_CURRIED_HELPER(a,b)   \
   template <typename F>                 \
   inline auto b(F f) FP_RETURNS(a);
@@ -54,11 +57,53 @@
 
 #define FP_CURRIED(func0,func1)                                                                                             \
   fp::curry(func0<decltype(func1),                                                                                          \
-  std::vector<typename remove_const_ref<typename fp::function_traits< decltype(func1) >::t0_type>::type> >, \
+  /*typename fp::types<typename remove_const_ref<typename fp::function_traits< decltype(func1) >::t0_type>::type> >::list, */   \
+  typename std::deque<typename remove_const_ref<typename fp::function_traits< decltype(func1) >::t0_type>::type> >,   \
   func1)
 #define FP_CURRIED2(func0,func2,value)                                                                                             \
-  fp::curry2(func0<decltype(func2), decltype(value), std::vector<typename remove_const_ref<typename fp::function_traits< decltype(func1) >::t0_type>::type> >, \
+  fp::curry2(func0<decltype(func2), decltype(value), std::deque<typename remove_const_ref<typename fp::function_traits< decltype(func1) >::t0_type>::type> >, \
   func2, value)
+
+#else
+
+template <typename F>
+inline FuncObj<F> makeFuncObj(F f) { return FuncObj<F>(f); }
+
+#define FP_DEFINE_FUNCTION_OBJECT_CURRIED_HELPER(funcName, funcObjName1) \
+template <typename F>                                      \
+struct funcObjName1 {                                      \
+  funcObjName1(F f_) : f(f_) { }                           \
+  template<typename C>                                     \
+  inline auto operator()(const C& c) FP_RETURNS( funcName(f, c) );
+private:                                                   \
+  F f;                                                     \
+};
+
+#define FP_DEFINE_FUNCTION_OBJECT_CURRIED(func0,func1) \
+  FP_DEFINE_FUNCTION_OBJECT_CURRIED_HELPER()
+
+#define FP_CURRIED(func0,func1) \
+  return makeFuncObj(func0,func1)
+  
+  /*
+  template<typename T, typename T1>                        \
+  inline returnType operator()(const T& t, const T1& t1) { \
+  return funcName(f,t,t1);                               \
+  }                                                        \
+  /*\
+  template<typename F, typename T>                           \
+  struct funcObjName2 : funcObjName1<F> {                    \
+    funcObjName2(F f_) : funcObjName1(f_) { }                \
+    inline returnType operator()(const T& t) {               \
+      return funcObjName1::operator()(t);                    \
+    }                                                        \
+    template <typename T1>                                   \
+    inline returnType operator()(const T& t, const T1& t1) { \
+      return funcObjName1::operator()(t,t1);                 \
+    }                                                        \
+};*/
+
+#endif
 
 #define FP_DEFINE_CURRIED(funcName, funcName2)            \
   FP_DEFINE_FUNCTION_OBJECT( funcName, funcName ## Func ) \

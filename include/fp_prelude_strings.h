@@ -22,7 +22,7 @@ namespace fp {
 ///////////////////////////////////////////////////////////////////////////
 
 template<typename T>
-inline std::vector<T>& split_helper(const T& s, char delim, std::vector<T>& elems) {
+inline typename types<T>::list& split_helper(const T& s, char delim, typename types<T>::list& elems) {
   std::stringstream ss(s);
   T item;
   while(std::getline(ss, item, delim)) {
@@ -32,13 +32,13 @@ inline std::vector<T>& split_helper(const T& s, char delim, std::vector<T>& elem
 }
 
 template<typename T>
-inline std::vector<T> split(const T& s, char delim) {
-  std::vector<T> elems;
+inline typename types<T>::list split(const T& s, char delim) {
+  typename types<T>::list elems;
   return split_helper(s, delim, elems);
 };
 
 template<typename C>
-std::string concat(const C& c, const char* infix = " ", const char* prefix = "", const char* suffix = "") {
+string concat(const C& c, const char* infix = " ", const char* prefix = "", const char* suffix = "") {
   if (length(c) == 0)
     return "";
   
@@ -63,12 +63,12 @@ inline bool istrue(bool b) { return b; }
 // lines
 
 template<typename T>
-inline std::vector<T> lines(const T& s) {
+inline typename types<T>::list lines(const T& s) {
   return split(s, '\n');
 }
-inline std::vector<std::string> lines(std::ifstream& ifs) {
-  std::vector<std::string> ifsLines;
-  std::string line;
+inline types<string>::list lines(std::ifstream& ifs) {
+  types<string>::list ifsLines;
+  string line;
   while (getline(ifs, line))
     ifsLines.push_back(line);
   return ifsLines;
@@ -85,7 +85,7 @@ auto unlines(const C& elems) -> value_type_of(C) {
 ///////////////////////////////////////////////////////////////////////////
 // words
 template<typename T>
-inline std::vector<T> words(const T& s) {
+inline typename types<T>::list words(const T& s) {
   return split(s, ' ');
 }
 
@@ -100,25 +100,25 @@ auto unwords(const T& elems) -> decltype(concat(elems, ' ')) {
 ///////////////////////////////////////////////////////////////////////////
 // show
 template<typename T>
-inline fp_enable_if_not_container(T,std::string) show(const T& t) {
+inline fp_enable_if_not_container(T,string) show(const T& t) {
   std::stringstream ss;
   ss << t;
   return ss.str();
 }
 
-inline std::string show(const std::vector<char>& c) {
-  return std::string(extent(c));
+inline string show(const types<char>::list& c) {
+  return string(extent(c));
 }
 
-inline std::string show(const std::string& s) {
+inline string show(const string& s) {
   return s;
 }
 
 template<typename C>
-inline fp_enable_if_container(C,std::string) show(const C& c) {
+inline fp_enable_if_container(C,string) show(const C& c) {
 
   typedef value_type_of(C) T;
-  const bool is_nonstring_container = is_container<T>::value && !std::is_same<std::string,T>::value;
+  const bool is_nonstring_container = is_container<T>::value && !std::is_same<string,T>::value;
   const char* infix  = is_nonstring_container ? ",\n" : ", ";
   const char* prefix = is_nonstring_container ? "["   : "[";
   const char* suffix = is_nonstring_container ? "]\n" : "]";
@@ -130,11 +130,11 @@ inline fp_enable_if_container(C,std::string) show(const C& c) {
 ///////////////////////////////////////////////////////////////////////////
 // print
 
-inline void putStr(const std::string& s) {
+inline void putStr(const string& s) {
   std::cout << s;
 }
 
-inline void putStrLen(const std::string& s) {
+inline void putStrLen(const string& s) {
   std::cout << s << std::endl;
 }
 

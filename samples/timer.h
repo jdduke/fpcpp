@@ -108,4 +108,11 @@ double sample_timer::elapsed() {
 
 #endif
 
+struct timed_run {
+  timed_run( const char* desc ) : desc(desc) { }
+  ~timed_run( ) { std::cout << desc << "\t\t" << timer.elapsed() << " (s)" << std::endl; }
+  sample_timer timer;
+  const char* desc;
+};
+
 #endif

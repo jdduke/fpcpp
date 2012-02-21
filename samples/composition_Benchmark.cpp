@@ -52,13 +52,6 @@ struct gen_rand {
   float factor;
 };
 
-struct timed_run {
-  timed_run( const char* desc ) : desc(desc) { }
-  ~timed_run( ) { std::cout << desc << timer.elapsed() << " (s)" << std::endl; }
-  sample_timer timer;
-  const char* desc;
-};
-
 ///////////////////////////////////////////////////////////////////////////
 
 float test_func1(float x, float y, float z, float w) {
