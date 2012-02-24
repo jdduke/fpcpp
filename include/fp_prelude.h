@@ -24,8 +24,8 @@ inline T randRange(T t0 = std::numeric_limits<T>::min(), T t1 = std::numeric_lim
   return (T)(t0 + static_cast<double>(rand())/((unsigned long long)RAND_MAX+1) * (t1 - t0));
 }
 template<typename T>
-struct rand_range_ {
-  rand_range_(T t0_ = std::numeric_limits<T>::min(), T t1_ = std::numeric_limits<T>::max()) : t0(t0_), t1(t1_) { }
+struct randRange_ {
+  randRange_(T t0_ = std::numeric_limits<T>::min(), T t1_ = std::numeric_limits<T>::max()) : t0(t0_), t1(t1_) { }
   T operator()() { return randRange<T>(t0,t1); }
   T t0, t1;
 };
@@ -34,7 +34,7 @@ struct rand_range_ {
 // randN
 template<typename T>
 inline typename types<T>::list randN(size_t n, T t0 = std::numeric_limits<T>::min(), T t1 = std::numeric_limits<T>::max()) {
-  return takeF(n, rand_range_<T>(t0,t1));
+  return takeF(n, randRange_<T>(t0,t1));
 }
 
 ///////////////////////////////////////////////////////////////////////////

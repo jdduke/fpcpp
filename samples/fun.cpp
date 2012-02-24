@@ -11,8 +11,9 @@
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <deque>
+#include <set>
 
-#include "timer.h"
+#include "benchmark_common.h"
 
 using fp::string;
 using fp::types;
@@ -26,33 +27,12 @@ typedef types<string>::list      StringList;
 typedef types<StringList>::list  StringLists;
 typedef types<StringPair>::list  StringPairList;
 
-#if defined(_DEBUG)
-#define ITER_MULT 5
-#else
-#define ITER_MULT 5
-#endif
-
-#define ENABLE_BENCHMARK 1
-#if ENABLE_BENCHMARK
-#define BENCHMARK(desc,func,iters) {   \
-    timed_run timed(desc);             \
-    for (size_t i = 0; i < iters; ++i) \
-       func;                           \
-  }
-
-#define run_impl(func,iters) BENCHMARK(#func ## "\t" ## #iters,func,iters)
-#define run(func,iters) run_impl(func,iters)
-#else
-#define run(func,iters) fp::print(#func); fp::print(func)
-#endif
-
-///////////////////////////////////////////////////////////////////////////
 
 Rows pascalsTriangle( size_t count ) {
 
   using namespace fp;
 
-  let nextRow = []( const Row& r ) {
+  let nextRow = []( const Row& r ) -> Row {
     return fp::zipWith( std::plus<int>(), fp::cons( (int)0, r ), fp::append( r, 0 ) );
   };
 
@@ -145,7 +125,7 @@ typename types< std::complex<T> >::list fft( const typename types<T>::list& v ) 
     let ys       = fft<T>( fst( evenOdds) );
     let zs       = fft<T>( snd( evenOdds) );
     let cx = [=](CT z, T k) { return z*std::polar((T)1, (T)(-2. * M_PI * (double)k/n)); };
-    let ts = zipWith( cx, zs, increasing( length(zs), (T)0 ) );
+    let ts = zipWith( cx, zs, increasingN( length(zs), (T)0 ) );
 
     return concat( zipWith( std::plus<  CT >(), ys, ts ),
                    zipWith( std::minus< CT >(), ys, ts ) );

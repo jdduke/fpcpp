@@ -166,10 +166,10 @@ int main(int argc, char **argv) {
     return cardinalToChar[index];
   };
 
-  let boids = fp::zip(fp::zip(fp::takeF(BOIDS, fp::rand_range_<float>(0.f, (float)X)),
-                              fp::takeF(BOIDS, fp::rand_range_<float>(0.f, (float)Y))),
-                      fp::zip(fp::takeF(BOIDS, fp::rand_range_<float>(-1.f,1.f)),
-                              fp::takeF(BOIDS, fp::rand_range_<float>(-1.f,1.f))));
+  let boids = fp::zip(fp::zip(fp::randN(BOIDS, 0.f, (float)X),
+                              fp::randN(BOIDS, 0.f, (float)Y)),
+                      fp::zip(fp::randN(BOIDS, -1.f,1.f),
+                              fp::randN(BOIDS, -1.f,1.f)));
 
   typedef std::array< D,   X > Row;
   typedef std::array< Row, Y > Grid;

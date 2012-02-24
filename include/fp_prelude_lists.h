@@ -21,7 +21,6 @@
 
 namespace fp {
 
-
 ///////////////////////////////////////////////////////////////////////////
 // List operations
 ///////////////////////////////////////////////////////////////////////////
@@ -29,14 +28,14 @@ namespace fp {
 ///////////////////////////////////////////////////////////////////////////
 // map
 
-template <typename F, typename C, typename R>
+template<typename F, typename C, typename R>
 inline R& __map__(F f, const C& c, R& r) {
   std::transform(extent(c), back(r), f);
   return r;
 }
 
 // This code is abominable...
-template <typename F, typename C>
+template<typename F, typename C>
 inline auto
 map(F f, const C& c) -> typename std::enable_if< !std::is_same<void,decltype(f(head(c)))>::value,
                                                  typename types< nonconstref_type_of(decltype(f(head(c)))) >::list >::type {
@@ -45,12 +44,12 @@ map(F f, const C& c) -> typename std::enable_if< !std::is_same<void,decltype(f(h
   return __map__(f, c, result);
 }
 
-template <typename F, typename C>
-void mapV(F f, const C& c) { //-> typename std::enable_if< std::is_same<void,decltype(f(head(c)))>::value, void >::type {
+template<typename F, typename C>
+void mapV(F f, const C& c) {
   std::for_each(extent(c), f);
 }
 
-template <typename F>
+template<typename F>
 inline string map(F f, const string& s) {
   typedef typename types<char>::list char_list;
   char_list charList;
@@ -58,7 +57,7 @@ inline string map(F f, const string& s) {
   return show(charList);
 }
 
-template <typename F>
+template<typename F>
 inline string map(F f, const char* s) {
   return map(f, string(s));
 }
@@ -67,14 +66,13 @@ FP_DEFINE_CURRIED(map, map_);
 ///////////////////////////////////////////////////////////////////////////
 // filter
 
-template <typename F, typename C>
+template<typename F, typename C>
 inline C filter(F f, C c) {
   C result;
   std::copy_if(extent(c), back(result), f);
   return result;
 }
 FP_DEFINE_CURRIED(filter, filter_);
-
 
 
 
@@ -257,7 +255,7 @@ inline std::function< T(void) > iterate(F f, T t) {
 ///////////////////////////////////////////////////////////////////////////
 // repeat
 template <typename T>
-inline std::function< T(void) > iterate(T t) {
+inline thunk< T > iterate(T t) {
   return [=]() mutable { return t; };
 }
 
@@ -269,8 +267,9 @@ inline auto replicate(size_t n, T t) FP_RETURNS( typename types<T>::list(n, t) )
 ///////////////////////////////////////////////////////////////////////////
 // cycle
 template <typename C>
-inline auto cycle(const C& c) -> std::function< value_type_of(C) (size_t)> {
-  return [=](size_t i) { return c[i % length(c)]; };
+inline auto cycle(const C& c) -> thunk< value_type_of(C) > {
+  size_t i = 0;
+  return [=]() { return c[i++ % length(c)]; };
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -295,14 +294,25 @@ inline R& __zipWith__(F f, const T& t, const U& u, R& r) {
   std::transform(extent(t), begin(u), back(r), f);
   return r;
 }
+template <typename F, typename T, typename U, typename R>
+inline R& __zipWith__(F f, T&& t, U&& u, R& r) {
+  std::transform(extent(t), begin(u), back(r), f);
+  return r;
+}
 template <typename F, typename T, typename U, typename V, typename R>
-inline R& __zipWith3__(F f, const T& t, const U& u, const V& v, R& r) {
+inline R& __zipWith3__(F f, T&& t, U&& u, V&& v, R& r) {
   transform3(extent(t), begin(u), begin(v), back(r), f);
   return r;
 }
 
 template <typename F, typename T, typename U>
 inline auto zipWith(F f, const T& t, const U& u) -> typename types<result_type_of(F)>::list {
+  typedef result_type_of(F) result_type;
+  typename types<result_type>::list result;
+  return __zipWith__(f, t, u, result);
+}
+template <typename F, typename T, typename U>
+inline auto zipWith(F f, T&& t, U&& u) -> typename types<result_type_of(F)>::list {
   typedef result_type_of(F) result_type;
   typename types<result_type>::list result;
   return __zipWith__(f, t, u, result);
@@ -314,7 +324,13 @@ inline T zipWith3(F f, const T& t, const U& u, const V& v) {
   T result;
   return __zipWith3__(f, t, u, v, result);
 }
+template <typename F, typename T, typename U, typename V>
+inline T zipWith3(F f, T&& t, U&& u, const V&& v) {
+  T result;
+  return __zipWith3__(f, t, u, v, result);
+}
 FP_DEFINE_CURRIED_T(zipWith3, zipWith3_, _zipWith3_)
+
 
 ///////////////////////////////////////////////////////////////////////////
 // zip
@@ -480,12 +496,12 @@ inline C takeWhile(F f, const C& c) {
 }
 FP_DEFINE_CURRIED(takeWhile, takeWhile_);
 
-template <typename F, typename Source>
-inline auto takeWhileF(F f, Source source) -> typename types< decltype(source()) >::list {
-  typedef decltype(source()) t_type;
+template <typename F, typename T>
+inline auto takeWhileF(F f, T t) -> typename types< decltype(t()) >::list {
+  typedef decltype(t()) t_type;
   typename types<t_type>::list result;
-  auto   back_iter = back(result);
-  for (t_type value = source(); f(value); value=source())
+  auto back_iter = back(result);
+  for (let value = t(); f(value); value=t())
     back_iter = value;
   return result;
 }
@@ -502,17 +518,11 @@ template <typename T>
 inline typename types<T>::list take(size_t n, const typename types<T>::list& v) {
   return n < length(v) ? typename types<T>::list(begin(v), begin(v) + n) : v;
 }
-
 template <typename F>
-inline auto takeF(size_t n, F f) -> typename types< decltype(f()) >::list {
-#if 1
-  typename types< decltype(f()) >::list result(n);
+inline auto takeF(size_t n, F f) -> typename types< result_type_of(F) >::list {
+  typename types< result_type_of(F) >::list result(n);
   std::generate_n(begin(result), n, f);
   return result;
-#else
-  let takeN = [=](...) mutable { return n-- > 0; };
-  return takeWhileF(takeN, f);
-#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -543,23 +553,23 @@ inline C drop(size_t n, const C& c) {
 // splitAt
 
 template <typename C>
-inline std::pair<C,C> splitAt(size_t n, const C& c) {
-  return std::make_pair( take(n, c), drop(n, c) );
+inline pair<C,C> splitAt(size_t n, const C& c) {
+  return make_pair( take(n, c), drop(n, c) );
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // span
 
 template <typename F, typename C>
-inline std::pair<C,C> span(F f, const C& c) {
-  return std::make_pair( takeWhile(f, c), dropWhile(f, c) );
+inline pair<C,C> span(F f, const C& c) {
+  return make_pair( takeWhile(f, c), dropWhile(f, c) );
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // break
 
 template <typename F, typename C>
-inline std::pair<C,C> spanNot(F f, const C& c) {
+inline pair<C,C> spanNot(F f, const C& c) {
   return span( std::not1(f), c );
 }
 
@@ -621,23 +631,21 @@ inline T index(Index i, const std::list<T>& l) {
 ///////////////////////////////////////////////////////////////////////////
 // increasing
 template <typename T>
-inline typename types<T>::list increasing(size_t n, T t0 = (T)0) {
-  return takeF(n, enumFrom(t0));
-}
+inline auto increasing(T t0 = (T)0) FP_RETURNS( iterate(&succ<T>, t0) );
+template <typename T>
+inline auto increasingN(size_t n, T t0 = (T)0) FP_RETURNS( takeF(n, increasing(t0)) );
 
 ///////////////////////////////////////////////////////////////////////////
-// decreasingN
+// decreasing
 template <typename T>
-inline typename types<T>::list decreasing(size_t n, T t0 = (T)0) {
-  return takeF(n, iterate(&pred<T>, t0));
-}
+inline auto decreasing(T t0 = (T)0) FP_RETURNS( iterate(&pred<T>, t0) );
+template <typename T>
+inline auto decreasingN(size_t n, T t0 = (T)0) FP_RETURNS( takeF(n, decreasing(t0)) );
 
 ///////////////////////////////////////////////////////////////////////////
 // enumFrom
 template <typename T>
-std::function<T(void)> enumFrom(T t0) {
-  return iterate(&succ<T>, t0);
-}
+inline auto enumFrom(T t0) FP_RETURNS( iterate(&succ<T>, t0) );
 FP_DEFINE_FUNCTION_OBJECT(enumFrom, enumFromF);
 
 ///////////////////////////////////////////////////////////////////////////
