@@ -24,9 +24,9 @@ template<typename T> T div(T t0, T t1)  { return t0 / t1; }
 
 static const fp::types<float>::list  fVec10_1(10, 1.f);
 static const fp::types<double>::list dVec10_2(10, 2.f);
-let dVec5_1_5 = fp::increasing_n(5, 1.);
-let iVec5_0_5 = fp::increasing_n(6, 0);
-let iVec5_5_0 = fp::decreasing_n(6, 5);
+let dVec5_1_5 = fp::increasing(5, 1.);
+let iVec5_0_5 = fp::increasing(6, 0);
+let iVec5_5_0 = fp::decreasing(6, 5);
 
 template<typename MapOp, typename FilterOp, typename Source>
 bool filteredMap(MapOp mapOp, FilterOp filterOp, Source source, std::function<bool(result_type_of(MapOp))> successOp = &fp::istrue) {
@@ -40,7 +40,7 @@ bool filteredMap(MapOp mapOp, FilterOp filterOp, Source source, std::function<bo
 double pi(size_t samples = 1000) {
   using namespace fp;
   typedef std::pair<double,double> point;
-  return 4.* length(filter([](double d) { return d <= 1.0; }, 
+  return 4.* length(filter([](double d) { return d <= 1.0; },
                            map([](const point& p) { return p.first*p.first + p.second*p.second; },
                                zip(takeF(samples, rand_range_<double>(-1.0,1.0)),
                                    takeF(samples, rand_range_<double>(-1.0,1.0)))))) / samples;
@@ -50,8 +50,8 @@ double pi_(size_t samples = 1000) {
 
   using namespace fp;
 
-  let sample = []() -> int { 
-    let x = rand_range(-1.,1.); 
+  let sample = []() -> int {
+    let x = rand_range(-1.,1.);
     let y = rand_range(-1.,1.);
     let dist2 = x*x + y*y;
     return dist2 < 1. ? 1 : 0;
@@ -148,12 +148,41 @@ TEST(Prelude, FoldR) {
   EXPECT_EQ(foldr1(subi, iVec5_0_5), 5-4-3-2-1-0);
   EXPECT_EQ(foldr1(subi, iVec5_5_0), 0-1-2-3-4-5);
 
-  let add_s = [](const std::string& s0, const std::string& s1) { return s0 + s1; };
-  let add_s2 = &add<std::string>;
-  let foldr_s = foldr1_(add_s);
+  let add_s    = [](const std::string& s0, const std::string& s1) { return s0 + s1; };
+  let add_s2   = &add<std::string>;
+  let foldr_s  = foldr1_(add_s);
   let foldr_s2 = foldr1_(add_s2);
-  EXPECT_EQ(foldr_s(fp::words(std::string("a b c d e f g h i j")), std::string()), "jihgfedcba");
+  EXPECT_EQ(foldr_s(fp::words(std::string("a b c d e f g h i j")), std::string()), std::string("jihgfedcba"));
   EXPECT_EQ(foldr_s(fp::words(std::string("a b c")), std::string()), fp::sum(fp::reverse(fp::words(std::string("a b c")))));
+}
+
+TEST(Prelude, ScanL) {
+  using fp::fold;
+  using fp::foldl;
+  using fp::foldl1;
+  using fp::scanl;
+  using fp::scanl1;
+  using fp::sum;
+  using fp::product;
+
+  EXPECT_EQ(          foldl1(std::divides<double>(), dVec10_2),
+            fp::last( scanl1(std::divides<double>(), dVec10_2)));
+}
+
+TEST(Prelude, ScanR) {
+  using fp::foldr;
+  using fp::foldr_;
+  using fp::foldr1;
+  using fp::foldr1_;
+  using fp::scanr;
+  using fp::scanr1;
+
+  let addf = &add<float>;
+  let subi = &sub<int>;
+
+  EXPECT_EQ(foldr1(addf, fVec10_1),  fp::last( scanr1(addf, fVec10_1)));
+  EXPECT_EQ(foldr1(subi, iVec5_0_5), fp::last( scanr1(subi, iVec5_0_5)));
+  EXPECT_EQ(foldr1(subi, iVec5_5_0), fp::last( scanr1(subi, iVec5_5_0)));
 }
 
 TEST(Prelude, Filter) {
@@ -184,14 +213,14 @@ TEST(Prelude, ZipWith) {
   using fp::zipWith;
 
   std::array<int,3> expectedSum = {4,4,4};
-  EXPECT_EQ(fp::list(expectedSum),    zipWith(std::plus<int>(), fp::increasing_n(3, 1), fp::decreasing_n(3, 3)));
+  EXPECT_EQ(fp::list(expectedSum),    zipWith(std::plus<int>(), fp::increasing(3, 1), fp::decreasing(3, 3)));
 
   std::array<float,5> expectedPow = {5.0f,25.0f,125.0f,625.0f,3125.0f};
-  EXPECT_EQ(fp::list(expectedPow),    zipWith(powf, fp::types<float>::list(5, 5.f), fp::increasing_n(5, 1.f)));
+  EXPECT_EQ(fp::list(expectedPow),    zipWith(powf, fp::types<float>::list(5, 5.f), fp::increasing(5, 1.f)));
 
   std::array<int,4> expectedLambda = {7, 10, 13, 16};
   let lambda = [](int x, int y) -> int { return 2*x+y; };
-  EXPECT_EQ(fp::list(expectedLambda), zipWith(lambda, fp::increasing_n(4, 1), fp::increasing_n(4, 5)));
+  EXPECT_EQ(fp::list(expectedLambda), zipWith(lambda, fp::increasing(4, 1), fp::increasing(4, 5)));
 }
 
 
@@ -204,14 +233,14 @@ TEST(Prelude, All) {
   EXPECT_EQ(true, all([](double x) { return x == 2.; }, dVec10_2));
   EXPECT_EQ(false, all([](double x) { return x != 2.; }, dVec10_2));
 
-  EXPECT_EQ(true, all([](double x) { return x < 10; }, fp::increasing_n(10, 0.)));
+  EXPECT_EQ(true, all([](double x) { return x < 10; }, fp::increasing(10, 0.)));
 }
 
 TEST(Prelude, MinMax) {
   using fp::maximum;
   using fp::minimum;
 
-  let zeroToThousand = fp::increasing_n(1001, 0);
+  let zeroToThousand = fp::increasing(1001, 0);
   EXPECT_EQ(1000, maximum(zeroToThousand));
   EXPECT_EQ(0,    minimum(zeroToThousand));
   zeroToThousand.pop_back();
@@ -249,7 +278,7 @@ TEST(Prelude, Reverse) {
 
   EXPECT_EQ("dcba", reverse(std::string("abcd")));
 
-  EXPECT_EQ(fp::increasing_n(5, 0), reverse(fp::decreasing_n(5, 4)));
+  EXPECT_EQ(fp::increasing(5, 0), reverse(fp::decreasing(5, 4)));
 }
 
 TEST(Prelude, Random) {
@@ -267,7 +296,7 @@ TEST(Prelude, Random) {
   static const float  minRand = 0.f;
   static const float  maxRand = (float)numRandBins;
 
-  let randFloats = generate_n(numRands, rand_range_<float>(minRand, maxRand));
+  let randFloats = fp::takeF(numRands, rand_range_<float>(minRand, maxRand));
   EXPECT_GE(maxRand, fp::maximum(randFloats));
   EXPECT_LE(minRand, fp::maximum(randFloats));
   EXPECT_LE(5.f, fp::maximum(randFloats));
@@ -334,8 +363,8 @@ TEST(Prelude, Elem) {
   EXPECT_EQ(false,  notElem(5, iVec5_0_5));
   EXPECT_EQ(false,  elem(-1,  iVec5_0_5));
   EXPECT_EQ(true,   notElem(-1,  iVec5_0_5));
-  EXPECT_EQ(false,  elem(0,   fp::increasing_n(10, 1)));
-  EXPECT_EQ(true,   notElem(0,   fp::increasing_n(10, 1)));
+  EXPECT_EQ(false,  elem(0,   fp::increasing(10, 1)));
+  EXPECT_EQ(true,   notElem(0,   fp::increasing(10, 1)));
   EXPECT_EQ(false,  elem(-1,  iVec5_0_5));
   EXPECT_EQ(true,   notElem(-1,  iVec5_0_5));
   EXPECT_EQ(true,   elem('o', "Hello"));
@@ -345,7 +374,7 @@ TEST(Prelude, Elem) {
   EXPECT_EQ(false,  elem(10,  "Hello"));
   EXPECT_EQ(true,   notElem(10,  "Hello"));
 
-  let pairs = fp::zip(fp::increasing_n(10, 0), fp::decreasing_n(10, 9));
+  let pairs = fp::zip(fp::increasing(10, 0), fp::decreasing(10, 9));
   typedef decltype(pairs) PairVec;
   typedef PairVec::value_type Pair;
   pairs.push_back( Pair(33,33) );
@@ -359,15 +388,15 @@ TEST(Prelude, Drop) {
   using fp::drop;
   using fp::dropWhile;
 
-  EXPECT_EQ(0,   fp::sum(drop(10, fp::increasing_n(10, 0))));
-  EXPECT_EQ(9,   fp::sum(drop(9,  fp::increasing_n(10, 0))));
-  EXPECT_EQ(9+8, fp::sum(drop(8,  fp::increasing_n(10, 0))));
-  EXPECT_EQ(fp::increasing_n(5,0), drop(0, fp::increasing_n(5, 0)));
+  EXPECT_EQ(0,   fp::sum(drop(10, fp::increasing(10, 0))));
+  EXPECT_EQ(9,   fp::sum(drop(9,  fp::increasing(10, 0))));
+  EXPECT_EQ(9+8, fp::sum(drop(8,  fp::increasing(10, 0))));
+  EXPECT_EQ(fp::increasing(5,0), drop(0, fp::increasing(5, 0)));
 
-  EXPECT_EQ(0,   fp::sum(dropWhile([](int x) { return x < 10; }, fp::increasing_n(10, 0))));
-  EXPECT_EQ(9,   fp::sum(dropWhile([](int x) { return x < 9; }, fp::increasing_n(10, 0))));
-  EXPECT_EQ(9+8, fp::sum(dropWhile([](int x) { return x < 8; }, fp::increasing_n(10, 0))));
-  EXPECT_EQ(fp::decreasing_n(5, 4), dropWhile([](int x) { return x > 4; }, fp::decreasing_n(10, 9)));
+  EXPECT_EQ(0,   fp::sum(dropWhile([](int x) { return x < 10; }, fp::increasing(10, 0))));
+  EXPECT_EQ(9,   fp::sum(dropWhile([](int x) { return x < 9; }, fp::increasing(10, 0))));
+  EXPECT_EQ(9+8, fp::sum(dropWhile([](int x) { return x < 8; }, fp::increasing(10, 0))));
+  EXPECT_EQ(fp::decreasing(5, 4), dropWhile([](int x) { return x > 4; }, fp::decreasing(10, 9)));
 
 }
 
@@ -376,16 +405,16 @@ TEST(Prelude, Take) {
 	using fp::takeWhile;
 	using fp::takeWhileF;
 
-	EXPECT_EQ(0,   fp::sum(take(0, fp::increasing_n(10, 0))));
-	EXPECT_EQ(0,   fp::sum(take(1, fp::increasing_n(10, 0))));
-	EXPECT_EQ(1,   fp::sum(take(2, fp::increasing_n(10, 0))));
-	EXPECT_EQ(1+2, fp::sum(take(3, fp::increasing_n(10, 0))));
-	EXPECT_EQ(fp::increasing_n(5,0), take(5, fp::increasing_n(10, 0)));
+	EXPECT_EQ(0,   fp::sum(take(0, fp::increasing(10, 0))));
+	EXPECT_EQ(0,   fp::sum(take(1, fp::increasing(10, 0))));
+	EXPECT_EQ(1,   fp::sum(take(2, fp::increasing(10, 0))));
+	EXPECT_EQ(1+2, fp::sum(take(3, fp::increasing(10, 0))));
+	EXPECT_EQ(fp::increasing(5,0), take(5, fp::increasing(10, 0)));
 
-	EXPECT_EQ(0,   fp::sum(takeWhile([](int x) { return x < 0; }, fp::increasing_n(10, 0))));
-	EXPECT_EQ(0,   fp::sum(takeWhile([](int x) { return x < 1; }, fp::increasing_n(10, 0))));
-	EXPECT_EQ(0+1, fp::sum(takeWhile([](int x) { return x < 2; }, fp::increasing_n(10, 0))));
-	EXPECT_EQ(fp::decreasing_n(5, 9), takeWhile([](int x) { return x > 4; }, fp::decreasing_n(10, 9)));
+	EXPECT_EQ(0,   fp::sum(takeWhile([](int x) { return x < 0; }, fp::increasing(10, 0))));
+	EXPECT_EQ(0,   fp::sum(takeWhile([](int x) { return x < 1; }, fp::increasing(10, 0))));
+	EXPECT_EQ(0+1, fp::sum(takeWhile([](int x) { return x < 2; }, fp::increasing(10, 0))));
+	EXPECT_EQ(fp::decreasing(5, 9), takeWhile([](int x) { return x > 4; }, fp::decreasing(10, 9)));
 }
 
 
@@ -399,7 +428,7 @@ TEST(General, Comparing) {
   //let stringVec = fp::list(strings);n
   //EXPECT_EQ("three", fp::maximumBy(fp::comparing(fp::length<std::string>), stringVec));
 
-  let zippedList = fp::zip(fp::increasing_n(10, 0), fp::decreasing_n(10, 9));
+  let zippedList = fp::zip(fp::increasing(10, 0), fp::decreasing(10, 9));
   let sortedList = fp::sortBy(fp::comparing(&fp::snd<int,int>), zippedList);
   EXPECT_EQ(zippedList.back(), sortedList.front());
 }
@@ -448,7 +477,7 @@ TEST(Curry, Everything) {
   // 2 args
   EXPECT_EQ(2.f,   curry(&mult3<float>, 8.f)(.5f, .5f));
 
-  EXPECT_EQ((float)1*2*3*4*5, curry(fp::foldl1<std::function<float(float,float)>,fp::types<float>::list >, std::multiplies<float>())(fp::increasing_n(5, 1.f)));
+  EXPECT_EQ((float)1*2*3*4*5, curry(fp::foldl1<std::function<float(float,float)>,fp::types<float>::list >, std::multiplies<float>())(fp::increasing(5, 1.f)));
 }
 
 ///////////////////////////////////////////////////////////////////////////

@@ -113,7 +113,7 @@ template<> struct PlaylistUtils<M3U> {
 template<> struct PlaylistUtils<WPL> {
   static Playlist create( const fp::FilePath& filePath ) {
     using namespace rapidxml;
-    file<char> xmlFile( fp::cstr(filePath) );
+    file<char> xmlFile( fp::fromString(filePath) );
     xml_document<> doc;
     doc.parse<0>(xmlFile.data());
     let node = doc.first_node("media");

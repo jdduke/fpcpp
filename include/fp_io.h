@@ -38,27 +38,27 @@ std::ifstream readFile( const FilePath& filePath ) {
 }
 
 bool removeFile( const FilePath& filePath ) {
-  return remove( cstr(filePath) ) == 0;
+  return remove( fromString(filePath) ) == 0;
 }
 
 bool renameFile( const FilePath& srcPath, const std::string& dstFileName ) {
-  return ::rename( cstr(srcPath), cstr(dstFileName) ) == 0;
+  return ::rename( fromString(srcPath), fromString(dstFileName) ) == 0;
 }
 
 bool copyFile( const FilePath& srcPath, const FilePath& dstPath ) {
 #if USE_PLATFORM_SPECIFIC_CODE
 #if defined(PU_WINDOWS)
-  return CopyFile( cstr(srcPath), cstr(dstPath), false ) != 0;
+  return CopyFile( fromString(srcPath), fromString(dstPath), false ) != 0;
 #else
   bool success = false;
   int read_fd, write_fd;
   struct stat stat_buf;
   off_t offset = 0;
 
-  read_fd = open( cstr(srcPath), O_RDONLY );
+  read_fd = open( fromString(srcPath), O_RDONLY );
   if( read_fd != -1 ) {
     if ( fstat(read_fd, &stat_buf) == 0 ) {
-      write_fd = open( cstr(dstPath), O_WRONLY | O_CREAT, stat_buf.st_mode );
+      write_fd = open( fromString(dstPath), O_WRONLY | O_CREAT, stat_buf.st_mode );
       if ( write_fd != -1 ) {
         success = sendfile( write_fd, read_fd, &offset, stat_buf.st_size ) != -1;
         close( write_fd );
@@ -89,7 +89,7 @@ bool moveFile( const FilePath& srcPath, const FilePath& dstPath ) {
 bool doesFileExist( const FilePath& filePath ) {
 #if USE_PLATFORM_SPECIFIC_CODE
 #if defined(FP_WINDOWS)
-  DWORD attributes = GetFileAttributes( cstr(filePath) );
+  DWORD attributes = GetFileAttributes( fromString(filePath) );
   if (attributes != INVALID_FILE_ATTRIBUTES &&
       attributes & FILE_ATTRIBUTE_DIRECTORY)
     return true;
@@ -97,7 +97,7 @@ bool doesFileExist( const FilePath& filePath ) {
     return false;
 #else
   struct stat sb;
-  return (stat( cstr(filePath), &sb ) == 0) && S_ISDIR(sb.st_mode);
+  return (stat( fromString(filePath), &sb ) == 0) && S_ISDIR(sb.st_mode);
 #endif /* defined(FP_WINDOWS) */
 #else /* USE_PLATFORM_SPECIFIC_CODE */
   std::ifstream ifs( filePath );

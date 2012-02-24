@@ -38,7 +38,7 @@ inline R& __map__(F f, const C& c, R& r) {
 // This code is abominable...
 template <typename F, typename C>
 inline auto
-map(F f, const C& c) -> typename std::enable_if< !std::is_same<void,decltype(f(head(c)))>::value, 
+map(F f, const C& c) -> typename std::enable_if< !std::is_same<void,decltype(f(head(c)))>::value,
                                                  typename types< nonconstref_type_of(decltype(f(head(c)))) >::list >::type {
   typedef typename types< nonconstref_type_of(decltype(f(head(c)))) >::list result_type;
   result_type result;
@@ -182,6 +182,65 @@ inline bool andAll(const C& c) {
 template <typename C>
 inline bool orAll(const C& c) {
   return fold(extent(c), std::logical_or< value_type_of(C) >());
+}
+
+///////////////////////////////////////////////////////////////////////////
+// Building lists
+///////////////////////////////////////////////////////////////////////////
+
+template<typename InputIt, typename OutIt, typename T, typename Op>
+inline void scan(InputIt first, InputIt last, OutIt out, T t0, Op op) {
+  for(*out = t0; first != last; ) {
+    *out = t0 = op(t0, *first++);
+  }
+}
+
+template<typename InputIt, typename OutIt, typename Op>
+inline void scan(InputIt first, InputIt last, OutIt out, Op op) {
+  if (first != last) {
+    typename std::iterator_traits<InputIt>::value_type t0 = *first++;
+    scan(first, last, out, t0, op);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////
+// scanl
+
+template<typename F, typename T, typename C>
+typename types<T>::list scanl(F f, T t, const C& c) {
+  typename types<t>::list result(1, t);
+  scan(extent(c), back(result), t, f);
+  return result;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// scanl1
+
+template<typename F,  typename C>
+typename C scanl1(F f, const C& c) {
+  C result;
+  scan(extent(c), back(result), f);
+  return result;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// scanr
+
+template<typename F, typename T, typename C>
+typename types<T>::list scanr(F f, T t, const C& c) {
+  typename types<t>::list result(1, t);
+  scan(rextent(c), back(result), t, f);
+  return result;
+}
+
+//////////////////////////////////////////////////////////////////////////
+// scanr
+
+template<typename F, typename C>
+typename C scanr1(F f, const C& c) {
+  C result;
+  scan(rextent(c), back(result), f);
+  return result;
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -446,8 +505,14 @@ inline typename types<T>::list take(size_t n, const typename types<T>::list& v) 
 
 template <typename F>
 inline auto takeF(size_t n, F f) -> typename types< decltype(f()) >::list {
+#if 1
+  typename types< decltype(f()) >::list result(n);
+  std::generate_n(begin(result), n, f);
+  return result;
+#else
   let takeN = [=](...) mutable { return n-- > 0; };
   return takeWhileF(takeN, f);
+#endif
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -554,39 +619,26 @@ inline T index(Index i, const std::list<T>& l) {
 ///////////////////////////////////////////////////////////////////////////
 
 ///////////////////////////////////////////////////////////////////////////
-// generate_n
-template <typename F>
-inline auto generate_n(size_t n, F f) -> typename types< decltype(f()) >::list {
-  typename types< decltype(f()) >::list t(n);
-  std::generate_n(begin(t), n, f);
-  return t;
+// increasing
+template <typename T>
+inline typename types<T>::list increasing(size_t n, T t0 = (T)0) {
+  return takeF(n, enumFrom(t0));
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// increasing_n
+// decreasingN
 template <typename T>
-inline typename types<T>::list increasing_n(size_t n, T t0 = (T)0) {
-  return generate_n(n, [&]() -> T {
-    T r = t0; t0 = succ(t0); return r;
-  });
-}
-
-///////////////////////////////////////////////////////////////////////////
-// decreasing_n
-template <typename T>
-inline typename types<T>::list decreasing_n(size_t n, T t0 = (T)0) {
-  return generate_n(n, [&]() -> T {
-    T r = t0; t0 = pred(t0); return r;
-  });
+inline typename types<T>::list decreasing(size_t n, T t0 = (T)0) {
+  return takeF(n, iterate(&pred<T>, t0));
 }
 
 ///////////////////////////////////////////////////////////////////////////
 // enumFrom
 template <typename T>
-std::function<T(void)> enumFrom(T t) {
-  return iterate(&succ<T>, t);
-  //return [=]() mutable -> T { T r = t; t = succ(t); return r; };
+std::function<T(void)> enumFrom(T t0) {
+  return iterate(&succ<T>, t0);
 }
+FP_DEFINE_FUNCTION_OBJECT(enumFrom, enumFromF);
 
 ///////////////////////////////////////////////////////////////////////////
 // concat
@@ -603,6 +655,7 @@ concat(const T& t0, const T& t1) {
   typename types<T>::list result(1, t0);
   return result.append(t1);
 }
+FP_DEFINE_FUNCTION_OBJECT(concat, concatF);
 
 ///////////////////////////////////////////////////////////////////////////
 // append
@@ -611,6 +664,7 @@ inline C append(C c, const T& t) {
   c.insert(end(c), t);
   return c;
 }
+FP_DEFINE_FUNCTION_OBJECT(append, appendF);
 
 ///////////////////////////////////////////////////////////////////////////
 // cons
@@ -629,10 +683,7 @@ inline string cons(char t, string s) {
 inline string cons(string s0, const string& s1) {
   return s0.append(s1);
 }
-struct consF {
-  template<typename T, typename C>
-  inline auto operator()(const T& t, const C& c) FP_RETURNS( cons(t,c) );
-};
+FP_DEFINE_FUNCTION_OBJECT(cons, consF);
 
 ///////////////////////////////////////////////////////////////////////////
 // Pair/Tuple
@@ -644,14 +695,20 @@ template<typename T, typename U>
 inline nonconstref_type_of(T) fst(const pair<T,U>& p) {
   return p.first;
 }
+FP_DEFINE_FUNCTION_OBJECT(fst, fstF);
+
 template <typename T, typename U>
 inline nonconstref_type_of(U) snd(const pair<T,U>& p) {
   return p.second;
 }
+FP_DEFINE_FUNCTION_OBJECT(snd, sndF);
+
 template<typename T, typename U>
 inline pair<U,T> swap(const pair<T,U>& p) {
   return make_pair(p.first,p.second);
 }
+FP_DEFINE_FUNCTION_OBJECT(swap, swapF);
+
 template<typename F0, typename F1, typename T, typename U>
 inline auto mapPair(F0 f0, F1 f1, const std::pair<T,U>& p) FP_RETURNS( make_pair( f0(p.first), f1(p.second) ) );
 

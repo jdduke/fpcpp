@@ -26,7 +26,7 @@ C life(const C& grid, size_t x, size_t y) {
       grid[(i  -1)%size]                    + grid[(i  +1)%size] +
       grid[(i+x-1)%size] + grid[(i+x)%size] + grid[(i+x+1)%size];
     return ((grid[i]==1 && (neighbors==2 || neighbors==3)) || (grid[i]==0 && neighbors == 3)) ? 1 : 0;
-  }, fp::increasing_n(x*y,0));
+  }, fp::increasing(x*y,0));
 #else
   using fp::index;
   const let size = x * y;
@@ -35,7 +35,7 @@ C life(const C& grid, size_t x, size_t y) {
                           index((i  -1)%size,grid)                          + index((i  +1)%size,grid) +
                           index((i+x-1)%size,grid) + index((i+x)%size,grid) + index((i+x+1)%size,grid);
     return ((index(i,grid)==1 && (neighbors==2 || neighbors==3)) || (index(i,grid) == 0 && neighbors == 3)) ? 1 : 0;
-  }, fp::increasing_n(x*y,0));
+  }, fp::increasing(x*y,0));
 #endif
 }
 

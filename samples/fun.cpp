@@ -145,7 +145,7 @@ typename types< std::complex<T> >::list fft( const typename types<T>::list& v ) 
     let ys       = fft<T>( fst( evenOdds) );
     let zs       = fft<T>( snd( evenOdds) );
     let cx = [=](CT z, T k) { return z*std::polar((T)1, (T)(-2. * M_PI * (double)k/n)); };
-    let ts = zipWith( cx, zs, increasing_n( length(zs), (T)0 ) );
+    let ts = zipWith( cx, zs, increasing( length(zs), (T)0 ) );
 
     return concat( zipWith( std::plus<  CT >(), ys, ts ),
                    zipWith( std::minus< CT >(), ys, ts ) );

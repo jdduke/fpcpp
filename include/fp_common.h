@@ -9,6 +9,7 @@
 
 #include "fp_defines.h"
 #include "fp_template_utils.h"
+#include "fp_curry_defines.h"
 
 #include <array>
 #include <iterator>
@@ -26,23 +27,24 @@ using std::string;
 using std::begin;
 using std::end;
 
+template <typename C>
+std::back_insert_iterator<C> back(C& c) {
+  return std::back_inserter(c);
+}
+
+template <typename C>
+std::front_insert_iterator<C> front(C& c) {
+  return std::front_inserter(c);
+}
+
 ///////////////////////////////////////////////////////////////////////////
 // head
 
 template <typename C>
-inline auto head(C& c) -> nonconstref_type_of(decltype(*begin(c))) {
-  return *std::begin(c);
-}
+inline auto head(C&& c)      FP_RETURNS( *begin(c) );
 template <typename C>
-inline auto head(const C& c) -> nonconstref_type_of(decltype(*begin(c))) {
-  return *std::begin(c);
-}
-
-struct headF {
-  template<typename C>
-  inline auto operator()(const C& c) FP_RETURNS( head(c) );
-};
-//FP_DEFINE_FUNCTION_OBJECT(head, headF);
+inline auto head(const C& c) FP_RETURNS( *begin(c) );
+FP_DEFINE_FUNCTION_OBJECT(head, headF);
 
 ///////////////////////////////////////////////////////////////////////////
 // tail
@@ -55,30 +57,16 @@ template <typename C>
 inline C tail(const C& c) {
   return drop(1, c);
 }
+FP_DEFINE_FUNCTION_OBJECT(tail, tailF);
 
 ///////////////////////////////////////////////////////////////////////////
 // last
 
 template <typename C>
-inline C last(C&& c) {
-  return drop(l, c);
-}
+inline auto last(C&& c)      FP_RETURNS( *(--end(c)) );
 template <typename C>
-inline C last(const C& c) {
-  return drop(1, c);
-}
-
-///////////////////////////////////////////////////////////////////////////
-
-template <typename C>
-std::back_insert_iterator<C> back(C& c) {
-  return std::back_inserter(c);
-}
-
-template <typename C>
-std::front_insert_iterator<C> front(C& c) {
-  return std::front_inserter(c);
-}
+inline auto last(const C& c) FP_RETURNS( *(--end(c)) );
+FP_DEFINE_FUNCTION_OBJECT(last, lastF);
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -86,10 +74,7 @@ template<typename C>
 inline size_t length(const C& c) {
   return c.size();
 }
-struct lengthF {
-  template<typename C>
-  inline auto operator()(const C& c) FP_RETURNS( length(c) );
-};
+FP_DEFINE_FUNCTION_OBJECT(length, lengthF);
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -101,7 +86,7 @@ template<typename T, size_t S>
 inline size_t null(T (&A)[S]) {
   return S==0;
 }
-
+FP_DEFINE_FUNCTION_OBJECT(null, nullF);
 
 ///////////////////////////////////////////////////////////////////////////
 
@@ -117,11 +102,16 @@ inline typename types<T>::list list() {
 inline types<char>::list list(const string& s) {
   return types<char>::list(extent(s));
 }
+FP_DEFINE_FUNCTION_OBJECT(list, listF);
 
-inline const char* cstr( const string& s ) { return s.c_str(); }
+///////////////////////////////////////////////////////////////////////////
+
+inline const char* fromString( const string& s ) { return s.c_str(); }
+FP_DEFINE_FUNCTION_OBJECT(fromString, fromStringF);
 
 template<typename T>
 float fromIntegral(T t) { return (float)t; }
+FP_DEFINE_FUNCTION_OBJECT(fromIntegral, fromIntegralF);
 
 } /* namespace fp */
 

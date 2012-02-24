@@ -33,18 +33,19 @@
 #define FP_CURRY_HELPER(FUNC,PREFIX) FUNC(PREFIX)
 #define FP_CURRY(ARG,PREFIX)         FP_CURRY_HELPER(FP_CURRY##ARG, PREFIX)
 
-#define FP_DEFINE_FUNCTION_OBJECT(a,b)                            \
-  struct b {                                                      \
-    b() { }                                                       \
-    template<typename T>                                          \
-    auto operator()(T t) FP_RETURNS( a(t) );                      \
-    template<typename T>                                          \
-    auto operator()(const T& t) FP_RETURNS( a(t) );               \
-    template<typename F, typename T>                              \
-    auto operator()(F f, T t) FP_RETURNS( a(f,t) );               \
-    template<typename F, typename T, typename C>                  \
-    auto operator()(F f, T t, const C& c) FP_RETURNS( a(f,t,c) ); \
-  };
+#define FP_DEFINE_FUNCTION_OBJECT(func,funcObj)                                    \
+  struct funcObj {                                                                 \
+    template<typename T>                                                           \
+    inline auto operator()(T&& t) const FP_RETURNS( func(t) );                     \
+    template<typename T>                                                           \
+    inline auto operator()(const T& t) const FP_RETURNS( func(t) );                \
+    template<typename F, typename T>                                               \
+    inline auto operator()(F&& f, T&& t) const FP_RETURNS( func(f,t) );            \
+    template<typename F, typename T>                                               \
+    inline auto operator()(const F& f, const T& t) const FP_RETURNS( func(f,t) );  \
+    template<typename F, typename T, typename C>                                   \
+    inline auto operator()(F f, T t, const C& c) const FP_RETURNS( func(f,t,c) );  \
+  }
 
 #if 1
 
@@ -55,13 +56,13 @@
   template <typename F, typename T>     \
   inline auto b(F f, T t) FP_RETURNS(a);
 
-#define FP_CURRIED(func0,func1)                                                                                             \
-  fp::curry(func0<decltype(func1),                                                                                          \
+#define FP_CURRIED(func0,func1)                                                                                                 \
+  fp::curry(func0<decltype(func1),                                                                                              \
   /*typename fp::types<typename remove_const_ref<typename fp::function_traits< decltype(func1) >::t0_type>::type> >::list, */   \
-  typename std::deque<typename remove_const_ref<typename fp::function_traits< decltype(func1) >::t0_type>::type> >,   \
+  typename fp_list<typename remove_const_ref<typename fp::function_traits< decltype(func1) >::t0_type>::type> >,                \
   func1)
-#define FP_CURRIED2(func0,func2,value)                                                                                             \
-  fp::curry2(func0<decltype(func2), decltype(value), std::deque<typename remove_const_ref<typename fp::function_traits< decltype(func1) >::t0_type>::type> >, \
+#define FP_CURRIED2(func0,func2,value)                                                                                                                     \
+  fp::curry2(func0<decltype(func2), decltype(value), fp_list<typename remove_const_ref<typename fp::function_traits< decltype(func1) >::t0_type>::type> >, \
   func2, value)
 
 #else
@@ -105,11 +106,11 @@ private:                                                   \
 
 #endif
 
-#define FP_DEFINE_CURRIED(funcName, funcName2)            \
-  FP_DEFINE_FUNCTION_OBJECT( funcName, funcName ## Func ) \
+#define FP_DEFINE_CURRIED(funcName, funcName2)             \
+  FP_DEFINE_FUNCTION_OBJECT( funcName, funcName ## Func ); \
   FP_DEFINE_CURRIED_HELPER(  FP_CURRIED(funcName, f), funcName2 )
 #define FP_DEFINE_CURRIED_T(funcName, funcName2, funcName3)           \
-  FP_DEFINE_FUNCTION_OBJECT( funcName, funcName ## Func )             \
+  FP_DEFINE_FUNCTION_OBJECT( funcName, funcName ## Func );            \
   FP_DEFINE_CURRIED_HELPER(  FP_CURRIED( funcName, f),    funcName2 ) \
   FP_DEFINE_CURRIED_HELPER2( FP_CURRIED2(funcName, f, t), funcName3 )
 
