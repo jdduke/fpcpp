@@ -14,6 +14,7 @@
 #include "fp_prelude_lists.h"
 #include "fp_prelude_math.h"
 #include "fp_prelude_strings.h"
+#include "fp_prelude_objects.h"
 
 #include "fp_curry.h"
 
@@ -21,5 +22,6 @@
 #include "fp_composition_compound.h"
 
 #include "fp_io.h"
+
 
 #endif /* _FPCPP_H_ */

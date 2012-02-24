@@ -73,7 +73,6 @@ inline types<string>::list lines(std::ifstream& ifs) {
     ifsLines.push_back(line);
   return ifsLines;
 }
-FP_DEFINE_FUNCTION_OBJECT(lines, linesF);
 
 ///////////////////////////////////////////////////////////////////////////
 // unlines
@@ -82,7 +81,6 @@ template<typename C>
 auto unlines(const C& elems) -> value_type_of(C) {
   return concat(elems, '\n');
 }
-FP_DEFINE_FUNCTION_OBJECT(unlines, unlinesF);
 
 ///////////////////////////////////////////////////////////////////////////
 // words
@@ -90,7 +88,6 @@ template<typename T>
 inline typename types<T>::list words(const T& s) {
   return split(s, ' ');
 }
-FP_DEFINE_FUNCTION_OBJECT(words, wordsF);
 
 ///////////////////////////////////////////////////////////////////////////
 // unwords
@@ -99,7 +96,6 @@ template<typename T>
 auto unwords(const T& elems) -> decltype(concat(elems, ' ')) {
   return concat(elems, ' ');
 }
-FP_DEFINE_FUNCTION_OBJECT(unwords, unwordsF);
 
 ///////////////////////////////////////////////////////////////////////////
 // show
@@ -130,7 +126,6 @@ inline fp_enable_if_container(C,string) show(const C& c) {
   return concat( c, infix, prefix, suffix );
 }
 
-FP_DEFINE_FUNCTION_OBJECT(show, showF);
 
 ///////////////////////////////////////////////////////////////////////////
 // print
@@ -138,18 +133,15 @@ FP_DEFINE_FUNCTION_OBJECT(show, showF);
 inline void putStr(const string& s) {
   std::cout << s;
 }
-FP_DEFINE_FUNCTION_OBJECT(putStr, putStrF);
 
 inline void putStrLen(const string& s) {
   std::cout << s << std::endl;
 }
-FP_DEFINE_FUNCTION_OBJECT(putStrLen, putStrLenF);
 
 template<typename T>
 inline void print(const T& t) {
   putStrLen( show(t) );
 }
-FP_DEFINE_FUNCTION_OBJECT(print, print_);
 
 } /* namespace fp */
 

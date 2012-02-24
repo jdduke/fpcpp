@@ -51,8 +51,8 @@ double pi_(size_t samples = 1000) {
   using namespace fp;
 
   let sample = []() -> int {
-    let x = rand_range(-1.,1.);
-    let y = rand_range(-1.,1.);
+    let x = randRange(-1.,1.);
+    let y = randRange(-1.,1.);
     let dist2 = x*x + y*y;
     return dist2 < 1. ? 1 : 0;
   };
@@ -282,8 +282,8 @@ TEST(Prelude, Reverse) {
 }
 
 TEST(Prelude, Random) {
-  using fp::rand_n;
-  using fp::rand_range;
+  using fp::randN;
+  using fp::randRange;
   using fp::rand_range_;
 
   enum {
@@ -460,13 +460,17 @@ TEST(Curry, Everything) {
   using fp::curry;
   using fp::curry2;
   using fp::curry3;
+  using fp::curryAll2;
 
   // No args
   EXPECT_EQ(2.f,   curry(&multBy2<float>, 1.f)());
   EXPECT_EQ(2.f,   curry2(std::plus<float>(),       1.f, 1.f)());
   EXPECT_EQ(2.f,   curry2(std::multiplies<float>(), 1.f, 2.f)());
   EXPECT_EQ(99^77, curry2(&exor<int>, 99, 77)());
-  EXPECT_EQ(2.f,   curry3(&mult3<float>, 8.f, .5f, .5f)());
+  EXPECT_EQ(2.f,   curry3(mult3<float>, 8.f, .5f, .5f)());
+
+  EXPECT_EQ(2.f,   curryAll2(fp::math::addF(),1.f,1.f)());
+  EXPECT_EQ(2.f,   curryAll2(fp::math::multiplyF(), 1.f, 2.f)());
 
   // 1 arg
   EXPECT_EQ(2.f,   curry(std::plus<float>(),       1.f)(1.f));

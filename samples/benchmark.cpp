@@ -43,16 +43,6 @@ OutputIterator transform_4(InputIterator1 first1, InputIterator1 last1,
 
 ///////////////////////////////////////////////////////////////////////////
 
-struct gen_rand {
-  gen_rand(float r) : factor(r/RAND_MAX) { }
-  float operator()() const {
-    return rand() * factor;
-  }
-  float factor;
-};
-
-///////////////////////////////////////////////////////////////////////////
-
 float test_func1(float x, float y, float z, float w) {
   return (x * y) + (z * w);
 }
@@ -62,8 +52,7 @@ float test_func2(float x, float y, float z, float w) {
 }
 
 float test_func3() {
-  static gen_rand rand_gen(RAND_VEC_RANGE);
-  return logf(sqrtf(rand_gen() * rand_gen()));
+  return logf(sqrtf(fp::randRange(0.f, RAND_VEC_RANGE) * fp::randRange(0.f, RAND_VEC_RANGE)));
 }
 
 float test_func4(float x) {
@@ -108,9 +97,7 @@ void test() {
 
   using namespace fp;
   using namespace fp_operators;
-  gen_rand rand_gen(RAND_VEC_RANGE);
-  fp::types<float>::list rand_vec(RAND_VEC_SIZE);
-  std::generate_n(std::begin(rand_vec), RAND_VEC_SIZE, rand_gen);
+  let rand_vec = fp::randN(RAND_VEC_SIZE, (float)0, (float)RAND_VEC_RANGE);
 
   {
     auto add            = [](float x, float y) -> float { return x + y; };
@@ -153,10 +140,27 @@ void test() {
     std::cout << "Success = " << std::equal( result.begin(), result.end(), test_result.begin() ) << std::endl;
   }
 
+  let rand_gen  = fp::curry2(randRange<float>, 0.f, RAND_VEC_RANGE);
+  //let rand_gen2 = fp::curry2(randRangeF(),     0.f, RAND_VEC_RANGE);
+
+  {
+    //     static inline auto bind2(F f, T t, T1 t1) -> std::function< decltype(f(t,t1)) (T,T1) > {
+    //       //FP_RETURNS( std::bind( static_cast< decltype(F) (T,T1) >(f), t, t1) );
+    //       typedef decltype(f(t,t1)) result_type;
+    // 
+    //       return std::bind( static_cast< decltype(F) (T,T1) >(f), t, t1 );
+     //let func = randRangeF();
+     //typedef std::function< decltype(func(0.f, RAND_VEC_RANGE)) ) result_type;
+// 
+     let rand_gen2 = fp::curry_helper_impl<2>::bind2(randRangeF(), 0.f, RAND_VEC_RANGE);
+     rand_gen2();
+
+  }
+
   {
     //auto length_squared = [](float x, float y, float z) -> float { return x*x + y*y + z*z; };
     auto multiplied      = [](float x, float y) -> float { return x * y; };
-    auto mult_rand_rand  = compose2(multiplied, rand_gen, rand_gen);
+    auto mult_rand_rand  = compose2(multiplied, rand_range_<float>(0.f, RAND_VEC_RANGE), rand_range_<float>(0.f, RAND_VEC_RANGE));
     auto log_sqrt        = [](float x) -> float { return logf(sqrtf(x)); };
     auto test_lambda3    = [&]() -> float { return logf(sqrtf(rand_gen() * rand_gen())); };
     auto sqrt_mult_rand_rand  = log_sqrt + mult_rand_rand;
