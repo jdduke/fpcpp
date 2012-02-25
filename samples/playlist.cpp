@@ -138,9 +138,9 @@ template<> struct PlaylistUtils<WPL> {
 /////////////////////////////////////////////////////////////////////////////
 
 template<typename MapOp, typename FilterOp, typename Source>
-bool filteredMap( MapOp mapOp, FilterOp filterOp, Source source, std::function<bool(result_type_of(MapOp))> successOp = &fp::istrue ) {
+bool filteredMap( MapOp mapOp, FilterOp filterOp, Source source ) {
   using namespace fp;
-  return all(successOp,
+  return all(istrue,
              map(mapOp,
                  filter(filterOp,
                         source)));

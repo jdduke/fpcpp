@@ -49,10 +49,11 @@ StringLists anagrams( const fp::FilePath& filePath ) {
 
   using namespace fp;
 
-  let fstr    = fst<string,string>;
   let f       = readFile( filePath );
   let words   = lines( f );
-  let groupon = compose2( std::equal_to<string>(), fstr, fstr );
+  //let fstr    = fst<string,string>;
+  //let groupon = compose2( std::equal_to<string>(), fstr, fstr );
+  let groupon = [](const StringPair& s0, const StringPair& s1) { return fp::fst(s0) == fp::fst(s1); };
   let wix     = groupBy( groupon, sort( zip( map( sort<string>, words ), words) ) );
   let mxl     = maximum( map( length< StringPairList >, wix ) );
 

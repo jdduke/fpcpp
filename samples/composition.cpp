@@ -20,26 +20,6 @@ void test() {
   using namespace fp;
   using namespace fp_operators;
 
-  {
-    let hello = []() -> bool { 
-      std::cout << "Hello "; return true; 
-    };
-    let world = [](bool print) {
-      if(print) std::cout << " World " << std::endl; 
-    };
-    
-    auto hello_world  = world << hello;
-    auto hello_world2 = hello >> world;
-    hello_world();
-    hello_world2();
-
-    auto hello2 = [=]()     -> bool { return hello(); };
-    auto world2 = [=](bool b)       { world(b);       };
-    compose(world2, hello2)();
-
-    (world2 + hello2)();
-  }
-
   ///////////////////////////////////////////////////////////////////////////
 
   {
@@ -53,19 +33,7 @@ void test() {
                         [](float x, float y, float z) -> float { return x*x + y*y + z*z; });
     auto h    = [](float f_) -> int { return (int)std::ceil(f_); };
     auto hf   = compose(h,f);
-    auto hfg  = compose(hf,g);
-    auto hfg1 = compose( compose(
-                         [](float f)                   -> int   { return (int)std::ceil(f); },
-                         [](float l)                   -> float { return std::sqrt(l);      } ),
-                         [](float x, float y, float z) -> float { return x*x + y*y + z*z;   } );
-    auto hfg2 = compose(h,compose(f,g));
-    auto hfg3 = compose(h,f) + g;
-    auto hfg4 = hf + g;
-    auto hfg5 = h + f + g;
-    auto hfg6 = h <o> f <o> g;
-    auto hfg7 = (compose(h,f)+g);
-    auto fffg  = (f+f).with(f).with(g);
-    auto fffg2 = f+f+f+g;
+ 
 
     float v[] = {1.f, 2.f, -1.f};
 
@@ -76,16 +44,6 @@ void test() {
     print( "Length (f_lam + g_lam)        = ", fg3(  v[0], v[1], v[2]) );
     print( "Length (compose(f_lam,g_lam)) = ", fg4(  v[0], v[1], v[2]) );
     print( "Length                        = ", fg(   v[0], v[1], v[2]) );
-    print( "Ceil(Length)                  = ", hfg(  v[0], v[1], v[2]) );
-    print( "Ceil(Length)                  = ", hfg1( v[0], v[1], v[2]) );
-    print( "Ceil(Length)                  = ", hfg2( v[0], v[1], v[2]) );
-    print( "Ceil(Length)                  = ", hfg3( v[0], v[1], v[2]) );
-    print( "Ceil(Length)                  = ", hfg4( v[0], v[1], v[2]) );
-    print( "Ceil(Length)                  = ", hfg5( v[0], v[1], v[2]) );
-    print( "Ceil(Length)                  = ", hfg6( v[0], v[1], v[2]) );
-    print( "Ceil(Length)                  = ", hfg7( v[0], v[1], v[2]) );
-    print( "Sqrt(Sqrt(Length)))           = ", fffg( v[0], v[1], v[2]) );
-    print( "Sqrt(Sqrt(Length)))           = ", fffg2(v[0], v[1], v[2]) );
   }
 }
 

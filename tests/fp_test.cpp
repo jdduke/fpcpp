@@ -316,14 +316,14 @@ TEST(Prelude, Random) {
 TEST(Prelude, EnumFrom) {
   using fp::enumFrom;
 
-  let Zero_Ten  = fp::takeWhileF([](int x) -> bool { return x < 11; }, enumFrom(0));
+  let Zero_Ten  = fp::takeWhileT([](int x) -> bool { return x < 11; }, enumFrom(0));
   let Zero_Ten2 = fp::takeF(11, enumFrom(0));
   EXPECT_EQ(fp::sum(Zero_Ten),  55);
   EXPECT_EQ(fp::sum(Zero_Ten2), 55);
 
   ///////////////////////////////////////////////////////////////////////////
 
-  let a_z       = fp::takeWhileF([](char x) -> bool { return x <= 'z'; }, enumFrom('a'));
+  let a_z       = fp::takeWhileT([](char x) -> bool { return x <= 'z'; }, enumFrom('a'));
   let a_z2      = fp::takeF(26, enumFrom('a'));
   const std::string atoz("abcdefghijklmnopqrstuvwxyz");
   EXPECT_EQ(fp::show(a_z),  atoz);
@@ -484,146 +484,3 @@ TEST(Curry, Everything) {
 
   EXPECT_EQ((float)1*2*3*4*5, curry(fp::foldl1<std::function<float(float,float)>,fp::types<float>::list >, std::multiplies<float>())(fp::increasingN(5, 1.f)));
 }
-
-///////////////////////////////////////////////////////////////////////////
-
-template <typename Void, typename VoidFloat, typename One, typename Identity>
-void testNoArgs(Void voidf, VoidFloat voidfF, One one, Identity identity)
-{
-  using namespace fp;
-  using namespace fp_operators;
-
-  auto void_void    = compose(voidf,voidf);
-  auto one_voidf    = compose(voidfF,one);
-  auto voidf_one    = compose(one,voidfF);
-  auto one_identity = compose(identity,one);
-
-  void_void();
-  one_voidf();
-  EXPECT_EQ(1.f, voidf_one(1.f));
-  EXPECT_EQ(1.f, one_identity());
-  EXPECT_EQ(1.f, (one_identity + void_void)());
-}
-
-TEST(CompositionNoArgs, Func) {
-  testNoArgs(f(Void_Void), f(Void_Float), f(Float_Void), f(Float_Float));
-}
-
-TEST(CompositionNoArgs, FuncObj) {
-  testNoArgs(S_Void_Void(), S_Void_Float(), S_Float_Void(), S_Float_Float());
-}
-
-TEST(CompositionNoArgs, Lambda) {
-  testNoArgs(L_Void_Void, L_Void_Float, L_Float_Void, L_Float_Float);
-}
-
-///////////////////////////////////////////////////////////////////////////
-
-template <typename Identity, typename Plus2, typename Plus3, typename Plus4>
-void testArgs(Identity identity, Plus2 plus2, Plus3 plus3, Plus4 plus4)
-{
-  using namespace fp;
-  using namespace fp_operators;
-
-  auto identity_identity = compose(identity,identity);
-  auto plus2_identity = compose(identity,plus2);
-  auto plus3_identity = compose(identity,plus3);
-  auto plus4_identity = compose(identity,plus4);
-
-  EXPECT_EQ(1.f, identity_identity(1.f));
-  EXPECT_EQ(2.f, plus2_identity(1.f,1.f));
-  EXPECT_EQ(3.f, plus3_identity(1.f,1.f,1.f));
-  EXPECT_EQ(4.f, plus4_identity(1.f,1.f,1.f,1.f));
-
-  EXPECT_EQ(1.f,  identity_identity(1.f));
-  EXPECT_EQ(0.f,  plus2_identity(-1.f,1.f));
-  EXPECT_EQ(-1.f, plus3_identity(-1.f,1.f,-1.f));
-  EXPECT_EQ(0.f,  plus4_identity(-1.f,1.f,-1.f,1.f));
-
-  EXPECT_EQ(2.f, (identity_identity + identity_identity) (2.f));
-  EXPECT_EQ(4.f, (identity_identity + plus2_identity)(2.f,2.f));
-  EXPECT_EQ(6.f, (identity_identity + plus3_identity)(2.f,2.f,2.f));
-  EXPECT_EQ(8.f, (identity_identity + plus4_identity)(2.f,2.f,2.f,2.f));
-}
-
-TEST(CompositionMultipleArgs, Func) {
-  testArgs(f(Float_Float), f(Float_Float2), f(Float_Float3), f(Float_Float4));
-}
-
-TEST(CompositionMultipleArgs, FuncObj) {
-  testArgs(S_Float_Float(), S_Float_Float2(), S_Float_Float3(), S_Float_Float4());
-}
-
-TEST(CompositionMultipleArgs, Lambda) {
-  testArgs(L_Float_Float, L_Float_Float2, L_Float_Float3, L_Float_Float4);
-}
-
-
-///////////////////////////////////////////////////////////////////////////
-
-#if FP_COMPOUND
-
-template <typename Identity, typename Void, typename Plus>
-inline void testNoArgsCompound(Identity one, Void voidf_, Plus plus)
-{
-  using namespace fp;
-  using namespace fp_operators;
-
-  auto voidf      = compose2(voidf_, one, one);
-  auto oneplusone = compose2(plus,   one, one);
-
-  EXPECT_EQ(1.f+1.f, oneplusone());
-  EXPECT_EQ(1.f+1.f, (oneplusone + voidf)());
-}
-
-TEST(CompositionCompoundNoArgs, Func) {
-  testNoArgsCompound(f(Float_Void), f(Void_Float2), f(Float_Float2));
-}
-
-TEST(CompositionCompoundNoArgs, FuncObj) {
-  testNoArgsCompound(S_Float_Void(), S_Void_Float2(), S_Float_Float2());
-}
-
-TEST(CompositionCompoundNoArgs, Lambda) {
-  testNoArgsCompound(L_Float_Void, L_Void_Float2, L_Float_Float2);
-}
-
-///////////////////////////////////////////////////////////////////////////
-
-template<typename Identity, typename Plus>
-inline void testArgsCompound(Identity identity, Plus plus)
-{
-  using namespace fp;
-  using namespace fp_operators;
-
-  auto pii = compose2(plus, identity, identity);
-  auto ppp = compose2(plus, plus, plus);
-  auto ppiipii = compose2(plus, pii, pii);
-
-  EXPECT_EQ(1.f+1.f,             pii(1.f,1.f));
-  EXPECT_EQ((1.f+1.f)+(1.f+1.f), ppp(1.f,1.f,1.f,1.f));
-  EXPECT_EQ((1.f+1.f)+(1.f+1.f), ppiipii(1.f,1.f,1.f,1.f));
-
-  EXPECT_EQ(1.f-1.f,                pii(1.f,-1.f));
-  EXPECT_EQ((-1.f+1.f)+(-1.f+1.f),  ppp(-1.f,1.f,-1.f,1.f));
-  EXPECT_EQ((-1.f+1.f)+(-1.f+1.f),  ppiipii(-1.f,1.f,-1.f,1.f));
-
-  auto mult_2 = [](float x) -> float { return x*2; };
-  EXPECT_EQ((2.f+2.f)*2,             (mult_2 + pii)(2.f,2.f));
-  EXPECT_EQ(((2.f+2.f)+(2.f+2.f))*2, (mult_2 + ppp)(2.f,2.f,2.f,2.f));
-  EXPECT_EQ(((2.f+2.f)+(2.f+2.f))*2, (mult_2 + ppiipii)(2.f,2.f,2.f,2.f));
-}
-
-TEST(CompositionCompoundMultipleArgs, Func) {
-  testArgsCompound(f(Float_Float), f(Float_Float2));
-}
-
-TEST(CompositionCompoundMultipleArgs, FuncObj) {
-  testArgsCompound(S_Float_Float(), S_Float_Float2());
-}
-
-TEST(CompositionCompoundMultipleArgs, Lambda) {
-  testArgsCompound(L_Float_Float, L_Float_Float2);
-}
-
-#endif /* FP_COMPOUND */
