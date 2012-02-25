@@ -64,10 +64,10 @@
   func2, value)
 
 #define FP_DEFINE_CURRIED(funcName, funcName2)             \
-  FP_DEFINE_FUNCTION_OBJECT( funcName, funcName ## Func ); \
+  FP_DEFINE_FUNCTION_OBJECT( funcName, funcName ## F ); \
   FP_DEFINE_CURRIED_HELPER(  FP_CURRIED(funcName, f), funcName2 )
 #define FP_DEFINE_CURRIED_T(funcName, funcName2, funcName3)           \
-  FP_DEFINE_FUNCTION_OBJECT( funcName, funcName ## Func );            \
+  FP_DEFINE_FUNCTION_OBJECT( funcName, funcName ## F );            \
   FP_DEFINE_CURRIED_HELPER(  FP_CURRIED( funcName, f),    funcName2 ) \
   FP_DEFINE_CURRIED_HELPER2( FP_CURRIED2(funcName, f, t), funcName3 )
 

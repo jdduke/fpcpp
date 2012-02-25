@@ -306,14 +306,14 @@ inline R& __zipWith3__(F f, T&& t, U&& u, V&& v, R& r) {
 }
 
 template <typename F, typename T, typename U>
-inline auto zipWith(F f, const T& t, const U& u) -> typename types<result_type_of(F)>::list {
-  typedef result_type_of(F) result_type;
+inline auto zipWith(F f, const T& t, const U& u) -> typename types<decltype(f(head(t),head(u)))>::list {
+  typedef decltype(f(head(t),head(u))) result_type;
   typename types<result_type>::list result;
   return __zipWith__(f, t, u, result);
 }
 template <typename F, typename T, typename U>
-inline auto zipWith(F f, T&& t, U&& u) -> typename types<result_type_of(F)>::list {
-  typedef result_type_of(F) result_type;
+inline auto zipWith(F f, T&& t, U&& u) -> typename types<decltype(f(head(t),head(u)))>::list {
+  typedef decltype(f(head(t),head(u))) result_type;
   typename types<result_type>::list result;
   return __zipWith__(f, t, u, result);
 }
@@ -459,7 +459,7 @@ inline typename std::enable_if<!is_container<T>::value,std::list<T> >::type sort
 ///////////////////////////////////////////////////////////////////////////
 // groupBy
 
-template <typename F, typename C>
+template<typename F, typename C>
 inline typename types<C>::list groupBy(F f, const C& c) {
   typename types<C>::list result;
   let it = begin(c);
@@ -475,9 +475,27 @@ inline typename types<C>::list groupBy(F f, const C& c) {
 ///////////////////////////////////////////////////////////////////////////
 // group
 
-template <typename C>
+template<typename C>
 inline typename types<C>::list group(const C& c) {
   return groupBy(std::equal_to< value_type_of(C) >(), c);
+}
+
+///////////////////////////////////////////////////////////////////////////
+// insertBy
+
+template<typename F, typename T, typename C>
+inline C insertBy(F f, T t, C c) {
+  let compare = [&](const T& t1) { return f(t, t1); };
+  c.insert( std::find_if( extent(c), compare ), t );
+  return c;
+}
+
+///////////////////////////////////////////////////////////////////////////
+// insert
+
+template<typename T, typename C>
+inline C insert(T t, C c) {
+  return insertBy( less<T>, t, c );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -497,7 +515,7 @@ inline C takeWhile(F f, const C& c) {
 FP_DEFINE_CURRIED(takeWhile, takeWhile_);
 
 template <typename F, typename T>
-inline auto takeWhileF(F f, T t) -> typename types< decltype(t()) >::list {
+inline auto takeWhileT(F f, T t) -> typename types< decltype(t()) >::list {
   typedef decltype(t()) t_type;
   typename types<t_type>::list result;
   auto back_iter = back(result);
@@ -505,7 +523,7 @@ inline auto takeWhileF(F f, T t) -> typename types< decltype(t()) >::list {
     back_iter = value;
   return result;
 }
-FP_DEFINE_CURRIED(takeWhileF, takeWhileF_);
+FP_DEFINE_CURRIED(takeWhileT, takeWhileT_);
 
 ///////////////////////////////////////////////////////////////////////////
 // take
@@ -519,8 +537,8 @@ inline typename types<T>::list take(size_t n, const typename types<T>::list& v) 
   return n < length(v) ? typename types<T>::list(begin(v), begin(v) + n) : v;
 }
 template <typename F>
-inline auto takeF(size_t n, F f) -> typename types< result_type_of(F) >::list {
-  typename types< result_type_of(F) >::list result(n);
+inline auto takeF(size_t n, F f) -> typename types< decltype(f()) >::list {
+  typename types< decltype(f()) >::list result(n);
   std::generate_n(begin(result), n, f);
   return result;
 }
@@ -723,6 +741,25 @@ inline auto mapPair(F0 f0, F1 f1, const std::pair<T,U>& p) FP_RETURNS( make_pair
 template<typename F, typename T, typename U>
 inline auto mapFst(F f, const std::pair<T,U>& p) FP_RETURNS( make_pair( f(p.first), p.second ) );
 FP_DEFINE_CURRIED(mapFst, mapFst_);
+
+///////////////////////////////////////////////////////////////////////////
+// mapSnd
+
+template<typename F, typename T, typename U>
+inline auto mapSnd(F f, const std::pair<T,U>& p) FP_RETURNS( make_pair( p.first, f(p.second) ) );
+template<typename F0>
+struct mapSndF {
+  mapSndF(F0 f0_) : f0(f0_) { }
+  template<typename T, typename U>
+  inline auto operator()(const pair<T,U>& t) FP_RETURNS( make_pair( fst(t), f0(snd(t)) ) );
+
+  F0 f0;
+};
+template<typename F0>
+mapSndF<F0> mapSndF_(F0 f0) { return mapSndF<F0>(f0); }
+
+///////////////////////////////////////////////////////////////////////////
+// mapArrow
 
 template<typename F0, typename F1, typename T>
 inline auto mapArrow(F0 f0, F1 f1, const T& T) FP_RETURNS( make_pair( f0(t), f1(t) ) );

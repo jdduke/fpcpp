@@ -49,8 +49,8 @@ template<typename C>
 inline auto head(C&& c)      FP_RETURNS( *begin(c) );
 template<typename C>
 inline auto head(const C& c) FP_RETURNS( *begin(c) );
-template<typename T>
-inline T head(thunk<T> t) { return t(); }
+//template<typename T>
+//inline T head(std::function<T(void)> t) { return t(); }
 
 ///////////////////////////////////////////////////////////////////////////
 // tail

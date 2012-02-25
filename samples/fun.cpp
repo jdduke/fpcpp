@@ -154,7 +154,7 @@ struct HTree;
 typedef pair<char,string> Code;
 typedef pair<size_t,char> Freq;
 typedef pair<size_t,HTree> FreqTree;
-typedef types< Code >::list     Encoding;
+typedef types< Code >::list     Codes;
 typedef types< Freq >::list     Frequencies;
 typedef types< FreqTree >::list FreqTrees;
 
@@ -167,12 +167,12 @@ struct HTree {
   char value;
 };
 
-inline Encoding serialize( const HTree* t ) {
+inline Codes serialize( const HTree* t ) {
   using namespace fp;
   if (nullptr == t) {
-    return Encoding();
+    return Codes();
   } else if (t->value) {
-    return Encoding(1, Code(t->value, "") );
+    return Codes(1, Code(t->value, "") );
   } else {
     let leftS  = serialize(t->left);
     let rightS = serialize(t->right);
@@ -187,6 +187,29 @@ inline Encoding serialize( const HTree* t ) {
   }
 }
 
+typedef fp::pair<size_t, Codes> FreqCodes;
+Codes reduce( fp::types< FreqCodes >::list buf ) {
+
+  using namespace fp;
+
+  if (length(buf) == 1) return snd(head(buf));
+
+  let consC = (string(*)(char,string))cons;
+  let cons0 = curry(consC, '0');
+  let cons1 = curry(consC, '1');
+
+  let add = [&]( const FreqCodes& a, const FreqCodes& b ) {
+    return FreqCodes(a.first+b.first, 
+                     fp::concat(fp::map(fp::mapSndF_(cons0), fp::snd(a)),
+                                fp::map(fp::mapSndF_(cons1), fp::snd(b))));
+  };
+
+  return reduce( insertBy( comparing(fstF()), 
+                           add( index(0, buf), 
+                                index(1, buf) ), 
+                           drop(2, buf) ) );
+}
+
 StringList huffman( string s ) {
 
   using namespace fp;
@@ -196,32 +219,25 @@ StringList huffman( string s ) {
   let freq = []( const types<char>::list& s ) -> Frequencies {
     return fp::map( fp::mapArrowF_( fp::lengthF(), fp::headF() ), fp::group( fp::sort(s) ) );
   };
-  let hstep = []( const FreqTrees& fts ) -> FreqTrees {
-    using namespace fp;
-    if (length(fts) < 2)
-      return FreqTrees();
 
-    let wt1 = index(0, fts);
-    let wt2 = index(1, fts);
+  let result = reduce( map( []( const Freq& f ) { 
+    return fp::make_pair( fp::fst(f), Codes(1, fp::make_pair( fp::snd(f), "" )) );
+  }, sortBy( comparing(fstF()), freq(list(s)) ) ) );
 
-    return FreqTrees();
+  return map( [](const Code& c) { 
+    return fp::show("\'") + fp::fst(c) + "\' : " + fp::snd(c) + "\n";
+  }, /*sortBy( comparing(compose(&length<string>,&snd<char,string>)), */ result );
 
-    // TODO: Implement
-    /*return insertBy( comparing(fst<size_t,HTree>), 
-                     make_pair(wt1.first+wt2.second, HTree(wt1.second,wt2.second)) );*/
-
-  };
-  let huffmanTree = [&]( const Frequencies& fs ) -> HTree* {
-    using namespace fp;
-    htree.resize( length(fs) );
-    // inTODO: implement
-    //return fp::snd( fp::head( fp::until() ))
-    return &htree.front();
-  };
-  let vecs = list(s);
-  return map( []( const pair<char,std::string>& p ) {
-    return fp::show('\'') + fp::fst(p) + "\' : " + fp::fst(p);
-  }, serialize( huffmanTree( freq( vecs ) ) ) );
+ /*
+huffman :: [(Int, Char)] -> [(Char, String)]
+huffman = reduce . map (\(p, c) -> (p, [(c ,"")])) . sortBy (comparing fst)
+  where
+    reduce [(_, ys)]  = ys
+    reduce (x1:x2:xs) = reduce $ insertBy (comparing fst) (add x1 x2) xs
+    add (p1, xs1) (p2, xs2) = (p1 + p2, map (second ('0':)) xs1 ++ map (second ('1':)) xs2)
+ 
+test s = mapM_ (\(a,b)->putStrLn ('\'' : a : "\' : " ++ b)) . huffman . freq $ s
+ */
 
 }
 

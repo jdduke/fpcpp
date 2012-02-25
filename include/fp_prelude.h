@@ -54,7 +54,7 @@ inline T pred(const T& t) {
 ///////////////////////////////////////////////////////////////////////////
 // comparing
 
-#if FP_COMPOUND
+#if 0
 
 template <typename F>
 inline auto comparing(F f) FP_RETURNS( fp::compose2(std::less<result_type_of(F)>(), f, f) );

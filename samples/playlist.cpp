@@ -129,7 +129,7 @@ template<> struct PlaylistUtils<WPL> {
         return "";
       }
     };
-    return fp::takeWhileF( [](const string& s) {
+    return fp::takeWhileT( [](const string& s) {
       return !s.empty(); 
     }, wplLines );
   }

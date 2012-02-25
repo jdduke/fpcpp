@@ -53,9 +53,9 @@ public:
   }
 
   template<typename T0, typename T1, typename T2, typename T3>
-  auto operator()(const T0& t0, const T1& t1, const T2& t2, const T3& t3) -> typename compound_result4<F,f_arity,G,T0,T1,T2,T3>::type {
-    return compound_result4<F,f_arity,G,T0,T1,T2,T3>::apply(f,g,t0,t1,t2,t3);
-  }
+  auto operator()(const T0& t0, const T1& t1, const T2& t2, const T3& t3) 
+    FP_RETURNS( compound_result4<F,f_arity,G,T0,T1,T2,T3>::apply(f,g,t0,t1,t2,t3) );
+
 #endif
 
 protected:
