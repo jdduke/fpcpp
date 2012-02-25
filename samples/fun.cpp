@@ -13,6 +13,7 @@
 #include <deque>
 #include <set>
 
+#define ENABLE_BENCHMARK 0
 #include "benchmark_common.h"
 
 using fp::string;
@@ -117,19 +118,17 @@ typename types< std::complex<T> >::list fft( const typename types<T>::list& v ) 
   typedef std::complex<T> CT;
   typedef types< CT >::list FFTVec;
 
-  if      ( length(v) == 0 ) return FFTVec();
-  else if ( length(v) == 1 ) return FFTVec( 1, head(v) );
-  else {
-    let n        = length( v );
-    let evenOdds = fftSplit<T>( v );
-    let ys       = fft<T>( fst( evenOdds) );
-    let zs       = fft<T>( snd( evenOdds) );
-    let cx = [=](CT z, T k) { return z*std::polar((T)1, (T)(-2. * M_PI * (double)k/n)); };
-    let ts = zipWith( cx, zs, increasingN( length(zs), (T)0 ) );
+  if ( length(v) == 0 ) return FFTVec();
+  if ( length(v) == 1 ) return FFTVec( 1, head(v) );
 
-    return concat( zipWith( std::plus<  CT >(), ys, ts ),
-                   zipWith( std::minus< CT >(), ys, ts ) );
-  }
+  let n        = length( v );
+  let evenOdds = fftSplit<T>( v );
+  let ys       = fft<T>( fst( evenOdds) );
+  let cx = [=](CT z, T k) { return z*std::polar((T)1, (T)(-2. * M_PI * (double)k/n)); };
+  let ts = zipWith( cx, fft<T>( snd( evenOdds) ), increasingN( n/2, (T)0 ) );
+
+  return concat( zipWith( std::plus<  CT >(), ys, ts ),
+                 zipWith( std::minus< CT >(), ys, ts ) );
 
   /* Compare with Haskell:
 

@@ -15,7 +15,10 @@
 #define ITER_MULT 5
 #endif
 
+#if !defined(ENABLE_BENCHMARK)
 #define ENABLE_BENCHMARK 1
+#endif
+
 #if ENABLE_BENCHMARK
 #define BENCHMARK(desc,func,iters) {     \
     timed_run timed(desc);               \
@@ -27,7 +30,7 @@
 #define run_impl(func,iters) BENCHMARK(#func ## "\t" ## #iters,func,iters)
 #define run(func,iters) run_impl(func,iters)
 #else
-#define run(func,iters) { fp::print(#func); let result = func; fp::print(result) }
+#define run(func,iters) { fp::print(#func); let result = func; fp::print(result); fp::print("");} typedef int FP_CONCAT(RETURNS_,__LINE__)
 #endif
 
 #endif /* _BENCHMARK_COMMON_H_ */
