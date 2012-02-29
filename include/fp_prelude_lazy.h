@@ -16,8 +16,8 @@ namespace fp {
 // map
 
 template<typename F, typename T>
-inline auto map(F f, thunk<T> t) -> decltype( thunk< decltype(f(t())) > ) {
-  return [=]() mutable { return f(t()); }
+inline auto map(F f, thunk<T> t) -> thunk< decltype(f(t())) > {
+  return [=]() mutable { return f(t()); };
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -25,7 +25,7 @@ inline auto map(F f, thunk<T> t) -> decltype( thunk< decltype(f(t())) > ) {
 
 template<typename F, typename T>
 inline thunk<T> filter(F f, thunk<T> t) {
-  return [=]() -> T { 
+  return [=]() -> T {
     let value = t();
     while ( !f(value) ) {
       value = t();
@@ -38,7 +38,7 @@ inline thunk<T> filter(F f, thunk<T> t) {
 // scanl
 
 template<typename F, typename T, typename T1>
-typename thunk<T> scanl(F f, T t0, thunk<T1> t) {
+thunk<T> scanl(F f, T t0, thunk<T1> t) {
   return [=]() mutable -> T {
     let result = t0;
     t0 = f(result, t());
@@ -50,9 +50,9 @@ typename thunk<T> scanl(F f, T t0, thunk<T1> t) {
 // scanl1
 
 template<typename F,  typename T>
-typename thunk<T> scanl1(F f, thunk<T> t) {
+thunk<T> scanl1(F f, thunk<T> t) {
   let t0 = t();
-  return scanl(f, t0, ts);
+  return scanl(f, t0, t);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -109,7 +109,7 @@ inline thunk<T> dropWhile(F f, thunk<T> t) {
 
 template <typename T>
 inline thunk<T> drop(size_t n, thunk<T> t) {
-  let dropN = [=](...) mutable { 
+  let dropN = [=](...) mutable {
     return n-- > 0;
   };
   return dropWhile(dropN, t);
@@ -118,7 +118,7 @@ inline thunk<T> drop(size_t n, thunk<T> t) {
 ///////////////////////////////////////////////////////////////////////////
 // splitAt
 
-// Does this even make sense? 
+// Does this even make sense?
 template <typename T>
 inline pair< thunk<T>, thunk<T> > splitAt(size_t n, thunk<T> t) {
   return make_pair( t, drop(n, t) );

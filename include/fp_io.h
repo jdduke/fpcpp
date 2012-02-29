@@ -33,8 +33,9 @@ namespace fp {
 
 typedef std::string FilePath;
 
-std::ifstream readFile( const FilePath& filePath ) {
-  return std::ifstream( filePath );
+std::ifstream& readFile( const FilePath& filePath, std::ifstream& ifs ) {
+  ifs.open( filePath );
+  return ifs;
 }
 
 bool removeFile( const FilePath& filePath ) {
@@ -70,7 +71,7 @@ bool copyFile( const FilePath& srcPath, const FilePath& dstPath ) {
 }
 #endif /* defined(FP_WINDOWS) */
 #else  /* USE_PLATFORM_SPECIFIC_CODE */
-  std::ifstream ifs( srcPath, std::ios::in  | std::ios::binary | std::ios::_Nocreate );
+  std::ifstream ifs( srcPath, std::ios::in  | std::ios::binary );
   if ( ifs.is_open() ) {
     std::ofstream ofs( dstPath, std::ios::out | std::ios::binary );
     if ( ofs.is_open() ) {

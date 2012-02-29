@@ -54,20 +54,19 @@
   template <typename F, typename T>     \
   inline auto b(F f, T t) FP_RETURNS(a);
 
-#define FP_CURRIED(func0,func1)                                                                                                 \
-  fp::curry(func0<decltype(func1),                                                                                              \
-  /*typename fp::types<typename remove_const_ref<typename fp::function_traits< decltype(func1) >::t0_type>::type> >::list, */   \
-  typename fp_list<typename remove_const_ref<typename fp::function_traits< decltype(func1) >::t0_type>::type> >,                \
-  func1)
+#define FP_CURRIED(func0,func1)                                                                                             \
+  fp::curry(func0<decltype(func1), typename fp_list<typename remove_const_ref<typename fp::function_traits< decltype(func1) >::t0_type>::type> >, \
+            func1)
 #define FP_CURRIED2(func0,func2,value)                                                                                                                     \
-  fp::curry2(func0<decltype(func2), decltype(value), fp_list<typename remove_const_ref<typename fp::function_traits< decltype(func1) >::t0_type>::type> >, \
-  func2, value)
+  fp::curry2(func0<decltype(func2), decltype(value), fp_list<typename remove_const_ref<typename fp::function_traits< decltype(func2) >::t0_type>::type> >, \
+             func2,                                                                                                                                        \
+             value)
 
 #define FP_DEFINE_CURRIED(funcName, funcName2)             \
   FP_DEFINE_FUNCTION_OBJECT( funcName, funcName ## F ); \
   FP_DEFINE_CURRIED_HELPER(  FP_CURRIED(funcName, f), funcName2 )
 #define FP_DEFINE_CURRIED_T(funcName, funcName2, funcName3)           \
-  FP_DEFINE_FUNCTION_OBJECT( funcName, funcName ## F );            \
+  FP_DEFINE_FUNCTION_OBJECT( funcName, funcName ## F );               \
   FP_DEFINE_CURRIED_HELPER(  FP_CURRIED( funcName, f),    funcName2 ) \
   FP_DEFINE_CURRIED_HELPER2( FP_CURRIED2(funcName, f, t), funcName3 )
 

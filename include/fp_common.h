@@ -110,6 +110,21 @@ inline types<char>::list list(const string& s) {
 }
 
 ///////////////////////////////////////////////////////////////////////////
+// index
+
+template<typename Index, typename C>
+inline fp_enable_if_container(C,value_type_of(C)) index(Index i, const C& c) {
+  return c[i];
+}
+
+template<typename Index, typename T>
+inline T index(Index i, const std::list<T>& l) {
+  let it = begin(l);
+  std::advance(it, i);
+  return it != end(l) ? *it : T();
+}
+
+///////////////////////////////////////////////////////////////////////////
 
 // Thunk from list... careful, no bounds check
 template<typename C>

@@ -27,7 +27,7 @@
     }                                    \
   }
 
-#define run_impl(func,iters) BENCHMARK(#func ## "\t" ## #iters,func,iters)
+#define run_impl(func,iters) BENCHMARK(#func,func,iters)
 #define run(func,iters) run_impl(func,iters)
 #else
 #define run(func,iters) { fp::print(#func); let result = func; fp::print(result); fp::print("");} typedef int FP_CONCAT(RETURNS_,__LINE__)

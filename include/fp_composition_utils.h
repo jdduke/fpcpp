@@ -20,6 +20,9 @@ namespace std {
 
 namespace fp {
 
+template <typename F, typename G0>              class composed;
+template <typename F, typename G0, typename G1> class composed2;
+
 ///////////////////////////////////////////////////////////////////////////
 
 template <typename T>
@@ -31,6 +34,9 @@ template<typename T>
 auto make_function(T *t) -> typename make_function_traits<T>::type {
   return t;
 }
+
+///////////////////////////////////////////////////////////////////////////
+
 
 ///////////////////////////////////////////////////////////////////////////
 

@@ -104,8 +104,8 @@ if(WIN32)
   endif()
 endif()
 
-include_directories(${FPCPP_SOURCE_DIR}/include)
-include_directories(${FPCPP_SOURCE_DIR}/externals)
+include_directories(include)
+include_directories(externals)
 
 set(TTHREAD_LIB tthread)
 
@@ -113,6 +113,7 @@ if(BUILD_SAMPLES OR BUILD_TESTS)
   add_subdirectory(externals/tthread)
   include_directories(common)
   include_directories(external)
+  include_directories(samples)
 endif()
 
 if(BUILD_SAMPLES)

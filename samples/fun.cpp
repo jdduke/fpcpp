@@ -4,7 +4,7 @@
 // www.opensource.org/licenses/mit-license.php
 /////////////////////////////////////////////////////////////////////////////
 
-#include <fpcpp.h>
+#include "fpcpp.h"
 
 #include <iostream>
 #include <complex>
@@ -13,7 +13,7 @@
 #include <deque>
 #include <set>
 
-#define ENABLE_BENCHMARK 0
+#define ENABLE_BENCHMARK 1
 #include "benchmark_common.h"
 
 using fp::string;
@@ -49,7 +49,8 @@ StringLists anagrams( const fp::FilePath& filePath ) {
 
   using namespace fp;
 
-  let f       = readFile( filePath );
+  std::ifstream ifs;
+  let& f      = readFile( filePath, ifs );
   let words   = lines( f );
   //let fstr    = fst<string,string>;
   //let groupon = compose2( std::equal_to<string>(), fstr, fstr );
@@ -59,12 +60,12 @@ StringLists anagrams( const fp::FilePath& filePath ) {
 
   return fp::map( []( const StringPairList& sl ) {
     return fp::map( fp::snd<string,string>, sl );
-  }, fp::filter( [=]( const StringPairList& sl ) { 
-    return fp::length( sl ) == mxl; 
+  }, fp::filter( [=]( const StringPairList& sl ) {
+    return fp::length( sl ) == mxl;
   }, wix) );
 
   /* Compare with Haskell:
-  
+
     import Data.List
     groupon f x y = f x == f y
 
@@ -86,14 +87,12 @@ T nthRoot( int n, T x ) {
 
   typedef std::pair<T,T> Guess;
 
-  return fst( until( uncurry( std::equal_to<T>() ), [=]( Guess g ) -> Guess { 
-    T x0 = fp::snd( g ); return Guess( x0, (x0*(n-1)+(x/pow(x0,n-1)))*(1./n) ); 
+  return fst( until( uncurry( std::equal_to<T>() ), [=]( Guess g ) -> Guess {
+    T x0 = fp::snd( g ); return Guess( x0, (x0*(n-1)+(x/pow(x0,n-1)))*(1./n) );
   }, Guess( x, x/n ) ) );
 
   /* Compare with Haskell:
-
     n `nthRoot` x = fst $ until (uncurry(==)) (\(_,x0) -> (x0,((n-1)*x0+x/x0**(n-1))/n)) (x,x/n)
-
   */
 
 }
@@ -113,11 +112,11 @@ typename types< typename types<T>::list, typename types<T>::list >::pair fftSpli
   }
 }
 
-template<typename T> 
+template<typename T>
 typename types< std::complex<T> >::list fft( const typename types<T>::list& v ) {
   using namespace fp;
   typedef std::complex<T> CT;
-  typedef types< CT >::list FFTVec;
+  typedef typename types< CT >::list FFTVec;
 
   if ( length(v) == 0 ) return FFTVec();
   if ( length(v) == 1 ) return FFTVec( 1, head(v) );
@@ -138,7 +137,7 @@ typename types< std::complex<T> >::list fft( const typename types<T>::list& v ) 
   fft xs = zipWith (+) ys ts ++ zipWith (-) ys ts
   where n = length xs
   ys = fft evens
-    zs = fft odds 
+    zs = fft odds
     (evens, odds) = split xs
     split [] = ([], [])
     split [x] = ([x], [])
@@ -151,44 +150,12 @@ typename types< std::complex<T> >::list fft( const typename types<T>::list& v ) 
 
 ///////////////////////////////////////////////////////////////////////////
 
-struct HTree;
 typedef pair<char,string> Code;
 typedef pair<size_t,char> Freq;
-typedef pair<size_t,HTree> FreqTree;
 typedef types< Code >::list     Codes;
 typedef types< Freq >::list     Frequencies;
-typedef types< FreqTree >::list FreqTrees;
-
-struct HTree { 
-  HTree() : left(nullptr), right(nullptr), value(0) { }
-  HTree(const HTree& l, const HTree& r) : left(&l), right(&r), value(0) { }
-  HTree(char c) : left(nullptr), right(nullptr), value(c) { }
-  const HTree* left;
-  const HTree* right;
-  char value;
-};
-
-inline Codes serialize( const HTree* t ) {
-  using namespace fp;
-  if (nullptr == t) {
-    return Codes();
-  } else if (t->value) {
-    return Codes(1, Code(t->value, "") );
-  } else {
-    let leftS  = serialize(t->left);
-    let rightS = serialize(t->right);
-
-    let cons0 = [](std::string& s) { return fp::cons('0', s); };
-    let cons1 = [](std::string& s) { return fp::cons('1', s); };
-    let apply0 = [&](const Code& c) { return Code(fp::fst(c), cons0(fp::snd(c))); };
-    let apply1 = [&](const Code& c) { return Code(fp::fst(c), cons1(fp::snd(c))); };
-
-    return concat( map( apply0, leftS), 
-                   map( apply1, leftS) );
-  }
-}
-
 typedef fp::pair<size_t, Codes> FreqCodes;
+
 Codes reduce( fp::types< FreqCodes >::list buf ) {
 
   using namespace fp;
@@ -200,35 +167,36 @@ Codes reduce( fp::types< FreqCodes >::list buf ) {
   let cons1 = curry(consC, '1');
 
   let add = [&]( const FreqCodes& a, const FreqCodes& b ) {
-    return FreqCodes(a.first+b.first, 
+    return FreqCodes(a.first+b.first,
                      fp::concat(fp::map(fp::mapSndF_(cons0), fp::snd(a)),
                                 fp::map(fp::mapSndF_(cons1), fp::snd(b))));
   };
 
-  return reduce( insertBy( comparing(fstF()), 
-                           add( index(0, buf), 
-                                index(1, buf) ), 
+  return reduce( insertBy( comparing(fstF()),
+                           add( index(0, buf),
+                                index(1, buf) ),
                            drop(2, buf) ) );
 }
 
 StringList huffman( string s ) {
 
+#if defined(VC_VER)
   using namespace fp;
-
-  types<HTree>::list htree;
 
   let freq = []( const types<char>::list& s ) -> Frequencies {
     return fp::map( fp::mapArrowF_( fp::lengthF(), fp::headF() ), fp::group( fp::sort(s) ) );
   };
 
-  let result = reduce( map( []( const Freq& f ) { 
+  let result = reduce( map( []( const Freq& f ) {
     return fp::make_pair( fp::fst(f), Codes(1, fp::make_pair( fp::snd(f), "" )) );
   }, sortBy( comparing(fstF()), freq(list(s)) ) ) );
 
-  return map( [](const Code& c) { 
+  return map( [](const Code& c) {
     return fp::show("\'") + fp::fst(c) + "\' : " + fp::snd(c) + "\n";
   }, /*sortBy( comparing(compose(&length<string>,&snd<char,string>)), */ result );
-
+#else
+  return StringList();
+#endif
  /*
 huffman :: [(Int, Char)] -> [(Char, String)]
 huffman = reduce . map (\(p, c) -> (p, [(c ,"")])) . sortBy (comparing fst)
@@ -236,7 +204,7 @@ huffman = reduce . map (\(p, c) -> (p, [(c ,"")])) . sortBy (comparing fst)
     reduce [(_, ys)]  = ys
     reduce (x1:x2:xs) = reduce $ insertBy (comparing fst) (add x1 x2) xs
     add (p1, xs1) (p2, xs2) = (p1 + p2, map (second ('0':)) xs1 ++ map (second ('1':)) xs2)
- 
+
 test s = mapM_ (\(a,b)->putStrLn ('\'' : a : "\' : " ++ b)) . huffman . freq $ s
  */
 
@@ -255,12 +223,6 @@ int main(int argc, char **argv) {
   run( pascalsTriangle( 6 ), 10000 * ITER_MULT );
 
   ///////////////////////////////////////////////////////////////////////////
-
-  run( nthRoot( 5, 34. ),    100000 * ITER_MULT );
-  run( nthRoot( 6, 25. ),    100000 * ITER_MULT );
-  run( nthRoot( 7, 100. ),   100000 * ITER_MULT );
-
-  ///////////////////////////////////////////////////////////////////////////
   static const char* unixdict = "./../../../samples/unixdict.txt";
   run( anagrams( unixdict ), 5 * ITER_MULT );
 
@@ -270,10 +232,19 @@ int main(int argc, char **argv) {
   let fftIn = fp::list( fftValues );
   run( fft<float>( fftIn /*=1,1,1,1,0,0,0,0*/ ), 5000 * ITER_MULT );
 
+  #if defined(VC_VER)
+
+  ///////////////////////////////////////////////////////////////////////////
+
+  run( nthRoot( 5, 34. ),    100000 * ITER_MULT );
+  run( nthRoot( 6, 25. ),    100000 * ITER_MULT );
+  run( nthRoot( 7, 100. ),   100000 * ITER_MULT );
+
   ///////////////////////////////////////////////////////////////////////////
 
   print( show("\n\nHuffman( \"this is an example for huffman encoding\" )") );
   print( huffman( "this is an example for huffman encoding" ) );
+#endif
 
   print( "" );
 

@@ -68,7 +68,7 @@
 #define FP_CONCAT(x, y) FP_CONCAT_IMPL(x,y)
 
 // auto function(<arguments>) RETURNS(<some-expression>);
-#define FP_RETURNS(...)        -> decltype(__VA_ARGS__) { return (__VA_ARGS__); }                      typedef int FP_CONCAT(RETURNS_, __LINE__)
-#define FP_RETURNS_NONREF(...) -> nonconstref_type_of(decltype(__VA_ARGS__)) { return (__VA_ARGS__); } typedef int FP_CONCAT(RETURNS_, __LINE__)
+#define FP_RETURNS(...)        -> decltype(__VA_ARGS__) { return (__VA_ARGS__); }                      typedef int FP_CONCAT(RETURNS_ON_, FP_CONCAT(__LINE__,__COUNTER__))
+#define FP_RETURNS_NONREF(...) -> nonconstref_type_of(decltype(__VA_ARGS__)) { return (__VA_ARGS__); } typedef int FP_CONCAT(RETURNS_ON_, FP_CONCAT(__LINE__,__COUNTER__))
 
 #endif /* _FP_DEFINES_H_ */

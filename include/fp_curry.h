@@ -73,7 +73,7 @@ inline auto curry3(F f, T t, T1 t1, T2 t2) FP_RETURNS( fp::curry_helper<F>::bind
 template<typename F, typename T, typename T1, typename T2, typename T3>
 inline auto curry4(F f, T t, T1 t1, T2 t2, T3 t3) FP_RETURNS( fp::curry_helper<F>::bind4(f,t,t1,t2,t3) );
 
-// This is useful for template/overloaded functions... using the arguments, we can uniquely determine the 
+// This is useful for template/overloaded functions... using the arguments, we can uniquely determine the
 //     the function template instance, and in turn curry the arguments
 template <typename F, typename T>
 inline auto curryAll(F f, T t) FP_RETURNS( fp::curry_helper_impl<1>::bind(f,t) );
@@ -91,17 +91,23 @@ inline auto curryAll4(F f, T t, T1 t1, T2 t2, T3 t3) FP_RETURNS( fp::curry_helpe
 ///////////////////////////////////////////////////////////////////////////
 // uncurry
 
-template<typename F> 
+template<typename F>
 struct uncurryF {
 
   uncurryF(F f_) : f(f_) { }
 
   template<typename T0, typename T1>
-  inline auto operator()(const std::pair<T0,T1>& p2) FP_RETURNS( f( fst(p2), snd(p2) ) );
+  inline auto operator()(const std::pair<T0,T1>& p2) -> decltype( declval<F>()( fst(p2), snd(p2) ) ) {
+    return f( fst(p2), snd(p2) );
+  }
   template<typename T0, typename T1, typename T2>
-  inline auto operator()(const std::tuple<T0,T1,T2>& p3) FP_RETURNS( f( std::get<0>(p3), std::get<1>(p3), std::get<2>(p3) ) );
+  inline auto operator()(const std::tuple<T0,T1,T2>& p3) -> decltype( declval<F>()( std::get<0>(p3), std::get<1>(p3), std::get<2>(p3) ) ) {
+    return f( std::get<0>(p3), std::get<1>(p3), std::get<2>(p3) );
+  }
   template<typename T0, typename T1, typename T2, typename T3>
-  inline auto operator()(const std::tuple<T0,T1,T2,T3>& p4) FP_RETURNS( f( std::get<0>(p4), std::get<1>(p4), std::get<2>(p4), std::get<3>(p4) ) );
+  inline auto operator()(const std::tuple<T0,T1,T2,T3>& p4) -> decltype( declval<F>()( std::get<0>(p4), std::get<1>(p4), std::get<2>(p4), std::get<3>(p4) ) ) {
+    return f( std::get<0>(p4), std::get<1>(p4), std::get<2>(p4), std::get<3>(p4) );
+  }
 
 private:
   F f;

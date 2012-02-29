@@ -9,6 +9,7 @@
 
 #include "fp_defines.h"
 #include "fp_curry.h"
+#include "fp_prelude_math.h"
 #include "fp_prelude.h"
 
 #include <algorithm>
@@ -206,7 +207,7 @@ inline void scan(InputIt first, InputIt last, OutIt out, Op op) {
 
 template<typename F, typename T, typename C>
 typename types<T>::list scanl(F f, T t, const C& c) {
-  typename types<t>::list result(1, t);
+  typename types<T>::list result(1, t);
   scan(extent(c), back(result), t, f);
   return result;
 }
@@ -214,8 +215,8 @@ typename types<T>::list scanl(F f, T t, const C& c) {
 //////////////////////////////////////////////////////////////////////////
 // scanl1
 
-template<typename F,  typename C>
-typename C scanl1(F f, const C& c) {
+template<typename F, typename C>
+C scanl1(F f, const C& c) {
   C result;
   scan(extent(c), back(result), f);
   return result;
@@ -226,7 +227,7 @@ typename C scanl1(F f, const C& c) {
 
 template<typename F, typename T, typename C>
 typename types<T>::list scanr(F f, T t, const C& c) {
-  typename types<t>::list result(1, t);
+  typename types<T>::list result(1, t);
   scan(rextent(c), back(result), t, f);
   return result;
 }
@@ -235,7 +236,7 @@ typename types<T>::list scanr(F f, T t, const C& c) {
 // scanr
 
 template<typename F, typename C>
-typename C scanr1(F f, const C& c) {
+C scanr1(F f, const C& c) {
   C result;
   scan(rextent(c), back(result), f);
   return result;
@@ -269,7 +270,7 @@ inline auto replicate(size_t n, T t) FP_RETURNS( typename types<T>::list(n, t) )
 template <typename C>
 inline auto cycle(const C& c) -> thunk< value_type_of(C) > {
   size_t i = 0;
-  return [=]() { return c[i++ % length(c)]; };
+  return [=]() mutable { return c[i++ % length(c)]; };
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -414,23 +415,6 @@ inline value_type_of(C) minimum(const C& c) {
 }
 
 ///////////////////////////////////////////////////////////////////////////
-// reverse
-
-#if 0
-template <typename C>
-inline C reverse( const C& c ) {
-  C result( c );
-  std::reverse( extent(c) );
-  return c;
-}
-#else
-template <typename C>
-inline C reverse(const C& c) {
-  return foldl( flip( cons<value_type_of(C),C> ), C(), c );
-}
-#endif
-
-///////////////////////////////////////////////////////////////////////////
 // sortBy
 
 template <typename F, typename C>
@@ -495,7 +479,7 @@ inline C insertBy(F f, T t, C c) {
 
 template<typename T, typename C>
 inline C insert(T t, C c) {
-  return insertBy( less<T>, t, c );
+  return insertBy( math::less<T>, t, c );
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -622,26 +606,6 @@ inline bool lookup(const K& k, const C& c) {
   return iter_value( c.find(k), c );
 }
 
-
-///////////////////////////////////////////////////////////////////////////
-// Indexing lists
-///////////////////////////////////////////////////////////////////////////
-
-///////////////////////////////////////////////////////////////////////////
-// index
-
-template<typename Index, typename C>
-inline fp_enable_if_container(C,value_type_of(C)) index(Index i, const C& c) {
-  return c[i];
-}
-
-template<typename Index, typename T>
-inline T index(Index i, const std::list<T>& l) {
-  let it = begin(l);
-  std::advance(it, i);
-  return it != end(l) ? *it : T();
-}
-
 ///////////////////////////////////////////////////////////////////////////
 // Generating lists
 ///////////////////////////////////////////////////////////////////////////
@@ -712,6 +676,23 @@ inline string cons(string s0, const string& s1) {
 FP_DEFINE_FUNCTION_OBJECT(cons, consF);
 
 ///////////////////////////////////////////////////////////////////////////
+// reverse
+
+#if 0
+template <typename C>
+inline C reverse( const C& c ) {
+  C result( c );
+  std::reverse( extent(c) );
+  return c;
+}
+#else
+template <typename C>
+inline C reverse(const C& c) {
+  return foldl( flip( cons<value_type_of(C),C> ), C(), c );
+}
+#endif
+
+///////////////////////////////////////////////////////////////////////////
 // Pair/Tuple
 
 using std::pair;
@@ -751,7 +732,9 @@ template<typename F0>
 struct mapSndF {
   mapSndF(F0 f0_) : f0(f0_) { }
   template<typename T, typename U>
-  inline auto operator()(const pair<T,U>& t) FP_RETURNS( make_pair( fst(t), f0(snd(t)) ) );
+  inline auto operator()(const pair<T,U>& t) -> std::pair<T, decltype( declval<F0>()(snd(t)) )> {
+    return make_pair( fst(t), f0(snd(t)) );
+  }
 
   F0 f0;
 };
@@ -762,14 +745,16 @@ mapSndF<F0> mapSndF_(F0 f0) { return mapSndF<F0>(f0); }
 // mapArrow
 
 template<typename F0, typename F1, typename T>
-inline auto mapArrow(F0 f0, F1 f1, const T& T) FP_RETURNS( make_pair( f0(t), f1(t) ) );
+inline auto mapArrow(F0 f0, F1 f1, const T& t) FP_RETURNS( make_pair( f0(t), f1(t) ) );
 
 // TODO: Factor this out into some nice common code for re-use
 template<typename F0, typename F1>
 struct mapArrowF {
   mapArrowF(F0 f0_, F1 f1_) : f0(f0_), f1(f1_) { }
   template<typename T>
-  inline auto operator()(const T& t) FP_RETURNS( make_pair( f0(t), f1(t) ) );
+  inline auto operator()(const T& t) -> std::pair<decltype( declval<F0>()(fst(t))), decltype( declval<F1>()(snd(t)) )> {
+    make_pair( f0(t), f1(t) );
+  }
 
   F0 f0;
   F1 f1;

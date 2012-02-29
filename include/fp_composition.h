@@ -13,6 +13,8 @@ namespace fp {
 
 ///////////////////////////////////////////////////////////////////////////
 
+using std::declval;
+
 template<typename F, typename G>
 class composed {
 public:
@@ -27,22 +29,22 @@ public:
 #else
 
   template<typename T0>
-  inline auto operator()(const T0& t) -> decltype(f(g(t0))) {
-    return f(g(t));
+  inline auto operator()(const T0& t0) -> decltype( declval<F>()(declval<G>()(t0)) ) {
+    return f(this->g(t0));
   }//FP_RETURNS( f(g(t)) );
 
   template<typename T0, typename T1>
-  inline auto operator()(const T0& t0, const T1& t1) -> decltype(f(g(t0,g1))) {
+  inline auto operator()(const T0& t0, const T1& t1) -> decltype( declval<F>()(declval<G>()(t0,t1)) ) {
     return f(g(t0,t1));
-  } // FP_RETURNS( f(g(t0,t1)) );
+  }
 
   template<typename T0, typename T1, typename T2>
-  inline auto operator()(const T0& t0, const T1& t1, const T2& t2) -> decltype(f(g(t0,t1,t2))) {
+  inline auto operator()(const T0& t0, const T1& t1, const T2& t2) -> decltype( declval<F>()(declval<G>()(t0,t1,t2)) ) {
     return f(g(t0,t1,t2));
   }
 
   template<typename T0, typename T1, typename T2, typename T3>
-  inline auto operator()(const T0& t0, const T1& t1, const T2& t2, const T3& t3) -> decltype(f(g(t0,t1,t2,t3))) {
+  inline auto operator()(const T0& t0, const T1& t1, const T2& t2, const T3& t3) -> decltype(  declval<F>()(declval<G>()(t0,t1,t2,t3)) ) {
     return f(g(t0,t1,t2,t3));
   }
 

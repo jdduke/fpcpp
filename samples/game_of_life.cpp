@@ -26,7 +26,7 @@ C life(const C& grid, size_t x, size_t y) {
       grid[(i  -1)%size]                    + grid[(i  +1)%size] +
       grid[(i+x-1)%size] + grid[(i+x)%size] + grid[(i+x+1)%size];
     return ((grid[i]==1 && (neighbors==2 || neighbors==3)) || (grid[i]==0 && neighbors == 3)) ? 1 : 0;
-  }, fp::increasing(x*y,0));
+  }, fp::increasingN(x*y,0));
 #else
   using fp::index;
   const let size = x * y;
@@ -48,15 +48,15 @@ int main(int argc, char **argv) {
     Y = 20,
   };
 
-  let grid = fp::map([](float f) { return f < 0.f ? 0 : 1; }, 
-                     fp::takeF(X*Y, fp::rand_range_<float>(-1.f,1.f)));
+  let grid = fp::map([](float f) { return f < 0.f ? 0 : 1; },
+                     fp::takeF(X*Y, fp::randRange_<float>(-1.f,1.f)));
 
   while (true) {
     grid = life(grid, X, Y);
     size_t i = 0;
     std::stringstream ss;
     let showGrid = [=,&ss](int x) mutable {
-      if(i++ % X == 0) 
+      if(i++ % X == 0)
         ss << std::endl;
       const char c = (x ? 'X' : ' ');
       ss << c;
