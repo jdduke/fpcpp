@@ -753,7 +753,7 @@ struct mapArrowF {
   mapArrowF(F0 f0_, F1 f1_) : f0(f0_), f1(f1_) { }
   template<typename T>
   inline auto operator()(const T& t) -> std::pair<decltype( declval<F0>()(fst(t))), decltype( declval<F1>()(snd(t)) )> {
-    make_pair( f0(t), f1(t) );
+    return make_pair( f0(t), f1(t) );
   }
 
   F0 f0;

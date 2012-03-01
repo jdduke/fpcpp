@@ -180,10 +180,9 @@ Codes reduce( fp::types< FreqCodes >::list buf ) {
 
 StringList huffman( string s ) {
 
-#if defined(VC_VER)
   using namespace fp;
 
-  let freq = []( const types<char>::list& s ) -> Frequencies {
+  let freq = []( const types<char>::list& s ) {
     return fp::map( fp::mapArrowF_( fp::lengthF(), fp::headF() ), fp::group( fp::sort(s) ) );
   };
 
@@ -194,10 +193,8 @@ StringList huffman( string s ) {
   return map( [](const Code& c) {
     return fp::show("\'") + fp::fst(c) + "\' : " + fp::snd(c) + "\n";
   }, /*sortBy( comparing(compose(&length<string>,&snd<char,string>)), */ result );
-#else
-  return StringList();
-#endif
- /*
+
+  /*
 huffman :: [(Int, Char)] -> [(Char, String)]
 huffman = reduce . map (\(p, c) -> (p, [(c ,"")])) . sortBy (comparing fst)
   where
@@ -232,8 +229,6 @@ int main(int argc, char **argv) {
   let fftIn = fp::list( fftValues );
   run( fft<float>( fftIn /*=1,1,1,1,0,0,0,0*/ ), 5000 * ITER_MULT );
 
-  #if defined(VC_VER)
-
   ///////////////////////////////////////////////////////////////////////////
 
   run( nthRoot( 5, 34. ),    100000 * ITER_MULT );
@@ -244,7 +239,6 @@ int main(int argc, char **argv) {
 
   print( show("\n\nHuffman( \"this is an example for huffman encoding\" )") );
   print( huffman( "this is an example for huffman encoding" ) );
-#endif
 
   print( "" );
 

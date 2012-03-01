@@ -8,6 +8,7 @@
 #define _FP_COMPOSITION_H_
 
 #include "fp_defines.h"
+#include "fp_composition_utils.h"
 
 namespace fp {
 
