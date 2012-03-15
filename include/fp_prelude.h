@@ -13,28 +13,45 @@
 #include "fp_composition_compound.h"
 
 #include <limits>
+#include <random>
 
 namespace fp {
 
 // ///////////////////////////////////////////////////////////////////////////
-// randRange
+// uniform
+
+typedef std::mt19937 uniform_gen;
 
 template<typename T>
-inline T randRange(T t0 = std::numeric_limits<T>::min(), T t1 = std::numeric_limits<T>::max()) {
-  return (T)(t0 + static_cast<double>(rand())/((unsigned long long)RAND_MAX+1) * (t1 - t0));
+inline typename std::enable_if< std::is_floating_point<T>::value, T>::type
+uniform(T t0, T t1) {
+  static uniform_gen generator;
+  return std::uniform_real<T>(t0, t1)(generator);
 }
+
 template<typename T>
-struct randRange_ {
-  randRange_(T t0_ = std::numeric_limits<T>::min(), T t1_ = std::numeric_limits<T>::max()) : t0(t0_), t1(t1_) { }
-  T operator()() { return randRange<T>(t0,t1); }
-  T t0, t1;
+inline typename std::enable_if< !std::is_floating_point<T>::value, T>::type
+uniform(T t0, T t1) {
+  static uniform_gen generator;
+  return std::uniform_int<T>(t0, t1)(generator);
+}
+
+template<typename T>
+struct uniform_ {
+  uniform_(T t0, T t1, unsigned long long seed) 
+    : mUniform(t0, t1), mGenerator(seed) { }
+  uniform_(T t0, T t1) 
+    : mUniform(t0, t1), mGenerator(uniform(uniform_gen::default_seed/4, uniform_gen::default_seed)) { }
+  T operator()() { return mUniform(mGenerator); }
+  std::uniform_real<T> mUniform;
+  uniform_gen mGenerator;
 };
 
 ///////////////////////////////////////////////////////////////////////////
-// randN
+// uniformN
 template<typename T>
-inline typename types<T>::list randN(size_t n, T t0 = std::numeric_limits<T>::min(), T t1 = std::numeric_limits<T>::max()) {
-  return takeF(n, randRange_<T>(t0,t1));
+inline typename types<T>::list uniformN(size_t n, T t0, T t1) {
+  return takeF(n, uniform_<T>(t0,t1));
 }
 
 ///////////////////////////////////////////////////////////////////////////

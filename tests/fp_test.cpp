@@ -37,37 +37,26 @@ bool filteredMap(MapOp mapOp, FilterOp filterOp, Source source, std::function<bo
                         source)));
 }
 
-double pi(size_t samples = 1000) {
+double pi(size_t samples = 10000) {
   using namespace fp;
   typedef std::pair<double,double> point;
   return 4.* length(filter([](double d) { return d <= 1.0; },
                            map([](const point& p) { return p.first*p.first + p.second*p.second; },
-                               zip(takeF(samples, randRange_<double>(-1.0,1.0)),
-                                   takeF(samples, randRange_<double>(-1.0,1.0)))))) / samples;
+                               zip(uniformN(samples, -1.0, 1.0),
+                                   uniformN(samples, -1.0, 1.0))))) / samples;
 }
 
-double pi_(size_t samples = 1000) {
-
+double pi_(size_t samples = 10000) {
   using namespace fp;
 
   let sample = []() -> int {
-    let x = randRange(-1.,1.);
-    let y = randRange(-1.,1.);
+    let x = uniform(-1.,1.);
+    let y = uniform(-1.,1.);
     let dist2 = x*x + y*y;
     return dist2 < 1. ? 1 : 0;
   };
 
   return 4. * foldl1(std::plus<int>(), takeF(samples, sample)) / samples;
-  /*
-  get_pi throws = do results <- replicateM throws one_trial
-    return (4 * fromIntegral (foldl' (+) 0 results) / fromIntegral throws)
-  where
-    one_trial = do rand_x <- randomRIO (-1, 1)
-    rand_y <- randomRIO (-1, 1)
-    let dist :: Double
-    dist = sqrt (rand_x*rand_x + rand_y*rand_y)
-    return (if dist < 1 then 1 else 0)
-    */
 }
 
 TEST(Prelude, Fun) {
@@ -97,7 +86,6 @@ TEST(Prelude, Fun) {
 
   EXPECT_NEAR(3.14, pi(), .1);
   EXPECT_NEAR(3.14, pi_(), .1);
-
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -250,7 +238,7 @@ TEST(Prelude, MinMax) {
 
   ///////////////////////////////////////////////////////////////////////////
 
-  let randFloat = fp::randRange_<float>();
+  let randFloat = fp::uniform_<float>(0.f, 1.f);
   fp::types<float>::list randFloats;
   randFloats.push_back(randFloat());
   float randMax = randFloats.back();
@@ -282,9 +270,9 @@ TEST(Prelude, Reverse) {
 }
 
 TEST(Prelude, Random) {
-  using fp::randN;
-  using fp::randRange;
-  using fp::randRange_;
+  using fp::uniformN;
+  using fp::uniform;
+  using fp::uniform_;
 
   enum {
     numRands = 10000,
@@ -296,7 +284,7 @@ TEST(Prelude, Random) {
   static const float  minRand = 0.f;
   static const float  maxRand = (float)numRandBins;
 
-  let randFloats = fp::randN(numRands, minRand, maxRand);
+  let randFloats = fp::uniformN(numRands, minRand, maxRand);
   EXPECT_GE(maxRand, fp::maximum(randFloats));
   EXPECT_LE(minRand, fp::maximum(randFloats));
   EXPECT_LE(5.f, fp::maximum(randFloats));

@@ -50,7 +50,7 @@ inline types<int>::list unique6( const types<int>::list& rands ) {
 }
 
 void unique( size_t count ) {
-  const let rands = fp::randN( count, 0, 100 );
+  const let rands = fp::uniformN( count, 0, 100 );
   let rands3 = rands;
   let rands5 = rands;
 
