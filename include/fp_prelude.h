@@ -35,20 +35,22 @@ using std::tr1::random_device;
 // ///////////////////////////////////////////////////////////////////////////
 // uniform
 
+#if !defined(__MINGW32__)
+
 typedef mt19937 uniform_gen;
 
 template<typename T>
 inline typename std::enable_if< std::is_floating_point<T>::value, T>::type
-uniform(T t0, T t1) {
-  static uniform_gen generator;
-  return uniform_real<T>(t0, t1)(generator);
+  uniform(T t0, T t1) {
+    static uniform_gen generator;
+    return uniform_real<T>(t0, t1)(generator);
 }
 
 template<typename T>
 inline typename std::enable_if< !std::is_floating_point<T>::value, T>::type
-uniform(T t0, T t1) {
-  static uniform_gen generator;
-  return uniform_int<T>(t0, t1)(generator);
+  uniform(T t0, T t1) {
+    static uniform_gen generator;
+    return uniform_int<T>(t0, t1)(generator);
 }
 
 template<typename T>
@@ -64,13 +66,30 @@ struct uniform_ {
   mutable uniform_gen mGenerator;
 };
 
-///////////////////////////////////////////////////////////////////////////
-// uniformN
 template<typename T>
 inline typename types<T>::list uniformN(size_t n, T t0, T t1) {
-  //return takeF(n, uniform_<T>(t0,t1));
   return takeF(n, [=]() { return uniform(t0,t1); });
 }
+
+#else
+
+template<typename T>
+inline T uniform(T t0, T t1) {
+  return (T)(t0 + static_cast<double>(rand())/((unsigned long long)RAND_MAX+1) * (t1 - t0));
+}
+template<typename T>
+struct uniform_ {
+  uniform_(T t0_, T t1_) : t0(t0_), t1(t1_) { }
+  T operator()() { return uniform<T>(t0,t1); }
+  T t0, t1;
+};
+
+template<typename T>
+inline typename types<T>::list uniformN(size_t n, T t0, T t1) {
+  return takeF(n, uniform_<T>(t0,t1));
+}
+
+#endif
 
 ///////////////////////////////////////////////////////////////////////////
 // succ
