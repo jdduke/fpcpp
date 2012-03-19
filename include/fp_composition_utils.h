@@ -49,7 +49,10 @@ template <typename T0, typename T1, typename T2, typename T3> struct function_tr
 #if FP_VARIADIC
 
 template <typename T>
-struct function_traits : public function_traits<decltype(&T::operator())> {};
+struct function_traits : public function_traits< decltype( &T::operator() )> {};
+
+template <typename T>
+struct function_traits<T*> : public function_traits< typename make_function_traits<T>::type > { };
 
 template <typename C, typename R, typename... Args>
 struct function_traits<R(C::*)(Args...) const> {

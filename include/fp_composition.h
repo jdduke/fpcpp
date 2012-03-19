@@ -20,19 +20,20 @@ template<typename F, typename G>
 class composed {
 public:
 
-  explicit composed(F f_,   G g_)   : f(f_), g(g_) { }
-  explicit composed(F&& f_, G&& g_) : f(std::move(f_)), g(std::move(g_)) { }
+  composed(F f_,   G g_)   : f(f_), g(g_) { }
+  composed(F&& f_, G&& g_) : f(std::move(f_)), g(std::move(g_)) { }
 
 #if FP_VARIADIC
   template<typename... Args>
-  auto operator()(Args... args) FP_RETURNS( f(g(args...)) );
+  inline auto operator()(const Args&... args) -> decltype(declval<F>()(declval<G>()(args...))){
+    return f(g(args...));
   }
 #else
 
   template<typename T0>
   inline auto operator()(const T0& t0) -> decltype( declval<F>()(declval<G>()(t0)) ) {
     return f(this->g(t0));
-  }//FP_RETURNS( f(g(t)) );
+  }
 
   template<typename T0, typename T1>
   inline auto operator()(const T0& t0, const T1& t1) -> decltype( declval<F>()(declval<G>()(t0,t1)) ) {

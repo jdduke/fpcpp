@@ -18,7 +18,7 @@
 #define FP_COMPOUND 1
 #else
 #define FP_DECLVAL  1
-#define FP_VARIADIC 0
+#define FP_VARIADIC 1
 #define FP_COMPOUND 0
 #endif
 

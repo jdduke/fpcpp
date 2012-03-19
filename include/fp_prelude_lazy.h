@@ -96,7 +96,8 @@ inline thunk<T> dropWhile(F f, thunk<T> t) {
   return [=]() mutable -> T {
     // If no values have been dropped, drop while f holds
     if (!dropped) {
-      for ( const let& result = t(); !f(result); result = t() ) ;
+      let result = t();
+      for ( ; !f(result); result = t() ) ;
       dropped = true;
       return result;
     }

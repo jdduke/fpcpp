@@ -138,10 +138,8 @@ TEST(Prelude, FoldR) {
 
   let add_s    = [](const std::string& s0, const std::string& s1) { return s0 + s1; };
   let add_s2   = &add<std::string>;
-  let foldr_s  = foldr1_(add_s);
-  let foldr_s2 = foldr1_(add_s2);
-  EXPECT_EQ(foldr_s(fp::words(std::string("a b c d e f g h i j")), std::string()), std::string("jihgfedcba"));
-  EXPECT_EQ(foldr_s(fp::words(std::string("a b c")), std::string()), fp::sum(fp::reverse(fp::words(std::string("a b c")))));
+  EXPECT_EQ(foldr1(add_s,  fp::words(std::string("a b c d e f g h i j"))), std::string("jihgfedcba"));
+  EXPECT_EQ(foldr1(add_s2, fp::words(std::string("a b c"))),               fp::sum(fp::reverse(fp::words(std::string("a b c")))));
 }
 
 TEST(Prelude, ScanL) {

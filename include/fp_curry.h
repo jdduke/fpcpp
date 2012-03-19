@@ -14,7 +14,7 @@
 
 namespace fp {
 
-template<size_t FArgC> struct curry_helper_impl { };
+template<size_t ArgC> struct curry_helper_impl;
 
   // When all arguments are given, we can uniquely determine the function type (useful for template/overloaded functions)
 
@@ -76,16 +76,16 @@ inline auto curry4(F f, T t, T1 t1, T2 t2, T3 t3) FP_RETURNS( fp::curry_helper<F
 // This is useful for template/overloaded functions... using the arguments, we can uniquely determine the
 //     the function template instance, and in turn curry the arguments
 template <typename F, typename T>
-inline auto curryAll(F f, T t) FP_RETURNS( fp::curry_helper_impl<1>::bind(f,t) );
+inline auto curryAll(F f, T t) FP_RETURNS( std::bind(f,t) );
 
 template <typename F, typename T, typename T1>
-inline auto curryAll2(F f, T t, T1 t1) FP_RETURNS( fp::curry_helper_impl<2>::bind2(f,t,t1) );
+inline auto curryAll2(F f, T t, T1 t1) FP_RETURNS( std::bind(f,t,t1) );
 
 template <typename F, typename T, typename T1, typename T2>
-inline auto curryAll3(F f, T t, T1 t1, T2 t2) FP_RETURNS( fp::curry_helper_impl<3>::bind3(f,t,t1,t2) );
+inline auto curryAll3(F f, T t, T1 t1, T2 t2) FP_RETURNS( std::bind(f,t,t1,t2) );
 
 template<typename F, typename T, typename T1, typename T2, typename T3>
-inline auto curryAll4(F f, T t, T1 t1, T2 t2, T3 t3) FP_RETURNS( fp::curry_helper_impl<4>::bind4(f,t,t1,t2,t3) );
+inline auto curryAll4(F f, T t, T1 t1, T2 t2, T3 t3) FP_RETURNS( std::bind(f,t,t1,t2,t3) );
 
 
 ///////////////////////////////////////////////////////////////////////////

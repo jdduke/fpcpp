@@ -31,9 +31,6 @@ void test() {
               + [](float x, float y, float z) -> float { return x*x + y*y + z*z; };
     auto fg4  = compose([](float l2) -> float                  { return std::sqrt(l2); },
                         [](float x, float y, float z) -> float { return x*x + y*y + z*z; });
-    auto h    = [](float f_) -> int { return (int)std::ceil(f_); };
-    auto hf   = compose(h,f);
- 
 
     float v[] = {1.f, 2.f, -1.f};
 
