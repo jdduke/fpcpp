@@ -14,7 +14,7 @@
 
 #if WIN32
 #include <Windows.h>
-inline void idle(DWORD milliseconds) { Sleep(milliseconds); }
+inline void idle(DWORD milliseconds)  { Sleep(milliseconds); }
 #else
 #include <unistd.h>
 inline void idle(size_t microseconds) { usleep(microseconds*1000); }
@@ -82,9 +82,9 @@ inline float dist( const T& a, const T& b) {
   return length( a - b );
 }
 
-template <typename T, typename U, typename V> 
+template <typename T, typename U, typename V>
 inline T clamp(const T& value, const U& low, const V& high) {
-  return value < low ? low : (value > high ? high : value); 
+  return value < low ? low : (value > high ? high : value);
 }
 
 template <typename T>
@@ -120,7 +120,7 @@ D cohesion( const Boid& boid, const Boids& neighbors ) {
 Boid evolve( const Boid& boid, const Boids& neighbors ) {
 
   let newDir = dir( boid );
-  
+
   if ( fp::length(neighbors) != 0) {
 
     std::array<float, 3> weights = { .5f, .2f, .3f };
@@ -143,7 +143,7 @@ Boids evolve( const Boids& boids, size_t x, size_t y ) {
   return fp::map( [=,&boids]( const Boid& boid ) -> Boid {
 
     let neighbors = fp::filter( [=,&boid]( const Boid& otherBoid ) {
-      return ( boid != otherBoid ) && 
+      return ( boid != otherBoid ) &&
              ( dist( pos(boid), pos(otherBoid) ) < NEIGHBORHOOD );
     }, boids );
 
@@ -151,6 +151,10 @@ Boids evolve( const Boids& boids, size_t x, size_t y ) {
 
   }, boids);
 }
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 int main(int argc, char **argv) {
 
@@ -160,7 +164,7 @@ int main(int argc, char **argv) {
   let showCell = [&]( const D& v ) -> char {
     if (length(v) < .25)
       return ' ';
-    let theta = atan2f( snd(v), fst(v) ); 
+    let theta = atan2f( snd(v), fst(v) );
     theta = theta < 0.f ? theta + 2.f*(float)M_PI : theta;
     let const index = (int)(theta * (4.f/M_PI)) % cardinalToChar.size();
     return cardinalToChar[index];
@@ -173,7 +177,7 @@ int main(int argc, char **argv) {
 
   typedef std::array< D,   X > Row;
   typedef std::array< Row, Y > Grid;
-  
+
   while (true) {
     boids = evolve(boids, X, Y);
 

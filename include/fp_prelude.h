@@ -12,46 +12,64 @@
 #include "fp_composition.h"
 #include "fp_composition_compound.h"
 
-#include <limits>
+#if defined(_MSC_VER)
 #include <random>
+#else
+#include <tr1/random>
+#endif
 
 namespace fp {
+
+#if defined(_MSC_VER)
+using std::uniform_real;
+using std::uniform_int;
+using std::mt19937;
+using std::random_device;
+#else
+using std::tr1::uniform_real;
+using std::tr1::uniform_int;
+using std::tr1::mt19937;
+using std::tr1::random_device;
+#endif
 
 // ///////////////////////////////////////////////////////////////////////////
 // uniform
 
-typedef std::mt19937 uniform_gen;
+typedef mt19937 uniform_gen;
 
 template<typename T>
 inline typename std::enable_if< std::is_floating_point<T>::value, T>::type
 uniform(T t0, T t1) {
   static uniform_gen generator;
-  return std::uniform_real<T>(t0, t1)(generator);
+  return uniform_real<T>(t0, t1)(generator);
 }
 
 template<typename T>
 inline typename std::enable_if< !std::is_floating_point<T>::value, T>::type
 uniform(T t0, T t1) {
   static uniform_gen generator;
-  return std::uniform_int<T>(t0, t1)(generator);
+  return uniform_int<T>(t0, t1)(generator);
 }
 
 template<typename T>
 struct uniform_ {
-  uniform_(T t0, T t1, unsigned long long seed) 
+  uniform_(T t0, T t1, unsigned long long seed)
     : mUniform(t0, t1), mGenerator(seed) { }
-  uniform_(T t0, T t1) 
-    : mUniform(t0, t1), mGenerator(uniform(uniform_gen::default_seed/4, uniform_gen::default_seed)) { }
-  T operator()() { return mUniform(mGenerator); }
-  std::uniform_real<T> mUniform;
-  uniform_gen mGenerator;
+  uniform_(T t0, T t1)
+    : mUniform(t0, t1), mGenerator(random_device()()) { }
+
+  T operator()() const { return mUniform(mGenerator); }
+
+  uniform_real<T> mUniform;
+  mutable uniform_gen mGenerator;
 };
 
 ///////////////////////////////////////////////////////////////////////////
 // uniformN
 template<typename T>
 inline typename types<T>::list uniformN(size_t n, T t0, T t1) {
-  return takeF(n, uniform_<T>(t0,t1));
+  //return takeF(n, uniform_<T>(t0,t1));
+  return takeF(n, [=]() { return uniform(t0,t1); });
 }
 
 ///////////////////////////////////////////////////////////////////////////

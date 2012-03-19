@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
   };
 
   let grid = fp::map([](float f) { return f < 0.f ? 0 : 1; },
-                     fp::takeF(X*Y, fp::randRange_<float>(-1.f,1.f)));
+                     fp::takeF(X*Y, fp::uniform_<float>(-1.f,1.f)));
 
   while (true) {
     grid = life(grid, X, Y);

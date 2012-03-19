@@ -112,6 +112,10 @@ typename types< typename types<T>::list, typename types<T>::list >::pair fftSpli
   }
 }
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 template<typename T>
 typename types< std::complex<T> >::list fft( const typename types<T>::list& v ) {
   using namespace fp;
@@ -182,8 +186,8 @@ StringList huffman( string s ) {
 
   using namespace fp;
 
-  let freq = []( const types<char>::list& s ) {
-    return fp::map( fp::mapArrowF_( fp::lengthF(), fp::headF() ), fp::group( fp::sort(s) ) );
+  let freq = []( types<char>::list&& s ) {
+    return fp::map( fp::mapArrowF_( fp::lengthF(), fp::headF() ), fp::group( fp::sort( std::move(s) ) ) );
   };
 
   let result = reduce( map( []( const Freq& f ) {
@@ -215,6 +219,7 @@ int main(int argc, char **argv) {
 
   print( "" );
 
+
   ///////////////////////////////////////////////////////////////////////////
 
   run( pascalsTriangle( 6 ), 10000 * ITER_MULT );
@@ -231,9 +236,11 @@ int main(int argc, char **argv) {
 
   ///////////////////////////////////////////////////////////////////////////
 
+#if defined(_MSC_VER)
   run( nthRoot( 5, 34. ),    100000 * ITER_MULT );
   run( nthRoot( 6, 25. ),    100000 * ITER_MULT );
   run( nthRoot( 7, 100. ),   100000 * ITER_MULT );
+#endif
 
   ///////////////////////////////////////////////////////////////////////////
 

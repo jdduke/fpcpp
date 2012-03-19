@@ -46,9 +46,13 @@ std::front_insert_iterator<C> front(C& c) {
 // head
 
 template<typename C>
-inline auto head(C&& c)      FP_RETURNS( *begin(c) );
+inline auto head(C&& c)      -> nonconstref_type_of(decltype(*begin(c))) {
+  return *begin(c);
+}
 template<typename C>
-inline auto head(const C& c) FP_RETURNS( *begin(c) );
+inline auto head(const C& c) -> nonconstref_type_of(decltype(*begin(c))) {
+  return *begin(c);
+}
 //template<typename T>
 //inline T head(std::function<T(void)> t) { return t(); }
 
