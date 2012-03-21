@@ -171,7 +171,7 @@ SongOp operation( int argc, char **argv ) {
     return invalidOp;
 
   let opArgC = OpTypeArgs[op];
-  if ((opArgC + 2) < argc)
+  if (int(opArgC + 2) < argc)
     return invalidOp;
 
   switch ( op ) {

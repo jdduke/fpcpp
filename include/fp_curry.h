@@ -9,6 +9,7 @@
 
 #include <fp_curry_defines.h>
 #include <fp_composition_utils.h>
+#include <fp_prelude_lists.h>
 
 #include <tuple>
 
@@ -97,8 +98,8 @@ struct uncurryF {
   uncurryF(F f_) : f(f_) { }
 
   template<typename T0, typename T1>
-  inline auto operator()(const std::pair<T0,T1>& p2) -> decltype( declval<F>()( fst(p2), snd(p2) ) ) {
-    return f( fst(p2), snd(p2) );
+  inline auto operator()(const std::pair<T0,T1>& p2) -> decltype( declval<F>()( p2.first, p2.second ) ) {
+    return f( p2.first, p2.second );
   }
   template<typename T0, typename T1, typename T2>
   inline auto operator()(const std::tuple<T0,T1,T2>& p3) -> decltype( declval<F>()( std::get<0>(p3), std::get<1>(p3), std::get<2>(p3) ) ) {

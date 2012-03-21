@@ -225,7 +225,12 @@ int main(int argc, char **argv) {
   run( pascalsTriangle( 6 ), 10000 * ITER_MULT );
 
   ///////////////////////////////////////////////////////////////////////////
+
+#if defined(_MSC_VER)
   static const char* unixdict = "./../../../samples/unixdict.txt";
+#else
+  static const char* unixdict = "./../../samples/unixdict.txt";
+#endif
   run( anagrams( unixdict ), 5 * ITER_MULT );
 
   ///////////////////////////////////////////////////////////////////////////
@@ -236,11 +241,9 @@ int main(int argc, char **argv) {
 
   ///////////////////////////////////////////////////////////////////////////
 
-#if defined(_MSC_VER)
   run( nthRoot( 5, 34. ),    100000 * ITER_MULT );
   run( nthRoot( 6, 25. ),    100000 * ITER_MULT );
   run( nthRoot( 7, 100. ),   100000 * ITER_MULT );
-#endif
 
   ///////////////////////////////////////////////////////////////////////////
 

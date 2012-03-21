@@ -137,6 +137,13 @@ inline std::function<value_type_of(C) ()> fromList(const C& c) {
   return [=]() mutable -> value_type_of(C) { return fp::index(i++, c); };
 }
 
+template<typename T>
+inline fp_enable_if_not_container(T,string) show(const T& t);
+template<typename C>
+inline fp_enable_if_container(C,string) show(const C& c);
+inline string show(const types<char>::list& c);
+inline string show(const string& s);
+
 // C-string from string
 inline const char* fromString( const string& s ) { return s.c_str(); }
 

@@ -213,13 +213,13 @@ TEST(Prelude, ZipWith) {
 TEST(Prelude, All) {
   using fp::all;
 
-  EXPECT_EQ(true,  all([](float x) { return x == 1.f; }, fVec10_1));
-  EXPECT_EQ(false, all([](float x) { return x != 1.f; }, fVec10_1));
+  EXPECT_TRUE( all([](float x) { return x == 1.f; }, fVec10_1));
+  EXPECT_FALSE(all([](float x) { return x != 1.f; }, fVec10_1));
 
-  EXPECT_EQ(true, all([](double x) { return x == 2.; }, dVec10_2));
-  EXPECT_EQ(false, all([](double x) { return x != 2.; }, dVec10_2));
+  EXPECT_TRUE( all([](double x) { return x == 2.; }, dVec10_2));
+  EXPECT_FALSE(all([](double x) { return x != 2.; }, dVec10_2));
 
-  EXPECT_EQ(true, all([](double x) { return x < 10; }, fp::increasingN(10, 0.)));
+  EXPECT_TRUE( all([](double x) { return x < 10; }, fp::increasingN(10, 0.)));
 }
 
 TEST(Prelude, MinMax) {
@@ -345,29 +345,29 @@ TEST(Prelude, Elem) {
 
   bool hasFind = fp::has_find<std::map<int,int>,int>::value;
 
-  EXPECT_EQ(true,   elem(5,   iVec5_0_5));
-  EXPECT_EQ(false,  notElem(5, iVec5_0_5));
-  EXPECT_EQ(false,  elem(-1,  iVec5_0_5));
-  EXPECT_EQ(true,   notElem(-1,  iVec5_0_5));
-  EXPECT_EQ(false,  elem(0,   fp::increasingN(10, 1)));
-  EXPECT_EQ(true,   notElem(0,   fp::increasingN(10, 1)));
-  EXPECT_EQ(false,  elem(-1,  iVec5_0_5));
-  EXPECT_EQ(true,   notElem(-1,  iVec5_0_5));
-  EXPECT_EQ(true,   elem('o', "Hello"));
-  EXPECT_EQ(false,  notElem('o', "Hello"));
-  EXPECT_EQ(false,  elem(-1,  iVec5_0_5));
-  EXPECT_EQ(true,   notElem(-1,  iVec5_0_5));
-  EXPECT_EQ(false,  elem(10,  "Hello"));
-  EXPECT_EQ(true,   notElem(10,  "Hello"));
+  EXPECT_TRUE( elem(5,   iVec5_0_5));
+  EXPECT_FALSE(notElem(5, iVec5_0_5));
+  EXPECT_FALSE(elem(-1,  iVec5_0_5));
+  EXPECT_TRUE( notElem(-1,  iVec5_0_5));
+  EXPECT_FALSE(elem(0,   fp::increasingN(10, 1)));
+  EXPECT_TRUE( notElem(0,   fp::increasingN(10, 1)));
+  EXPECT_FALSE(elem(-1,  iVec5_0_5));
+  EXPECT_TRUE( notElem(-1,  iVec5_0_5));
+  EXPECT_TRUE( elem('o', "Hello"));
+  EXPECT_FALSE(notElem('o', "Hello"));
+  EXPECT_FALSE(elem(-1,  iVec5_0_5));
+  EXPECT_TRUE( notElem(-1,  iVec5_0_5));
+  EXPECT_FALSE(elem(10,  "Hello"));
+  EXPECT_TRUE( notElem(10,  "Hello"));
 
   let pairs = fp::zip(fp::increasingN(10, 0), fp::decreasingN(10, 9));
   typedef decltype(pairs) PairVec;
   typedef PairVec::value_type Pair;
   pairs.push_back( Pair(33,33) );
 
-  EXPECT_EQ(true,  elem(Pair(0,9),   pairs));
-  EXPECT_EQ(true,  elem(Pair(33,33), pairs));
-  EXPECT_EQ(false, elem(Pair(44,44), pairs));
+  EXPECT_TRUE( elem(Pair(0,9),   pairs));
+  EXPECT_TRUE( elem(Pair(33,33), pairs));
+  EXPECT_FALSE(elem(Pair(44,44), pairs));
 }
 
 TEST(Prelude, Drop) {

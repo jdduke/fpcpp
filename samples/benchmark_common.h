@@ -10,9 +10,9 @@
 #include "timer.h"
 
 #if defined(_DEBUG)
-#define ITER_MULT 5
+#define ITER_MULT 1
 #else
-#define ITER_MULT 5
+#define ITER_MULT 2
 #endif
 
 #if !defined(ENABLE_BENCHMARK)
