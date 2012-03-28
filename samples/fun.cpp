@@ -49,20 +49,21 @@ StringLists anagrams( const fp::FilePath& filePath ) {
 
   using namespace fp;
 
+  typedef StringPair sp;
+  typedef StringPairList spl;
+
   std::ifstream ifs;
   let& f      = readFile( filePath, ifs );
   let words   = lines( f );
   //let fstr    = fst<string,string>;
   //let groupon = compose2( std::equal_to<string>(), fstr, fstr );
-  let groupon = [](const StringPair& s0, const StringPair& s1) { return fp::fst(s0) == fp::fst(s1); };
+  let groupon = [](const sp& s0, const sp& s1) { return fp::fst(s0) == fp::fst(s1); };
   let wix     = groupBy( groupon, sort( zip( map( sort<string>, words ), words) ) );
-  let mxl     = maximum( map( length< StringPairList >, wix ) );
+  let mxl     = maximum( map( length<spl>, wix ) );
 
-  return fp::map( []( const StringPairList& sl ) {
+  return map( []( const spl& sl ) {
     return fp::map( fp::snd<string,string>, sl );
-  }, fp::filter( [=]( const StringPairList& sl ) {
-    return fp::length( sl ) == mxl;
-  }, wix) );
+  }, filter( [=]( const spl& sl ) { return fp::length( sl ) == mxl; }, wix) );
 
   /* Compare with Haskell:
 
@@ -196,7 +197,7 @@ StringList huffman( string s ) {
 
   return map( [](const Code& c) {
     return fp::show("\'") + fp::fst(c) + "\' : " + fp::snd(c) + "\n";
-  }, /*sortBy( comparing(compose(&length<string>,&snd<char,string>)), */ result );
+  }, result );
 
   /*
 huffman :: [(Int, Char)] -> [(Char, String)]

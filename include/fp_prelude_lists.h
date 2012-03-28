@@ -75,6 +75,11 @@ inline C filter(F f, C c) {
 }
 FP_DEFINE_CURRIED(filter, filter_);
 
+template<typename T, typename F>
+list<T> operator|(const list<T>& l, F f) {
+  return filter(f, l);
+}
+
 
 
 ///////////////////////////////////////////////////////////////////////////
@@ -573,7 +578,13 @@ inline pair<C,C> spanNot(F f, const C& c) {
   return span( std::not1(f), c );
 }
 
+///////////////////////////////////////////////////////////////////////////
+// slice
 
+template <typename C>
+inline C slice(size_t i, size_t n, const C& c) {
+  return C(begin(c)+i, begin(c)+i+n);
+}
 
 
 ///////////////////////////////////////////////////////////////////////////
