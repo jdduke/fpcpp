@@ -68,7 +68,7 @@ FP_DEFINE_CURRIED(map, map_);
 // filter
 
 template<typename F, typename C>
-inline C filter(F f, C c) {
+inline C filter(F f, const C& c) {
   C result;
   std::copy_if(extent(c), back(result), f);
   return result;
@@ -76,11 +76,9 @@ inline C filter(F f, C c) {
 FP_DEFINE_CURRIED(filter, filter_);
 
 template<typename T, typename F>
-list<T> operator|(const list<T>& l, F f) {
+typename types<T>::list operator|(const typename types<T>::list& l, F f) {
   return filter(f, l);
 }
-
-
 
 ///////////////////////////////////////////////////////////////////////////
 // Reducing lists
@@ -89,6 +87,18 @@ list<T> operator|(const list<T>& l, F f) {
 ///////////////////////////////////////////////////////////////////////////
 // fold
 
+#if 1
+template<typename It, typename Op>
+inline auto fold(It first, It last, Op op) -> nonconstref_type_of(decltype(op(*first, *first))) {
+  typedef nonconstref_type_of(decltype(op(*first, *first))) T;
+  if (first != last) {
+    auto value = T(*first);
+    return std::accumulate(++first, last, value, op);
+  } else {
+    return T();
+  }
+}
+#else
 template<typename It, typename Op>
 inline auto fold(It first, It last, Op op) -> typename std::iterator_traits<It>::value_type {
   if (first != last) {
@@ -98,6 +108,7 @@ inline auto fold(It first, It last, Op op) -> typename std::iterator_traits<It>:
     return typename std::iterator_traits<It>::value_type();
   }
 }
+#endif
 
 template<typename It, typename T, typename Op>
 inline T fold(It first, It last, T t, Op op) {
