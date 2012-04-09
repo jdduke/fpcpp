@@ -49,14 +49,12 @@ void test2() {
   using namespace fp;
   using namespace fp::math;
 
-  let l1   = compose2(addF(), absF(), absF());
+  let square = [](float x) { return x*x; };
+
+  let l1 = fp::compose2(addF(), absF(), absF());
   assert( l1(1.f, -2.f) == 3.f );
 
-
-  // l2 norm = sqrt(x*x + y*y) = f(g(h(x),h(y))) where f = sqrt, g = plus, h = square
-
-  let square = [](float x) { return x*x; };
-  let l2 = compose(sqrtf, compose2(addF(), square, square));
+  let l2 = compose(sqrtF(), compose2(addF(), square, square));
   assert( l2(3.f, 4.f) == 5.f );
 }
 

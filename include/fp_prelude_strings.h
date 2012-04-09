@@ -134,7 +134,15 @@ inline void putStr(const string& s) {
   std::cout << s;
 }
 
+inline void putStr(string&& s) {
+  std::cout << s;
+}
+
 inline void putStrLen(const string& s) {
+  std::cout << s << std::endl;
+}
+
+inline void putStrLen(string&& s) {
   std::cout << s << std::endl;
 }
 

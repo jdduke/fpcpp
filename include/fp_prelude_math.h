@@ -8,6 +8,7 @@
 #define _FP_PRELUDE_MATH_H_
 
 #include "fp_defines.h"
+#include "fp_prelude_lists.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
