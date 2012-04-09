@@ -22,14 +22,14 @@ or
 
     double pi(size_t samples = 1000) {
     
-        let sample = []() -> int { 
+        let sampler = []() -> int { 
             let x = uniform(-1.,1.); 
             let y = uniform(-1.,1.);
             let dist2 = x*x + y*y;
             return dist2 < 1. ? 1 : 0;
         };
 
-        return 4. * foldl1(std::plus<int>(), take(samples, sample)) / samples;
+        return 4. * foldl1(std::plus<int>(), take(samples, sampler)) / samples;
         
     }
 
@@ -46,7 +46,7 @@ Map an operation across a filtered source and check for success:
 Curry functions:
    
     let multiplyBy4 = curry(std::multiplies<int>(), 4);
-    let sixteen     = multiplyBy4(4);
+    let twentyEight = multiplyBy4(7);
     
 Compose functions:
 
