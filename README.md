@@ -63,7 +63,7 @@ Compose functions:
     show( l2(1.f, 2.f) );
     
 
-    
+
 Documentation
 -------------
 
