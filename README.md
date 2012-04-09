@@ -14,8 +14,8 @@ Generate pi using Monte Carlo sampling:
     
         return 4.0 * length(filter([](double d) { return d <= 1.0; }, 
                                    map([](const pair<double,double>& p) { return fst(p)*fst(p) + snd(p)*snd(p); },
-                                       zip(take(samples, rand_range(-1.0,1.0)),
-                                           take(samples, rand_range(-1.0,1.0))))) / samples;
+                                       zip(take(samples, uniform(-1.0,1.0)),
+                                           take(samples, uniform(-1.0,1.0))))) / samples;
                                            
     }
 or
@@ -23,8 +23,8 @@ or
     double pi(size_t samples = 1000) {
     
         let sample = []() -> int { 
-            let x = rand_range(-1.,1.); 
-            let y = rand_range(-1.,1.);
+            let x = uniform(-1.,1.); 
+            let y = uniform(-1.,1.);
             let dist2 = x*x + y*y;
             return dist2 < 1. ? 1 : 0;
         };
