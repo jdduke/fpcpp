@@ -29,7 +29,7 @@ or
             return dist2 < 1. ? 1 : 0;
         };
 
-        return 4. * foldl1(std::plus<int>(), take(samples, sampler)) / samples;
+        return 4. * foldl1(addF(), take(samples, sampler)) / samples;
         
     }
 
@@ -45,25 +45,21 @@ Map an operation across a filtered source and check for success:
     
 Curry functions:
    
-    let multiplyBy4 = curry(std::multiplies<int>(), 4);
+    let multiplyBy4 = curry(multiplyF()), 4);
     let twentyEight = multiplyBy4(7);
     
 Compose functions:
 
     // l1 norm = |x|+|y| = f(g(x),g(y)) where f = add, g = abs
 
-    let fabs = [](float x) { return std::fabs(x); };
-    let l1   = compose2(std::plus<float>(), fabs, fabs);
-    
+    let l1   = compose2(addF(), absF(), absF());
     show( l1(1.f, 2.f) );
-
+    
 
     // l2 norm = sqrt(x*x + y*y) = f(g(h(x),h(y))) where f = sqrt, g = plus, h = square
 
-    let sqrtf  = [](float x) { return std::sqrtf(x); };
     let square = [](float x) { return x*x; };
-    let l2 = compose(sqrtf, compose2(std::plus<float>(), square, square));
-    
+    let l2 = compose(sqrtf, compose2(addF(), square, square));
     show( l2(1.f, 2.f) );
     
 
