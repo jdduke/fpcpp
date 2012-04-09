@@ -62,6 +62,7 @@
 #define fp_enable_if_not_container(TYPE,RTYPE) fp_enable_if(!fp::is_container<TYPE>::value, RTYPE)
 #define fp_enable_if_void(TYPE)                fp_enable_if(std::is_same<void,TYPE>::value,  void)
 #define fp_enable_if_nonvoid(TYPE,RTYPE)       fp_enable_if(!std::is_same<void,TYPE>::value, RTYPE)
+#define fp_enable_if_arithmetic(TYPE)          fp_enable_if(std::is_arithmetic<TYPE>::value, TYPE)
 
 // Join helpers
 #define FP_CONCAT_IMPL(x, y) x ## y

@@ -46,6 +46,8 @@ FP_DEFINE_FUNCTION_OBJECT(divide,   divideF);
 FP_DEFINE_FUNCTION_OBJECT(multiply, multiplyF);
 FP_DEFINE_FUNCTION_OBJECT(negate,   negateF);
 FP_DEFINE_FUNCTION_OBJECT(mod,      modF);
+FP_DEFINE_FUNCTION_OBJECT(sqrt,     sqrtF);
+FP_DEFINE_FUNCTION_OBJECT(abs,      absF);
 FP_DEFINE_FUNCTION_OBJECT(logicalAnd, logicalAndF);
 FP_DEFINE_FUNCTION_OBJECT(logicalOr,  logicalOrF);
 FP_DEFINE_FUNCTION_OBJECT(logicalNot, logicalNotF);

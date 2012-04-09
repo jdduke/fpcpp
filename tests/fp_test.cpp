@@ -39,6 +39,7 @@ bool filteredMap(MapOp mapOp, FilterOp filterOp, Source source, std::function<bo
 
 double pi(size_t samples = 10000) {
   using namespace fp;
+  using namespace fp::math;
   typedef std::pair<double,double> point;
   return 4.* length(filter([](double d) { return d <= 1.0; },
                            map([](const point& p) { return p.first*p.first + p.second*p.second; },
@@ -50,8 +51,8 @@ double pi_(size_t samples = 10000) {
   using namespace fp;
 
   let sample = []() -> int {
-    let x = uniform(-1.,1.);
-    let y = uniform(-1.,1.);
+    let x = math::uniform(-1.,1.);
+    let y = math::uniform(-1.,1.);
     let dist2 = x*x + y*y;
     return dist2 < 1. ? 1 : 0;
   };
@@ -236,7 +237,7 @@ TEST(Prelude, MinMax) {
 
   ///////////////////////////////////////////////////////////////////////////
 
-  let randFloat = fp::uniform_<float>(0.f, 1.f);
+  let randFloat = fp::math::uniform_<float>(0.f, 1.f);
   fp::types<float>::list randFloats;
   randFloats.push_back(randFloat());
   float randMax = randFloats.back();
@@ -268,9 +269,9 @@ TEST(Prelude, Reverse) {
 }
 
 TEST(Prelude, Random) {
-  using fp::uniformN;
-  using fp::uniform;
-  using fp::uniform_;
+  using fp::math::uniformN;
+  using fp::math::uniform;
+  using fp::math::uniform_;
 
   enum {
     numRands = 10000,
@@ -282,7 +283,7 @@ TEST(Prelude, Random) {
   static const float  minRand = 0.f;
   static const float  maxRand = (float)numRandBins;
 
-  let randFloats = fp::uniformN(numRands, minRand, maxRand);
+  let randFloats = fp::math::uniformN(numRands, minRand, maxRand);
   EXPECT_GE(maxRand, fp::maximum(randFloats));
   EXPECT_LE(minRand, fp::maximum(randFloats));
   EXPECT_LE(5.f, fp::maximum(randFloats));
