@@ -8,7 +8,6 @@
 #define _FP_PRELUDE_MATH_H_
 
 #include "fp_defines.h"
-#include "fp_prelude_lists.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -165,11 +164,6 @@ struct uniform_ {
   mutable uniform_gen mGenerator;
 };
 
-template<typename T>
-inline typename types<T>::list uniformN(size_t n, T t0, T t1) {
-  return takeF(n, [=]() { return uniform(t0,t1); });
-}
-
 #else
 
 template<typename T>
@@ -182,11 +176,6 @@ struct uniform_ {
   T operator()() { return uniform<T>(t0,t1); }
   T t0, t1;
 };
-
-template<typename T>
-inline typename types<T>::list uniformN(size_t n, T t0, T t1) {
-  return takeF(n, uniform_<T>(t0,t1));
-}
 
 #endif
 

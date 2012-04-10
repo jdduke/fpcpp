@@ -170,10 +170,10 @@ int main(int argc, char **argv) {
     return cardinalToChar[index];
   };
 
-  let boids = fp::zip(fp::zip(fp::math::uniformN(BOIDS, 0.f, (float)X),
-                              fp::math::uniformN(BOIDS, 0.f, (float)Y)),
-                      fp::zip(fp::math::uniformN(BOIDS, -1.f,1.f),
-                              fp::math::uniformN(BOIDS, -1.f,1.f)));
+  let boids = fp::zip(fp::zip(fp::uniformN(BOIDS, 0.f, (float)X),
+                              fp::uniformN(BOIDS, 0.f, (float)Y)),
+                      fp::zip(fp::uniformN(BOIDS, -1.f,1.f),
+                              fp::uniformN(BOIDS, -1.f,1.f)));
 
   typedef std::array< D,   X > Row;
   typedef std::array< Row, Y > Grid;

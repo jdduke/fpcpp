@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
   };
 
   let grid = fp::map([](float f) { return f < 0.f ? 0 : 1; },
-                     fp::math::uniformN(X*Y, -1.f, 1.f));
+                     fp::uniformN(X*Y, -1.f, 1.f));
 
   while (true) {
     grid = life(grid, X, Y);

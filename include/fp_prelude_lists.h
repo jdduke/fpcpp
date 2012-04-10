@@ -126,6 +126,7 @@ FP_DEFINE_CURRIED_T(foldl, foldl_, _foldl_);
 
 template <typename F, typename C>
 inline auto foldl1(F f, const C& c) -> value_type_of(C) {
+
   return fold(extent(c), f);
 }
 FP_DEFINE_CURRIED(foldl1, foldl1_);
@@ -649,6 +650,13 @@ inline auto decreasingN(size_t n, T t0 = (T)0) FP_RETURNS( takeF(n, decreasing(t
 template <typename T>
 inline auto enumFrom(T t0) FP_RETURNS( iterate(&succ<T>, t0) );
 FP_DEFINE_FUNCTION_OBJECT(enumFrom, enumFromF);
+
+///////////////////////////////////////////////////////////////////////////
+// uniform
+template<typename T>
+inline typename types<T>::list uniformN(size_t n, T t0, T t1) {
+  return takeF(n, [=]() { return math::uniform(t0,t1); });
+}
 
 ///////////////////////////////////////////////////////////////////////////
 // auto lists

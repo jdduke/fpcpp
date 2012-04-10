@@ -25,5 +25,6 @@
 
 #include "fp_io.h"
 
+#include "fp_maybe.h"
 
 #endif /* _FPCPP_H_ */

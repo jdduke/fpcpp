@@ -269,7 +269,7 @@ TEST(Prelude, Reverse) {
 }
 
 TEST(Prelude, Random) {
-  using fp::math::uniformN;
+  using fp::uniformN;
   using fp::math::uniform;
   using fp::math::uniform_;
 
@@ -283,7 +283,7 @@ TEST(Prelude, Random) {
   static const float  minRand = 0.f;
   static const float  maxRand = (float)numRandBins;
 
-  let randFloats = fp::math::uniformN(numRands, minRand, maxRand);
+  let randFloats = fp::uniformN(numRands, minRand, maxRand);
   EXPECT_GE(maxRand, fp::maximum(randFloats));
   EXPECT_LE(minRand, fp::maximum(randFloats));
   EXPECT_LE(5.f, fp::maximum(randFloats));
@@ -470,4 +470,5 @@ TEST(Curry, Everything) {
   EXPECT_EQ(2.f,   curry(&mult3<float>, 8.f)(.5f, .5f));
 
   EXPECT_EQ((float)1*2*3*4*5, curry(fp::foldl1<std::function<float(float,float)>,fp::types<float>::list >, std::multiplies<float>())(fp::increasingN(5, 1.f)));
+  EXPECT_EQ((float)1*2*3*4*5, std::bind(fp::foldl1F(), fp::math::multiplyF(), std::placeholders::_1)(fp::increasingN(5, 1.f)));
 }

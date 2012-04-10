@@ -5,6 +5,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef _FP_DEFINES_H_
+
 #define _FP_DEFINES_H_
 
 // Compiler specific defines
@@ -15,12 +16,10 @@
 #if defined(_MSC_VER)
 #define FP_DECLVAL  0
 #define FP_VARIADIC 0
-#define FP_COMPOUND 1
 #define FP_THIS_IN_RET 1
 #else
 #define FP_DECLVAL  1
 #define FP_VARIADIC 1
-#define FP_COMPOUND 1
 #define FP_THIS_IN_RET 0
 #endif
 

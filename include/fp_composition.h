@@ -29,7 +29,6 @@ public:
     return f(g(args...));
   }
 #else
-
   template<typename T0>
   inline auto operator()(const T0& t0) -> decltype( declval<F>()(declval<G>()(t0)) ) {
     return f(this->g(t0));
@@ -49,10 +48,13 @@ public:
   inline auto operator()(const T0& t0, const T1& t1, const T2& t2, const T3& t3) -> decltype(  declval<F>()(declval<G>()(t0,t1,t2,t3)) ) {
     return f(g(t0,t1,t2,t3));
   }
-
 #endif
 
 protected:
+
+  F& f1() { return f; }
+  G& f2() { return g; };
+
   composed();
 
   F f;
