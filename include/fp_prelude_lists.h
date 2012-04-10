@@ -651,6 +651,25 @@ inline auto enumFrom(T t0) FP_RETURNS( iterate(&succ<T>, t0) );
 FP_DEFINE_FUNCTION_OBJECT(enumFrom, enumFromF);
 
 ///////////////////////////////////////////////////////////////////////////
+// auto lists
+
+// Example: (0 <to> 9) == increasingN(0, 10)
+static struct list_to_helper { } to;
+
+template <typename T>
+struct list_to_helper_val {
+  list_to_helper_val(T value_) : value(value_) { }
+  T value;
+};
+
+template<typename T0, typename T1>
+inline auto operator>(list_to_helper_val<T0> t0, T1 t1) FP_RETURNS( increasingN((T0)(t1-t0.value+1), t0.value) );
+template<typename T>
+inline list_to_helper_val<T> operator<(T t, list_to_helper) {
+  return list_to_helper_val<T>(t);
+}
+
+///////////////////////////////////////////////////////////////////////////
 // concat
 template <typename T>
 inline fp_enable_if_container(T,T)

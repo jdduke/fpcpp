@@ -16,6 +16,7 @@
 #include "fp_prelude_math.h"
 #include "fp_prelude_strings.h"
 #include "fp_prelude_objects.h"
+//#include "fp_prelude_infix.h"
 
 #include "fp_curry.h"
 

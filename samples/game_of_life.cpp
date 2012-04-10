@@ -19,24 +19,14 @@ inline void idle(size_t microseconds) { usleep(microseconds*1000); }
 
 template <typename C>
 C life(const C& grid, size_t x, size_t y) {
-#if 1
+  using namespace fp;
   const let size = x * y;
-  return fp::map([=,&grid](int i) -> value_type_of(C) {
+  return map([=,&grid](size_t i) -> value_type_of(C) {
     const let neighbors = grid[(i-x-1)%size] + grid[(i-x)%size] + grid[(i-x+1)%size] +
-      grid[(i  -1)%size]                    + grid[(i  +1)%size] +
-      grid[(i+x-1)%size] + grid[(i+x)%size] + grid[(i+x+1)%size];
+                          grid[(i  -1)%size]                    + grid[(i  +1)%size] +
+                          grid[(i+x-1)%size] + grid[(i+x)%size] + grid[(i+x+1)%size];
     return ((grid[i]==1 && (neighbors==2 || neighbors==3)) || (grid[i]==0 && neighbors == 3)) ? 1 : 0;
-  }, fp::increasingN(x*y,0));
-#else
-  using fp::index;
-  const let size = x * y;
-  return fp::map([=,&grid](int i) -> value_type_of(C) {
-    const let neighbors = index((i-x-1)%size,grid) + index((i-x)%size,grid) + index((i-x+1)%size,grid) +
-                          index((i  -1)%size,grid)                          + index((i  +1)%size,grid) +
-                          index((i+x-1)%size,grid) + index((i+x)%size,grid) + index((i+x+1)%size,grid);
-    return ((index(i,grid)==1 && (neighbors==2 || neighbors==3)) || (index(i,grid) == 0 && neighbors == 3)) ? 1 : 0;
-  }, fp::increasing(x*y,0));
-#endif
+  }, (0 <to> x*y-1));
 }
 
 int main(int argc, char **argv) {
@@ -49,7 +39,7 @@ int main(int argc, char **argv) {
   };
 
   let grid = fp::map([](float f) { return f < 0.f ? 0 : 1; },
-                     fp::takeF(X*Y, fp::math::uniform_<float>(-1.f,1.f)));
+                     fp::math::uniformN(X*Y, -1.f, 1.f));
 
   while (true) {
     grid = life(grid, X, Y);

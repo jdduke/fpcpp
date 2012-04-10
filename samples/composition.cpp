@@ -56,6 +56,8 @@ void test2() {
 
   let l2 = compose(sqrtF(), compose2(addF(), square, square));
   assert( l2(3.f, 4.f) == 5.f );
+
+  //let test = 5 <add_i> 10;
 }
 
 int main(int argc, char** argv) {

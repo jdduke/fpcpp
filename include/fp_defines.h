@@ -48,7 +48,6 @@
 
 // Keywords
 #define let  auto
-#define in_ return
 #define extent(c)  fp::begin((c)),  fp::end((c))
 #define rextent(c) fp::rbegin((c)), fp::rend((c))
 

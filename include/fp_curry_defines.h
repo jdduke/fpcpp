@@ -47,6 +47,7 @@
     inline auto operator()(F f, T t, const C& c) const   FP_RETURNS( func(f,t,c) );\
   }
 
+
 #define FP_DEFINE_CURRIED_HELPER(a,b)   \
   template <typename F>                 \
   inline auto b(F f) FP_RETURNS(a);

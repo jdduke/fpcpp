@@ -62,4 +62,4 @@ FP_DEFINE_FUNCTION_OBJECT(less,          lessF);
 
 } /* namespace fp */
 
-#endif /* _FP_COMMON_H_ */
+#endif /* _FP_PRELUDE_OBJECTS_H_ */
