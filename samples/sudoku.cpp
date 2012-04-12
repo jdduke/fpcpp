@@ -18,29 +18,23 @@ using namespace fp;
 typedef types<string>::list strings;
 
 strings cross( const string& s0, const string& s1 ) {
-  /*return map([&](char c0) {
-    return map( [&](char c1) -> std::string {
-      std::string r; r+=c0; r+= c1; return r;
-    }, list(s1) );
-  }, list(s0));*/
-  //std::for_each(extent(s0)
   types<string>::list result;
-   for( size_t i = 0; i < s0.size(); ++i ) {
-     for ( size_t j = 0; j < s1.size(); ++j ) {
-       result.emplace_back( cons(show(s0[i]), show(s1[j])) );
-     }
-   }
+  for( size_t i = 0; i < s0.size(); ++i ) {
+    for ( size_t j = 0; j < s1.size(); ++j ) {
+      result.emplace_back( cons(show(s0[i]), show(s1[j])) );
+    }
+  }
   return result;
 }
 
 auto mapCross( const strings& s0, const strings& s1 ) -> strings {
   types<string>::list result;
-   for( size_t i = 0; i < s0.size(); ++i ) {
-     for ( size_t j = 0; j < s1.size(); ++j ) {
-       auto r = cross( s0[i], s0[j] );
-       result.insert( end(result), extent(r) );
-     }
-   }
+  for( size_t i = 0; i < s0.size(); ++i ) {
+    for ( size_t j = 0; j < s1.size(); ++j ) {
+      auto r = cross( s0[i], s0[j] );
+      result.insert( end(result), extent(r) );
+    }
+  }
   return result;
 };
 
