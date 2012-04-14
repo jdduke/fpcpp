@@ -88,32 +88,32 @@ inline T logicalNot(const T& t0) {
 // Comparison operations
 
 template<typename T>
-inline T equals(const T& t0, const T& t1) {
+inline bool equals(const T& t0, const T& t1) {
   return t0 == t1;
 }
 
 template<typename T>
-inline T notEquals(const T& t0, const T& t1) {
+inline bool notEquals(const T& t0, const T& t1) {
   return !equals(t0,t1);
 }
 
 template<typename T>
-inline T greaterEquals(const T& t0, const T& t1) {
+inline bool greaterEquals(const T& t0, const T& t1) {
   return t0 >= t1;
 }
 
 template<typename T>
-inline T lessEquals(const T& t0, const T& t1) {
+inline bool lessEquals(const T& t0, const T& t1) {
   return t0 <= t1;
 }
 
 template<typename T>
-inline T less(const T& t0, const T& t1) {
+inline bool less(const T& t0, const T& t1) {
   return t0 < t1;
 }
 
 template<typename T>
-inline T greater(const T& t0, const T& t1) {
+inline bool greater(const T& t0, const T& t1) {
   return t0 > t1;
 }
 

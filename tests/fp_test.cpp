@@ -457,7 +457,7 @@ TEST(Curry, Everything) {
   EXPECT_EQ(99^77, curry2(&exor<int>, 99, 77)());
   EXPECT_EQ(2.f,   curry3(mult3<float>, 8.f, .5f, .5f)());
 
-  EXPECT_EQ(2.f,   curryAll2(fp::math::addF(),1.f,1.f)());
+  EXPECT_EQ(2.f,   curryAll2(fp::math::addF(),      1.f, 1.f)());
   EXPECT_EQ(2.f,   curryAll2(fp::math::multiplyF(), 1.f, 2.f)());
 
   // 1 arg
@@ -470,5 +470,7 @@ TEST(Curry, Everything) {
   EXPECT_EQ(2.f,   curry(&mult3<float>, 8.f)(.5f, .5f));
 
   EXPECT_EQ((float)1*2*3*4*5, curry(fp::foldl1<std::function<float(float,float)>,fp::types<float>::list >, std::multiplies<float>())(fp::increasingN(5, 1.f)));
+#ifndef _MSC_VER
   EXPECT_EQ((float)1*2*3*4*5, std::bind(fp::foldl1F(), fp::math::multiplyF(), std::placeholders::_1)(fp::increasingN(5, 1.f)));
+#endif
 }

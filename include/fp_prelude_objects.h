@@ -35,6 +35,7 @@ FP_DEFINE_FUNCTION_OBJECT(show,      showF);
 FP_DEFINE_FUNCTION_OBJECT(putStr,    putStrF);
 FP_DEFINE_FUNCTION_OBJECT(putStrLen, putStrLenF);
 FP_DEFINE_FUNCTION_OBJECT(print,     printF);
+FP_DEFINE_FUNCTION_OBJECT(sort,      sortF);
 
 ///////////////////////////////////////////////////////////////////////////
 // math

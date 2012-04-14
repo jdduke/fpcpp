@@ -38,8 +38,8 @@ inline R& __map__(F f, const C& c, R& r) {
 // This code is abominable...
 template<typename F, typename C>
 inline auto
-map(F f, const C& c) -> typename std::enable_if< !std::is_same<void,decltype(f(head(c)))>::value,
-                                                 typename types< nonconstref_type_of(decltype(f(head(c)))) >::list >::type {
+map(F f, const C& c) -> typename std::enable_if< !std::is_same<void,decltype(f(declval<typename traits<C>::value_type>()))>::value,
+                                                 typename types< nonconstref_type_of(decltype(f(declval<typename traits<C>::value_type>()))) >::list >::type {
   typedef typename types< nonconstref_type_of(decltype(f(head(c)))) >::list result_type;
   result_type result;
   return __map__(f, c, result);

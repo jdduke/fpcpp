@@ -34,7 +34,7 @@ Rows pascalsTriangle( size_t count ) {
   using namespace fp;
 
   let nextRow = []( const Row& r ) -> Row {
-    return fp::zipWith( std::plus<int>(), fp::cons( (int)0, r ), fp::append( r, 0 ) );
+    return fp::zipWith( fp::math::addF(), fp::cons( (int)0, r ), fp::append( r, 0 ) );
   };
 
   let pascals = iterate( nextRow, Row(1,1) );
@@ -55,14 +55,12 @@ StringLists anagrams( const fp::FilePath& filePath ) {
   std::ifstream ifs;
   let& f      = readFile( filePath, ifs );
   let words   = lines( f );
-  //let fstr    = fst<string,string>;
-  //let groupon = compose2( std::equal_to<string>(), fstr, fstr );
-  let groupon = [](const sp& s0, const sp& s1) { return fp::fst(s0) == fp::fst(s1); };
-  let wix     = groupBy( groupon, sort( zip( map( sort<string>, words ), words) ) );
-  let mxl     = maximum( map( length<spl>, wix ) );
+  let groupon = compose2( math::equalsF(), fstF(), fstF() );
+  let wix     = groupBy( groupon, sort( zip( map( sortF(), words ), words) ) );
+  let mxl     = maximum( map( lengthF(), wix ) );
 
   return map( []( const spl& sl ) {
-    return fp::map( fp::snd<string,string>, sl );
+    return fp::map( fp::sndF(), sl );
   }, filter( [=]( const spl& sl ) { return fp::length( sl ) == mxl; }, wix) );
 
   /* Compare with Haskell:
@@ -88,7 +86,7 @@ T nthRoot( int n, T x ) {
 
   typedef std::pair<T,T> Guess;
 
-  return fst( until( uncurry( std::equal_to<T>() ), [=]( Guess g ) -> Guess {
+  return fst( until( uncurry( math::equalsF() ), [=]( Guess g ) -> Guess {
     T x0 = fp::snd( g ); return Guess( x0, (x0*(n-1)+(x/pow(x0,n-1)))*(1./n) );
   }, Guess( x, x/n ) ) );
 
@@ -117,20 +115,23 @@ typename types< typename types<T>::list, typename types<T>::list >::pair fftSpli
 #define M_PI 3.14159265358979323846
 #endif
 
-template<typename T>
-typename types< std::complex<T> >::list fft( const typename types<T>::list& v ) {
+template <typename V>
+auto fft( V v ) -> typename types< std::complex< value_type_of(V) > >::list {
+  typedef value_type_of(V) T;
   using namespace fp;
+  
   typedef std::complex<T> CT;
   typedef typename types< CT >::list FFTVec;
 
-  if ( length(v) == 0 ) return FFTVec();
-  if ( length(v) == 1 ) return FFTVec( 1, head(v) );
+  let const n        = length( v );
 
-  let n        = length( v );
-  let evenOdds = fftSplit<T>( v );
-  let ys       = fft<T>( fst( evenOdds) );
-  let cx = [=](CT z, T k) { return z*std::polar((T)1, (T)(-2. * M_PI * (double)k/n)); };
-  let ts = zipWith( cx, fft<T>( snd( evenOdds) ), increasingN( n/2, (T)0 ) );
+  if ( n == 0 ) return FFTVec();
+  if ( n == 1 ) return FFTVec( 1, head(v) );
+
+  let const evenOdds = fftSplit<T>( v );
+  let const ys       = fft( fst( evenOdds) );
+  let const cx = [=](CT z, T k) { return z*std::polar((T)1, (T)(-2. * M_PI * (double)k/n)); };
+  let const ts = zipWith( cx, fft( snd( evenOdds) ), increasingN( n/2, (T)0 ) );
 
   return concat( zipWith( std::plus<  CT >(), ys, ts ),
                  zipWith( std::minus< CT >(), ys, ts ) );
@@ -187,7 +188,7 @@ StringList huffman( string s ) {
 
   using namespace fp;
 
-  let freq = []( types<char>::list&& s ) {
+  let freq = []( types<char>::list s ) {
     return fp::map( fp::mapArrowF_( fp::lengthF(), fp::headF() ), fp::group( fp::sort( std::move(s) ) ) );
   };
 
@@ -238,7 +239,7 @@ int main(int argc, char **argv) {
 
   std::array<float, 8> fftValues = {1, 1, 1, 1, 0, 0, 0, 0};
   let fftIn = fp::list( fftValues );
-  run( fft<float>( fftIn /*=1,1,1,1,0,0,0,0*/ ), 5000 * ITER_MULT );
+  run( fft( fftIn /*=1,1,1,1,0,0,0,0*/ ), 5000 * ITER_MULT );
 
   ///////////////////////////////////////////////////////////////////////////
 

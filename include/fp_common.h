@@ -13,6 +13,7 @@
 
 #include <array>
 #include <functional>
+#include <initializer_list>
 #include <iterator>
 #include <tuple>
 #include <string>
@@ -28,6 +29,8 @@ using std::string;
 using std::begin;
 using std::end;
 using std::pair;
+using std::move;
+using std::forward;
 
 template<typename T>
 struct thunk : std::function<T()> { };
@@ -46,12 +49,11 @@ std::front_insert_iterator<C> front(C& c) {
 // head
 
 template<typename C>
-inline auto head(C&& c)      -> nonconstref_type_of(decltype(*begin(c))) {
-  return *begin(c);
-}
-template<typename C>
 inline auto head(const C& c) -> nonconstref_type_of(decltype(*begin(c))) {
   return *begin(c);
+}
+inline char head(const char* c) {
+  return c[0];
 }
 //template<typename T>
 //inline T head(std::function<T(void)> t) { return t(); }
@@ -61,11 +63,11 @@ inline auto head(const C& c) -> nonconstref_type_of(decltype(*begin(c))) {
 
 template<typename C>
 inline C tail(C&& c) {
-  return drop(1, c);
+  return move(drop(1, c));
 }
 template<typename C>
 inline C tail(const C& c) {
-  return drop(1, c);
+  return move(drop(1, c));
 }
 template<typename T>
 inline thunk<T> tail(thunk<T> t) {
@@ -103,14 +105,19 @@ inline size_t null(T (&A)[S]) {
 template<typename T, size_t S>
 inline typename types<T>::list list(const std::array<T,S>& a) {
   typename types<T>::list result(extent(a));
-  return result;
+  return move(result);
+}
+template<typename T, size_t S>
+inline typename types<T>::list list(const std::initializer_list<T>& il) {
+  typename types<T>::list result(extent(il));
+  return move(result);
 }
 template<typename T>
 inline typename types<T>::list list() {
   return typename types<T>::list();
 }
 inline types<char>::list list(const string& s) {
-  return types<char>::list(extent(s));
+  return move(types<char>::list(extent(s)));
 }
 
 ///////////////////////////////////////////////////////////////////////////
