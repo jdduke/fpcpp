@@ -22,7 +22,7 @@ FP_DEFINE_FUNCTION_OBJECT(null,          nullF);
 FP_DEFINE_FUNCTION_OBJECT(list,          listF);
 FP_DEFINE_FUNCTION_OBJECT(fromString,    fromStringF);
 FP_DEFINE_FUNCTION_OBJECT(fromIntegral,  fromIntegralF);
-FP_DEFINE_FUNCTION_OBJECT(randRange,     randRangeF);
+
 
 ///////////////////////////////////////////////////////////////////////////
 // prelude
@@ -36,6 +36,14 @@ FP_DEFINE_FUNCTION_OBJECT(putStr,    putStrF);
 FP_DEFINE_FUNCTION_OBJECT(putStrLen, putStrLenF);
 FP_DEFINE_FUNCTION_OBJECT(print,     printF);
 FP_DEFINE_FUNCTION_OBJECT(sort,      sortF);
+FP_DEFINE_FUNCTION_OBJECT(enumFrom,  enumFromF);
+FP_DEFINE_FUNCTION_OBJECT(concat,    concatF);
+FP_DEFINE_FUNCTION_OBJECT(append,    appendF);
+FP_DEFINE_FUNCTION_OBJECT(cons,      consF);
+FP_DEFINE_FUNCTION_OBJECT(fst,       fstF);
+FP_DEFINE_FUNCTION_OBJECT(snd,       sndF);
+FP_DEFINE_FUNCTION_OBJECT(swap,      swapF);
+
 
 ///////////////////////////////////////////////////////////////////////////
 // math
@@ -58,6 +66,11 @@ FP_DEFINE_FUNCTION_OBJECT(greaterEquals, greaterEqualsF);
 FP_DEFINE_FUNCTION_OBJECT(greater,       greaterF);
 FP_DEFINE_FUNCTION_OBJECT(lessEquals,    lessEqualsF);
 FP_DEFINE_FUNCTION_OBJECT(less,          lessF);
+FP_DEFINE_FUNCTION_OBJECT(even,          evenF);
+FP_DEFINE_FUNCTION_OBJECT(odd,           oddF);
+FP_DEFINE_FUNCTION_OBJECT(powerOfTwo,    powerOfTwoF);
+FP_DEFINE_FUNCTION_OBJECT(uniform,       uniformF);
+
 }
 
 

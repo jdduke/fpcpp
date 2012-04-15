@@ -51,6 +51,29 @@ struct remove_const_ref {
  typedef typename std::remove_const< typename std::remove_reference<T>::type >::type type;
 };
 
+
+///////////////////////////////////////////////////////////////////////////
+// int_to_type/type_to_type/select
+
+template <int v>
+struct int_to_type {
+  enum { value = v };
+};
+
+template <typename T>
+struct type_to_type {
+  typedef T type;
+};
+
+template <bool flag, typename T, typename U>
+struct select {
+  typedef T result_type;
+};
+template <typename T, typename U>
+struct select<false, T, U> {
+  typedef U result_type;
+};
+
 ///////////////////////////////////////////////////////////////////////////
 // traits
 
@@ -58,6 +81,7 @@ template<typename T, bool IsContainer> struct traits_helper { };
 
 template <typename T >
 struct traits_helper<T,true> {
+  typedef T&                                           ref_type;
   typedef decltype( begin( std::declval<T>() ) )       iterator;
   typedef decltype( begin( std::declval<const T>() ) ) const_iterator;
   typedef typename remove_const_ref< decltype( *begin( std::declval<T>() ) ) >::type value_type;
@@ -65,6 +89,7 @@ struct traits_helper<T,true> {
 
 template <typename T>
 struct traits_helper<T,false> {
+  typedef typename select<std::is_fundamental<T>::value, T, T&>::result_type ref_type;
   typedef T*       iterator;
   typedef const T* const_iterator;
   typedef typename remove_const_ref< T >::type value_type;
@@ -103,20 +128,6 @@ struct types {
   typedef fp_list<T>      list;
   typedef std::pair<T,U>  pair;
 };
-
-///////////////////////////////////////////////////////////////////////////
-// int_to_type/type_to_type
-
-template <int v>
-struct int_to_type {
-  enum { value = v };
-};
-
-template <typename T>
-struct type_to_type {
-  typedef T type;
-};
-
 
 ///////////////////////////////////////////////////////////////////////////
 // has_find

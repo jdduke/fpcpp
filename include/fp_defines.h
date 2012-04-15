@@ -55,6 +55,7 @@
 #define result_type_of(TYPE)           typename fp::function_traits<TYPE>::result_type
 #define argument_type_of(TYPE,ARGC)    typename fp::function_traits<TYPE>::t ## ARGC ## _type
 #define nonconstref_type_of(TYPE)      typename fp::remove_const_ref<TYPE>::type
+#define ref_type_of(TYPE)              typename fp::traits<TYPE>::ref_type
 
 // Template conditional type helpers
 #define fp_enable_if(CONDITION,RTYPE)          typename std::enable_if<CONDITION,RTYPE>::type
@@ -63,12 +64,13 @@
 #define fp_enable_if_void(TYPE)                fp_enable_if(std::is_same<void,TYPE>::value,  void)
 #define fp_enable_if_nonvoid(TYPE,RTYPE)       fp_enable_if(!std::is_same<void,TYPE>::value, RTYPE)
 #define fp_enable_if_arithmetic(TYPE)          fp_enable_if(std::is_arithmetic<TYPE>::value, TYPE)
+#define fp_enable_if_integral(TYPE)            fp_enable_if(std::is_integral<TYPE>::value, TYPE)
 
 // Join helpers
 #define FP_CONCAT_IMPL(x, y) x ## y
 #define FP_CONCAT(x, y) FP_CONCAT_IMPL(x,y)
 
-// auto function(<arguments>) RETURNS(<some-expression>);
+// auto function(<arguments>) RETURNS(<single-lineexpression>);
 #define FP_RETURNS(...)        -> decltype(__VA_ARGS__) { return (__VA_ARGS__); }                      typedef int FP_CONCAT(RETURNS_ON_, FP_CONCAT(__LINE__,__COUNTER__))
 #define FP_RETURNS_NONREF(...) -> nonconstref_type_of(decltype(__VA_ARGS__)) { return (__VA_ARGS__); } typedef int FP_CONCAT(RETURNS_ON_, FP_CONCAT(__LINE__,__COUNTER__))
 

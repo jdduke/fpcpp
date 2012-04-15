@@ -51,35 +51,36 @@ inline T negate(const T& t0) {
 }
 
 template<typename T>
-inline T mod(const T& t0, const T& t1) {
+inline fp_enable_if_integral(T) mod(T t0, T t1) {
   return t0 % t1;
 }
 
 template<typename T>
-inline fp_enable_if_arithmetic(T) sqrt(const T& t) {
+inline fp_enable_if_arithmetic(T) sqrt(T t) {
   return std::sqrt(t);
 }
 
 template<typename T>
-inline fp_enable_if_arithmetic(T) abs(const T& t0) {
+inline fp_enable_if_arithmetic(T) abs(T t0) {
   return std::abs(t0);
 }
+
 
 ///////////////////////////////////////////////////////////////////////////
 // Logical operations
 
 template<typename T>
-inline T logicalAnd(const T& t0, const T& t1) {
+inline fp_enable_if_integral(T) logicalAnd(const T& t0, const T& t1) {
   return t0 && t1;
 }
 
 template<typename T>
-inline T logicalOr(const T& t0, const T& t1) {
+inline fp_enable_if_integral(T) logicalOr(const T& t0, const T& t1) {
   return t0 || t1;
 }
 
 template<typename T>
-inline T logicalNot(const T& t0) {
+inline fp_enable_if_integral(T) logicalNot(const T& t0) {
   return !t0;
 }
 
@@ -117,6 +118,24 @@ inline bool greater(const T& t0, const T& t1) {
   return t0 > t1;
 }
 
+template<typename T>
+inline fp_enable_if_integral(T) even(T t) {
+  return mod(t, 2) == 0;
+}
+
+template<typename T>
+inline fp_enable_if_integral(T) odd(T t) {
+  return mod(t, 2) == 1;
+}
+
+template<typename T>
+inline fp_enable_if_integral(T) powerOfTwo(T t) {
+  return (t != 0) && (((t-1) & t) == 0);
+}
+
+
+/////////////////////////////////////////////////////////////////////////
+// Random operations
 
 #if defined(_MSC_VER)
 using std::uniform_real;

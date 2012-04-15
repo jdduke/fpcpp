@@ -316,6 +316,11 @@ inline R& __zipWith__(F f, T&& t, U&& u, R& r) {
   return r;
 }
 template <typename F, typename T, typename U, typename V, typename R>
+inline R& __zipWith3__(F f, const T& t, const U& u, const V& v, R& r) {
+  transform3(extent(t), begin(u), begin(v), back(r), f);
+  return r;
+}
+template <typename F, typename T, typename U, typename V, typename R>
 inline R& __zipWith3__(F f, T&& t, U&& u, V&& v, R& r) {
   transform3(extent(t), begin(u), begin(v), back(r), f);
   return r;
@@ -325,25 +330,27 @@ template <typename F, typename T, typename U>
 inline auto zipWith(F f, const T& t, const U& u) -> typename types<decltype(f(head(t),head(u)))>::list {
   typedef decltype(f(head(t),head(u))) result_type;
   typename types<result_type>::list result;
-  return __zipWith__(f, t, u, result);
+  return move(__zipWith__(f, t, u, result));
 }
 template <typename F, typename T, typename U>
 inline auto zipWith(F f, T&& t, U&& u) -> typename types<decltype(f(head(t),head(u)))>::list {
   typedef decltype(f(head(t),head(u))) result_type;
   typename types<result_type>::list result;
-  return __zipWith__(f, t, u, result);
+  return move(__zipWith__(f, t, u, result));
 }
 FP_DEFINE_CURRIED_T(zipWith, zipWith_, _zipWith_)
 
 template <typename F, typename T, typename U, typename V>
-inline T zipWith3(F f, const T& t, const U& u, const V& v) {
-  T result;
-  return __zipWith3__(f, t, u, v, result);
+inline auto zipWith3(F f, const T& t, const U& u, const V& v) -> typename types<decltype(f(head(t),head(u),head(v)))>::list {
+  typedef decltype(f(head(t), head(u), head(v))) result_type;
+  typename types<result_type>::list result;
+  return move(__zipWith3__(f, t, u, v, result));
 }
 template <typename F, typename T, typename U, typename V>
-inline T zipWith3(F f, T&& t, U&& u, const V&& v) {
-  T result;
-  return __zipWith3__(f, t, u, v, result);
+inline auto zipWith3(F f, T&& t, U&& u, V&& v)  -> typename types<decltype(f(head(t),head(u),head(v)))>::list {
+  typedef decltype(f(head(t), head(u), head(v))) result_type;
+  typename types<result_type>::list result;
+  return move(__zipWith3__(f, move(t), move(u), move(v), result));
 }
 FP_DEFINE_CURRIED_T(zipWith3, zipWith3_, _zipWith3_)
 
@@ -380,7 +387,7 @@ inline R& __unzip__(F f, const T& t, const U& u, R& r) {
 }
 
 template<typename T, typename U>
-inline std::pair< typename types<T>::list, typename types<U>::list > unzip(const typename types< std::pair<T,U> >::list& c) {
+inline auto unzip(const typename types< std::pair<T,U> >::list& c) -> std::pair< typename types<T>::list, typename types<U>::list > {
   typename types<T>::list t;
   typename types<U>::list u;
   for_each(extent(c), [&](const std::pair<T,U>& p) {
@@ -649,7 +656,6 @@ inline auto decreasingN(size_t n, T t0 = (T)0) FP_RETURNS( takeF(n, decreasing(t
 // enumFrom
 template <typename T>
 inline auto enumFrom(T t0) FP_RETURNS( iterate(&succ<T>, t0) );
-FP_DEFINE_FUNCTION_OBJECT(enumFrom, enumFromF);
 
 ///////////////////////////////////////////////////////////////////////////
 // uniform
@@ -692,7 +698,6 @@ concat(const T& t0, const T& t1) {
   typename types<T>::list result(1, t0);
   return result.append(t1);
 }
-FP_DEFINE_FUNCTION_OBJECT(concat, concatF);
 
 ///////////////////////////////////////////////////////////////////////////
 // append
@@ -701,7 +706,6 @@ inline C append(C c, const T& t) {
   c.insert(end(c), t);
   return c;
 }
-FP_DEFINE_FUNCTION_OBJECT(append, appendF);
 
 ///////////////////////////////////////////////////////////////////////////
 // cons
@@ -720,7 +724,6 @@ inline string cons(char t, string s) {
 inline string cons(string s0, const string& s1) {
   return s0.append(s1);
 }
-FP_DEFINE_FUNCTION_OBJECT(cons, consF);
 
 ///////////////////////////////////////////////////////////////////////////
 // reverse
@@ -749,19 +752,16 @@ template<typename T, typename U>
 inline nonconstref_type_of(T) fst(const pair<T,U>& p) {
   return p.first;
 }
-FP_DEFINE_FUNCTION_OBJECT(fst, fstF);
 
 template <typename T, typename U>
 inline nonconstref_type_of(U) snd(const pair<T,U>& p) {
   return p.second;
 }
-FP_DEFINE_FUNCTION_OBJECT(snd, sndF);
 
 template<typename T, typename U>
 inline pair<U,T> swap(const pair<T,U>& p) {
   return make_pair(p.first,p.second);
 }
-FP_DEFINE_FUNCTION_OBJECT(swap, swapF);
 
 template<typename F0, typename F1, typename T, typename U>
 inline auto mapPair(F0 f0, F1 f1, const std::pair<T,U>& p) FP_RETURNS( make_pair( f0(p.first), f1(p.second) ) );
