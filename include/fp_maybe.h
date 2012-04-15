@@ -17,8 +17,7 @@ public:
   Maybe(const Maybe& other)     : pair(other)                   { }
   Maybe(Maybe&& other)          : pair(std::move(other))        { }
   Maybe(Nothing)                : pair(false, T())              { }
-  Maybe(const T& value)         : pair(true,  value)            { }
-  Maybe(T&& value)              : pair(true,  std::move(value)) { }
+  Maybe(T value)                : pair(true,  std::move(value)) { }
   Maybe(bool valid, const T& t) : pair(valid, t)                { }
 
 
@@ -51,10 +50,7 @@ bool operator==(const Maybe<T>& opt, Nothing) { return !opt.valid(); }
 // just
 
 template <typename T>
-Maybe<T> just(const T& t) { return Maybe<T>(t); }
-
-template <typename T>
-Maybe<T> just(T&& t)      { return Maybe<T>(std::move(t)); }
+Maybe<T> just(T t) { return Maybe<T>(std::move(t)); }
 
 
 /////////////////////////////////////////////////////////////////////////

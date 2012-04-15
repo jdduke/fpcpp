@@ -8,6 +8,7 @@
 
 #include <iostream>
 
+using namespace std;
 using namespace fp;
 using namespace fp::math;
 
@@ -21,13 +22,13 @@ size_t s7();
 
 ///////////////////////////////////////////////////////////////////////////
 
-typedef std::function<size_t(void)> solution;
+typedef function<size_t(void)> solution;
 
 types<solution>::list solutions( ) {
   types<solution>::list ss;
   ss.push_back(s1);
   ss.push_back(s2);
-  /*ss.push_back(s3);
+  ss.push_back(s3);/*
   ss.push_back(s4);
   ss.push_back(s5);
   ss.push_back(s6);
@@ -47,12 +48,14 @@ int main(int argc, char **argv) {
 }
 
 ///////////////////////////////////////////////////////////////////////////
+// Find the sum of all the multiples of 3 or 5 below 1000.
 
 size_t s1() {
   return sum(filter([](size_t x) { return (x % 3) == 0 || (x % 5) == 0; }, fp::increasingN(999, 1)));
 }
 
 ///////////////////////////////////////////////////////////////////////////
+// By considering the terms in the Fibonacci sequence whose values do not exceed four million, find the sum of the even-valued terms.
 
 size_t s2() {
   size_t x0 = 0, x1 = 1;
@@ -61,9 +64,58 @@ size_t s2() {
     std::swap(x0+=x1, x1);
     return result;
   };
-  return sum(filter([](size_t x) { return x % 2 == 0; }, 
-                    takeWhileT(curry(greater<size_t>, 4000000), fibs)));
+  return sum(filter([](size_t x) { return x % 2 == 0; },
+                    takeWhileT(curry(math::greater<size_t>, 4000000), fibs)));
 }
 
 ///////////////////////////////////////////////////////////////////////////
+// What is the largest prime factor of the number 600851475143 ?
 
+size_t s3() {
+
+  const size_t factoredValue = 600851475143;
+
+#if 0
+  size_t value   = factoredValue;
+  size_t largest = 0;
+  size_t counter = 2;
+
+  let primeFactor = [=]() mutable -> fp::Maybe<size_t> {
+    while (counter * counter < value) {
+      if (value % counter == 0) {
+        value = value / counter;
+        largest = counter;
+        return fp::just(largest);
+      } else {
+        ++counter;
+        if (counter * counter >= value)
+          return fp::just(std::max(largest, value));
+      }
+    }
+    return Nothing();
+  };
+
+  return *fp::last(fp::takeWhileT([](const fp::Maybe<size_t>& m) { return !fp::isNothing(m); }, primeFactor));
+
+#else
+
+  let primeFactor = [](size_t factoredValue) -> size_t {
+    size_t value   = factoredValue;
+    size_t largest = 0;
+    size_t counter = 2;
+    while (counter * counter < value) {
+      if (value % counter == 0) {
+        value = value / counter;
+        largest = counter;
+      } else {
+        ++counter;
+      }
+    }
+    return std::max(largest, value);
+  };
+
+  return primeFactor(factoredValue);
+#endif
+}
+
+/////////////////////////////////////////////////////////////////////////
