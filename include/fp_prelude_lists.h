@@ -42,7 +42,7 @@ map(F f, const C& c) -> typename std::enable_if< !std::is_same<void,decltype(f(d
                                                  typename types< nonconstref_type_of(decltype(f(declval<typename traits<C>::value_type>()))) >::list >::type {
   typedef typename types< nonconstref_type_of(decltype(f(head(c)))) >::list result_type;
   result_type result;
-  return __map__(f, c, result);
+  return move(__map__(f, c, result));
 }
 
 template<typename F, typename C>
@@ -55,12 +55,12 @@ inline string map(F f, const string& s) {
   typedef typename types<char>::list char_list;
   char_list charList;
    __map__(f, char_list(extent(s)), charList);
-  return show(charList);
+  return move(show(charList));
 }
 
 template<typename F>
 inline string map(F f, const char* s) {
-  return map(f, string(s));
+  return move(map(f, string(s)));
 }
 FP_DEFINE_CURRIED(map, map_);
 
@@ -71,13 +71,13 @@ template<typename F, typename C>
 inline C filter(F f, const C& c) {
   C result;
   std::copy_if(extent(c), back(result), f);
-  return result;
+  return move(result);
 }
 FP_DEFINE_CURRIED(filter, filter_);
 
 template<typename T, typename F>
 typename types<T>::list operator|(const typename types<T>::list& l, F f) {
-  return filter(f, l);
+  return move(filter(f, l));
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -93,7 +93,7 @@ inline auto fold(It first, It last, Op op) -> nonconstref_type_of(decltype(op(*f
   typedef nonconstref_type_of(decltype(op(*first, *first))) T;
   if (first != last) {
     auto value = T(*first);
-    return std::accumulate(++first, last, value, op);
+    return move(std::accumulate(++first, last, value, op));
   } else {
     return T();
   }
@@ -112,7 +112,7 @@ inline auto fold(It first, It last, Op op) -> typename std::iterator_traits<It>:
 
 template<typename It, typename T, typename Op>
 inline T fold(It first, It last, T t, Op op) {
-  return std::accumulate(first, last, t, op);
+  return move(std::accumulate(first, last, t, op));
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -120,14 +120,13 @@ inline T fold(It first, It last, T t, Op op) {
 
 template <typename F, typename T, typename C>
 inline T foldl(F f, T t, const C& c) {
-  return fold(extent(c), t, f);
+  return move(fold(extent(c), t, f));
 }
 FP_DEFINE_CURRIED_T(foldl, foldl_, _foldl_);
 
 template <typename F, typename C>
 inline auto foldl1(F f, const C& c) -> value_type_of(C) {
-
-  return fold(extent(c), f);
+  return move(fold(extent(c), f));
 }
 FP_DEFINE_CURRIED(foldl1, foldl1_);
 
@@ -136,13 +135,13 @@ FP_DEFINE_CURRIED(foldl1, foldl1_);
 
 template <typename F, typename T, typename C>
 inline T foldr(F f, T t, const C& c) {
-  return fold(rextent(c), t, f);
+  return move(fold(rextent(c), t, f));
 }
 FP_DEFINE_CURRIED_T(foldr, foldr_, _foldr_);
 
 template <typename F, typename C>
 inline auto foldr1(F f, const C& c) -> value_type_of(C) {
-  return fold(rextent(c), f);
+  return move(fold(rextent(c), f));
 }
 FP_DEFINE_CURRIED(foldr1, foldr1_);
 
@@ -224,7 +223,7 @@ template<typename F, typename T, typename C>
 typename types<T>::list scanl(F f, T t, const C& c) {
   typename types<T>::list result(1, t);
   scan(extent(c), back(result), t, f);
-  return result;
+  return move(result);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -234,7 +233,7 @@ template<typename F, typename C>
 C scanl1(F f, const C& c) {
   C result;
   scan(extent(c), back(result), f);
-  return result;
+  return move(result);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -244,7 +243,7 @@ template<typename F, typename T, typename C>
 typename types<T>::list scanr(F f, T t, const C& c) {
   typename types<T>::list result(1, t);
   scan(rextent(c), back(result), t, f);
-  return result;
+  return move(result);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -254,7 +253,7 @@ template<typename F, typename C>
 C scanr1(F f, const C& c) {
   C result;
   scan(rextent(c), back(result), f);
-  return result;
+  return move(result);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -364,7 +363,7 @@ inline typename types< typename tuple_traits<C0,C1>::type >::list zip(const C0& 
   typedef value_type_of(C1) U;
   typedef typename types< std::pair<T,U> >::list result_type;
   result_type result;
-  return __zipWith__([](const T& t, const U& u) { return std::make_pair(t,u); }, c1, c2, result);
+  return move(__zipWith__([](const T& t, const U& u) { return std::make_pair(t,u); }, c1, c2, result));
 }
 
 template<typename C0, typename C1, typename C2>
@@ -374,7 +373,7 @@ inline typename types< typename triple_traits<C0,C1,C2>::type >::list zip3(const
   typedef value_type_of(C2) V;
   typedef typename types< std::tuple<T,U,V> >::list result_type;
   result_type result;
-  return __zipWith__([](const T& t, const U& u, const V& v) { return std::make_tuple(t,u,v); }, c1, c2, c3, result);
+  return move(__zipWith__([](const T& t, const U& u, const V& v) { return std::make_tuple(t,u,v); }, c1, c2, c3, result));
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -442,7 +441,7 @@ inline value_type_of(C) minimum(const C& c) {
 template <typename F, typename C>
 inline C sortBy(F f, C c) {
   std::sort(extent(c), f);
-  return c;
+  return move(c);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -451,14 +450,14 @@ inline C sortBy(F f, C c) {
 template <typename C>
 inline C sort(C c) {
   std::sort(extent(c));
-  return c;
+  return move(c);
 }
 
 #if !USE_DEQUE_FOR_LISTS
 template <typename T>
 inline typename std::enable_if<!is_container<T>::value,std::list<T> >::type sort(std::list<T> l) {
   l.sort();
-  return l;
+  return move(l);
 }
 #endif
 
@@ -475,7 +474,7 @@ inline typename types<C>::list groupBy(F f, const C& c) {
       return f(*it,t);
     });
   }
-  return result;
+  return move(result);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -493,7 +492,7 @@ template<typename F, typename T, typename C>
 inline C insertBy(F f, T t, C c) {
   let compare = [&](const T& t1) { return f(t, t1); };
   c.insert( std::find_if( extent(c), compare ), t );
-  return c;
+  return move(c);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -516,7 +515,7 @@ inline C takeWhile(F f, const C& c) {
   C result;
   //std::copy(begin(t), std::find_if(extent(t), std::not1<F>(f)), back(result));
   copyWhile(extent(c), back(result), f);
-  return result;
+  return move(result);
 }
 FP_DEFINE_CURRIED(takeWhile, takeWhile_);
 
@@ -527,7 +526,7 @@ inline auto takeWhileT(F f, T t) -> typename types< decltype(t()) >::list {
   auto back_iter = back(result);
   for (let value = t(); f(value); value=t())
     back_iter = value;
-  return result;
+  return move(result);
 }
 FP_DEFINE_CURRIED(takeWhileT, takeWhileT_);
 
@@ -546,7 +545,7 @@ template <typename F>
 inline auto takeF(size_t n, F f) -> typename types< decltype(f()) >::list {
   typename types< decltype(f()) >::list result(n);
   std::generate_n(begin(result), n, f);
-  return result;
+  return move(result);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -556,7 +555,7 @@ template <typename F, typename C>
 inline C dropWhile(F f, const C& c) {
   C result;
   std::copy(std::find_if_not(extent(c), f), end(c), back(result));
-  return result;
+  return move(result);
 }
 FP_DEFINE_CURRIED(dropWhile, dropWhile_);
 
@@ -680,6 +679,7 @@ template<typename T0, typename T1>
 inline auto operator>(list_to_helper_val<T0> t0, T1 t1) FP_RETURNS( increasingN((T0)(t1-t0.value+1), t0.value) );
 template<typename T>
 inline list_to_helper_val<T> operator<(T t, list_to_helper) {
+  ((void)to);
   return list_to_helper_val<T>(t);
 }
 
@@ -690,13 +690,13 @@ inline fp_enable_if_container(T,T)
 concat(const T& t0, const T& t1) {
   T result(t0);
   std::copy(extent(t1), back(result));
-  return result;
+  return move(result);
 }
 template <typename T>
 inline fp_enable_if_not_container(T,typename types<T>::list)
 concat(const T& t0, const T& t1) {
   typename types<T>::list result(1, t0);
-  return result.append(t1);
+  return move(result.append(t1));
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -704,7 +704,7 @@ concat(const T& t0, const T& t1) {
 template <typename C, typename T>
 inline C append(C c, const T& t) {
   c.insert(end(c), t);
-  return c;
+  return move(c);
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -716,13 +716,13 @@ inline C cons(const T& t, const C& c) {
 template <typename T>
 inline std::deque<T> cons(const T& t, std::deque<T> c) {
   c.push_front(t);
-  return c;
+  return move(c);
 }
 inline string cons(char t, string s) {
-  return s.insert(0, 1, t);
+  return move(s.insert(0, 1, t));
 }
 inline string cons(string s0, const string& s1) {
-  return s0.append(s1);
+  return move(s0.append(s1));
 }
 
 ///////////////////////////////////////////////////////////////////////////
@@ -757,6 +757,17 @@ template <typename T, typename U>
 inline nonconstref_type_of(U) snd(const pair<T,U>& p) {
   return p.second;
 }
+
+#if 0
+template<typename T, typename U>
+inline nonconstref_type_of(T) fst(pair<T,U>&& p) {
+  return move(p.first);
+}
+template <typename T, typename U>
+inline nonconstref_type_of(U) snd(pair<T,U>&& p) {
+  return move(p.second);
+}
+#endif
 
 template<typename T, typename U>
 inline pair<U,T> swap(const pair<T,U>& p) {

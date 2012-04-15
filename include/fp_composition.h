@@ -86,6 +86,7 @@ namespace fp_operators {
   inline auto operator>(F f, G g) FP_RETURNS( fp::compose(f,g) );
   template<typename F>
   inline F operator<(F f, compose_dot_helper) {
+    ((void)o);
     return f;
   }
 #endif

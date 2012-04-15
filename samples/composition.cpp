@@ -52,10 +52,10 @@ void test2() {
   let square = [](float x) { return x*x; };
 
   let l1 = fp::compose2(addF(), absF(), absF());
-  assert( l1(1.f, -2.f) == 3.f );
+  print( l1(1.f, -2.f) == 3.f );
 
   let l2 = compose(sqrtF(), compose2(addF(), square, square));
-  assert( l2(3.f, 4.f) == 5.f );
+  print( l2(3.f, 4.f) == 5.f );
 
   //let test = 5 <add_i> 10;
 }

@@ -107,7 +107,7 @@ typename types< typename types<T>::list, typename types<T>::list >::pair fftSpli
   else if ( length(s) == 1 ) return make_pair( FFTVec(1, head(s)), FFTVec() );
   else {
     let xt_yt = fftSplit<T>( drop(2, s) );
-    return make_pair( cons( index(0,s), fst(xt_yt)), cons( index(1,s), snd(xt_yt) ) );
+    return make_pair( cons( index(0,s), fst(move(xt_yt))), cons( index(1,s), snd(move(xt_yt)) ) );
   }
 }
 
@@ -249,8 +249,7 @@ int main(int argc, char **argv) {
 
   ///////////////////////////////////////////////////////////////////////////
 
-  print( show("\n\nHuffman( \"this is an example for huffman encoding\" )") );
-  print( huffman( "this is an example for huffman encoding" ) );
+  run( huffman( "this is an example for huffman encoding" ),  50 * ITER_MULT );
 
   print( "" );
 
