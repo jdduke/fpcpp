@@ -54,10 +54,9 @@ inline types<int>::list unique7( types<int>::list rands ) {
   return types<int>::list( fp::begin(rands), std::unique( extent(rands) ) );
 }
 
-void unique( size_t count, size_t iters = ITER_MULT ) {
-  const let rands = fp::uniformN( count, 0, 100 );
-  print( "Length = " + show(count) + " - Iters = " + show(iters));
-
+template <typename C>
+void unique_impl(const C& rands, size_t iters) {
+  print( "Length = " + show(length(rands)) + " - Iters = " + show(iters));
   run( let t = unique1( rands );  (void)fp::length(t),  iters );
   run( let t = unique2( rands );  (void)fp::length(t),  iters );
   run( let t = rands; unique3(t); (void)fp::length(t),  iters );
@@ -65,6 +64,19 @@ void unique( size_t count, size_t iters = ITER_MULT ) {
   run( let t = rands; unique5(t); (void)fp::length(t),  iters );
   run( let t = unique6( rands );  (void)fp::length(t),  iters );
   run( let t = unique7( rands );  (void)fp::length(t),  iters );
+}
+
+void unique( size_t count, size_t iters = ITER_MULT ) {
+  {
+    const let rands = fp::uniformN( count, 0, 100 );
+    unique_impl(rands);
+  }
+  {
+    types<string>::list rands;
+    for (size_t i = 0; i < count; ++i)
+      rands.emplace_back( show( uniformN( 10, 'a', 'z' ) ) );
+    unique_impl(rands);
+  }
 }
 
 ///////////////////////////////////////////////////////////////////////////
