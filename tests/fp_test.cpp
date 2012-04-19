@@ -344,7 +344,7 @@ TEST(Prelude, Elem) {
   using fp::elem;
   using fp::notElem;
 
-  bool hasFind = fp::has_find<std::map<int,int>,int>::value;
+  //bool hasFind = fp::has_find<std::map<int,int>,int>::value;
 
   EXPECT_TRUE( elem(5,   iVec5_0_5));
   EXPECT_FALSE(notElem(5, iVec5_0_5));

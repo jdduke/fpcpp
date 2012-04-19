@@ -20,38 +20,48 @@ using namespace fp;
 
 ///////////////////////////////////////////////////////////////////////////
 
-inline types<int>::list unique1( const types<int>::list& rands ) {
+template <typename C>
+inline C unique1( const C& rands ) {
   let sorted = fp::sort( rands );
   sorted.erase( std::unique( extent(sorted) ), fp::end(sorted) );
   return move(sorted);
 }
-inline types<int>::list unique2( types<int>::list rands ) {
+template <typename C>
+inline C unique2( C rands ) {
   rands = move( fp::sort( move(rands) ) );
   rands.resize( std::unique( extent(rands) ) - fp::begin(rands) );
   return move(rands);
 }
-inline void unique3( types<int>::list& rands ) {
+template <typename C>
+inline void unique3( C& rands ) {
   std::sort( extent(rands) );
   rands.resize( std::unique( extent(rands) ) - fp::begin(rands) );
 }
-inline types<int>::list unique4( const types<int>::list& rands ) {
-  std::set<int> s;
+template <typename C>
+inline C unique4( const C& rands ) {
+  typedef nonconstref_type_of(decltype(head(rands))) T;
+  std::set<T> s;
   const size_t size = fp::length(rands);
   for( unsigned i = 0; i < size; ++i )
     s.insert( rands[i] );
-  return types<int>::list( extent(s) );
+  return C( extent(s) );
 }
-inline void unique5( types<int>::list& rands ) {
-  std::set<int> s( extent(rands) );
+template <typename C>
+inline void unique5( C& rands ) {
+  typedef nonconstref_type_of(decltype(head(rands))) T;
+  std::set<T> s( extent(rands) );
   rands.assign( extent(s) );
 }
-inline types<int>::list unique6( const types<int>::list& rands ) {
-  std::unordered_set<int> s( extent(rands) );
-  return types<int>::list( extent(s) );
+template <typename C>
+inline C unique6( const C& rands ) {
+  typedef nonconstref_type_of(decltype(head(rands))) T;
+  std::unordered_set<T> s( extent(rands) );
+  return C( extent(s) );
 }
-inline types<int>::list unique7( types<int>::list rands ) {
+template <typename C>
+inline C unique7( C rands ) {
   rands = move( fp::sort( move(rands) ) );
-  return types<int>::list( fp::begin(rands), std::unique( extent(rands) ) );
+  return C( fp::begin(rands), std::unique( extent(rands) ) );
 }
 
 template <typename C>
@@ -69,13 +79,13 @@ void unique_impl(const C& rands, size_t iters) {
 void unique( size_t count, size_t iters = ITER_MULT ) {
   {
     const let rands = fp::uniformN( count, 0, 100 );
-    unique_impl(rands);
+    unique_impl(rands, iters);
   }
   {
     types<string>::list rands;
     for (size_t i = 0; i < count; ++i)
       rands.emplace_back( show( uniformN( 10, 'a', 'z' ) ) );
-    unique_impl(rands);
+    unique_impl(rands, iters);
   }
 }
 

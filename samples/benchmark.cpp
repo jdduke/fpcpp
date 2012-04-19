@@ -52,7 +52,7 @@ float test_func2(float x, float y, float z, float w) {
 }
 
 float test_func3() {
-  return logf(sqrtf(fp::randRange(0.f, RAND_VEC_RANGE) * fp::randRange(0.f, RAND_VEC_RANGE)));
+  return logf(sqrtf(fp::math::uniform(0.f, RAND_VEC_RANGE) * fp::math::uniform(0.f, RAND_VEC_RANGE)));
 }
 
 float test_func4(float x) {
@@ -147,11 +147,11 @@ void test() {
     //     static inline auto bind2(F f, T t, T1 t1) -> std::function< decltype(f(t,t1)) (T,T1) > {
     //       //FP_RETURNS( std::bind( static_cast< decltype(F) (T,T1) >(f), t, t1) );
     //       typedef decltype(f(t,t1)) result_type;
-    // 
+    //
     //       return std::bind( static_cast< decltype(F) (T,T1) >(f), t, t1 );
      //let func = randRangeF();
      //typedef std::function< decltype(func(0.f, RAND_VEC_RANGE)) ) result_type;
-// 
+//
      let rand_gen2 = fp::curry_helper_impl<2>::bind2(randRangeF(), 0.f, RAND_VEC_RANGE);
      rand_gen2();
 

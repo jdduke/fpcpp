@@ -38,10 +38,12 @@ inline R& __map__(F f, const C& c, R& r) {
 // This code is abominable...
 template<typename F, typename C>
 inline auto
-map(F f, const C& c) -> typename std::enable_if< !std::is_same<void,decltype(f(declval<typename traits<C>::value_type>()))>::value,
-                                                 typename types< nonconstref_type_of(decltype(f(declval<typename traits<C>::value_type>()))) >::list >::type {
+map(F f, const C& c)
+    -> typename std::enable_if< !std::is_same<void,decltype(f(declval<typename traits<C>::value_type>()))>::value,
+       typename types< nonconstref_type_of(decltype(f(declval<typename traits<C>::value_type>()))) >::list >::type {
   typedef typename types< nonconstref_type_of(decltype(f(head(c)))) >::list result_type;
   result_type result;
+  result.reserve(c.size());
   return move(__map__(f, c, result));
 }
 
@@ -69,7 +71,7 @@ FP_DEFINE_CURRIED(map, map_);
 
 template<typename F, typename C>
 inline C filter(F f, const C& c) {
-  C result;
+  C result; result.reserve(c.size());
   std::copy_if(extent(c), back(result), f);
   return move(result);
 }
@@ -687,10 +689,9 @@ inline list_to_helper_val<T> operator<(T t, list_to_helper) {
 // concat
 template <typename T>
 inline fp_enable_if_container(T,T)
-concat(const T& t0, const T& t1) {
-  T result(t0);
-  std::copy(extent(t1), back(result));
-  return move(result);
+concat(T t0, const T& t1) {
+  std::copy(extent(t1), back(t0));
+  return move(t0);
 }
 template <typename T>
 inline fp_enable_if_not_container(T,typename types<T>::list)
@@ -728,17 +729,16 @@ inline string cons(string s0, const string& s1) {
 ///////////////////////////////////////////////////////////////////////////
 // reverse
 
-#if 0
+#if 1
 template <typename C>
-inline C reverse( const C& c ) {
-  C result( c );
+inline C reverse( C c ) {
   std::reverse( extent(c) );
-  return c;
+  return move(c);
 }
 #else
 template <typename C>
 inline C reverse(const C& c) {
-  return foldl( flip( cons<value_type_of(C),C> ), C(), c );
+  return move(foldl( flip( cons<value_type_of(C),C> ), C(), c ));
 }
 #endif
 
