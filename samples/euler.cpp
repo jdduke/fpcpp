@@ -73,36 +73,12 @@ size_t s2() {
 
 size_t s3() {
 
-  const size_t factoredValue = 600851475143;
+  const unsigned long long factoredValue = 600851475143;
 
-#if 0
-  size_t value   = factoredValue;
-  size_t largest = 0;
-  size_t counter = 2;
-
-  let primeFactor = [=]() mutable -> fp::Maybe<size_t> {
-    while (counter * counter < value) {
-      if (value % counter == 0) {
-        value = value / counter;
-        largest = counter;
-        return fp::just(largest);
-      } else {
-        ++counter;
-        if (counter * counter >= value)
-          return fp::just(std::max(largest, value));
-      }
-    }
-    return Nothing();
-  };
-
-  return *fp::last(fp::takeWhileT([](const fp::Maybe<size_t>& m) { return !fp::isNothing(m); }, primeFactor));
-
-#else
-
-  let primeFactor = [](size_t factoredValue) -> size_t {
-    size_t value   = factoredValue;
-    size_t largest = 0;
-    size_t counter = 2;
+  let primeFactor = [](long long factoredValue) -> long long {
+    unsigned long long value = factoredValue;
+    unsigned long long largest = 0;
+    unsigned long long counter = 2;
     while (counter * counter < value) {
       if (value % counter == 0) {
         value = value / counter;
@@ -115,7 +91,6 @@ size_t s3() {
   };
 
   return primeFactor(factoredValue);
-#endif
 }
 
 /////////////////////////////////////////////////////////////////////////

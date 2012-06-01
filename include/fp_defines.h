@@ -14,13 +14,28 @@
 // FP_COMPOUND - Whether the compiler properly compiles compound composition
 
 #if defined(_MSC_VER)
-#define FP_DECLVAL  0
+#define FP_INITIALIZER 0
 #define FP_VARIADIC 0
 #define FP_THIS_IN_RET 1
+#if _MSC_VER >= 1700
+#define FP_DECLVAL  1
+#define FP_NOEXCEPT noexcept
 #else
 #define FP_DECLVAL  1
-#define FP_VARIADIC 1
+#define FP_NOEXCEPT noexcept
+#endif
+#elif defined(__INTEL_COMPILER)
+#define FP_INITIALIZER 1
+#define FP_DECLVAL     0
+#define FP_VARIADIC    1
+#define FP_THIS_IN_RET 1
+#define FP_NOEXCEPT noexcept
+else
+#define FP_INITIALIZER 1
+#define FP_DECLVAL     1
+#define FP_VARIADIC    1
 #define FP_THIS_IN_RET 0
+#define FP_NOEXCEPT noexcept
 #endif
 
 #define USE_DEQUE_FOR_LISTS 0
@@ -46,7 +61,7 @@
 #endif
 
 // Keywords
-#define let  auto
+#define let auto
 #define extent(c)  fp::begin((c)),  fp::end((c))
 #define rextent(c) fp::rbegin((c)), fp::rend((c))
 
@@ -71,7 +86,9 @@
 #define FP_CONCAT(x, y) FP_CONCAT_IMPL(x,y)
 
 // auto function(<arguments>) RETURNS(<single-lineexpression>);
-#define FP_RETURNS(...)        -> decltype(__VA_ARGS__) { return (__VA_ARGS__); }                      typedef int FP_CONCAT(RETURNS_ON_, FP_CONCAT(__LINE__,__COUNTER__))
-#define FP_RETURNS_NONREF(...) -> nonconstref_type_of(decltype(__VA_ARGS__)) { return (__VA_ARGS__); } typedef int FP_CONCAT(RETURNS_ON_, FP_CONCAT(__LINE__,__COUNTER__))
+#define FP_RETURNS(...)        -> decltype(__VA_ARGS__) { return (__VA_ARGS__); }                      \
+  typedef int FP_CONCAT(RETURNS_ON_, FP_CONCAT(__LINE__,__COUNTER__))
+#define FP_RETURNS_NONREF(...) -> nonconstref_type_of(decltype(__VA_ARGS__)) { return (__VA_ARGS__); } \
+  typedef int FP_CONCAT(RETURNS_ON_, FP_CONCAT(__LINE__,__COUNTER__))
 
 #endif /* _FP_DEFINES_H_ */

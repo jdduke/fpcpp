@@ -13,10 +13,13 @@
 
 #include <array>
 #include <functional>
-#include <initializer_list>
 #include <iterator>
 #include <tuple>
 #include <string>
+
+#if FP_INITIALIZER
+#include <initializer_list>
+#endif
 
 namespace fp {
 
@@ -107,11 +110,6 @@ inline typename types<T>::list list(const std::array<T,S>& a) {
   typename types<T>::list result(extent(a));
   return move(result);
 }
-template<typename T, size_t S>
-inline typename types<T>::list list(const std::initializer_list<T>& il) {
-  typename types<T>::list result(extent(il));
-  return move(result);
-}
 template<typename T>
 inline typename types<T>::list list() {
   return typename types<T>::list();
@@ -119,6 +117,13 @@ inline typename types<T>::list list() {
 inline types<char>::list list(const string& s) {
   return move(types<char>::list(extent(s)));
 }
+#if FP_INITIALIZER
+template<typename T, size_t S>
+inline typename types<T>::list list(const std::initializer_list<T>& il) {
+  typename types<T>::list result(extent(il));
+  return move(result);
+}
+#endif
 
 ///////////////////////////////////////////////////////////////////////////
 // index
@@ -138,11 +143,12 @@ inline T index(Index i, const std::list<T>& l) {
 ///////////////////////////////////////////////////////////////////////////
 
 // Thunk from list... careful, no bounds check
+/*
 template<typename C>
 inline std::function<value_type_of(C) ()> fromList(const C& c) {
   size_t i = 0;
-  return [=]() mutable -> value_type_of(C) { return fp::index(i++, c); };
-}
+  return [=]() mutable { return fp::index(i++, c); };
+}*/
 
 template<typename T>
 inline fp_enable_if_not_container(T,string) show(const T& t);

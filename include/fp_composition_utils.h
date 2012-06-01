@@ -8,15 +8,9 @@
 #define _FP_COMPOSITION_UTILS_H_
 
 #include "fp_defines.h"
+#include "fp_template_utils.h"
 
 #include <functional>
-
-#if !FP_DECLVAL
-namespace std {
-  template <typename T>
-  typename std::add_rvalue_reference<T>::type declval();
-}
-#endif
 
 namespace fp {
 

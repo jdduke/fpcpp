@@ -4,6 +4,9 @@
 // www.opensource.org/licenses/mit-license.php
 /////////////////////////////////////////////////////////////////////////////
 
+// Clang has compilation issues with the regex include
+#if !defined(__clang__)
+
 #include <fpcpp.h>
 
 #include <fstream>
@@ -122,7 +125,7 @@ template<> struct PlaylistUtils<WPL> {
         let mp3Attribute = node->first_attribute("src");
         if (mp3Attribute)
           return mp3Attribute->value();
-        else 
+        else
           return "invalid";
         node = node->next_sibling("media");
       } else {
@@ -130,7 +133,7 @@ template<> struct PlaylistUtils<WPL> {
       }
     };
     return fp::takeWhileT( [](const string& s) {
-      return !s.empty(); 
+      return !s.empty();
     }, wplLines );
   }
 };
@@ -197,3 +200,11 @@ int main(int argc, char **argv) {
 
   return 0;
 }
+
+#else
+
+int main(int argc, char **argv) {
+  return 0;
+}
+
+#endif // !defined(__clang__)
